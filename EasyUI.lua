@@ -106,21 +106,29 @@ end
 local WndFrame = class(WndBase)
 function WndFrame:ctor(__name, __data)
 	__data = __data or {}
-	if __data.type == "NONE" then
-
-	else
-
-	end
-	local frame = Wnd.OpenWindow("Interface/EasyUI/ini/WndFrame.ini", __name)
-	frame:Lookup("Btn_Close").OnLButtonClick = function()
-		Wnd.CloseWindow(__name)
+	local frame = nil
+	if __data.type == "THIN" then
+		frame = Wnd.OpenWindow("Interface/EasyUI/ini/WndFrameThin.ini", __name)
+	elseif __data.type == "SMALL" then
+		frame = Wnd.OpenWindow("Interface/EasyUI/ini/WndFrameSmall.ini", __name)
+	elseif __data.type == "NORMAL" then
+		frame = Wnd.OpenWindow("Interface/EasyUI/ini/WndFrame.ini", __name)
+	elseif __data.type == "LARGER" then
+		frame = Wnd.OpenWindow("Interface/EasyUI/ini/WndFrameLarger.ini", __name)
+	elseif __data.type == "NONE" then
+		frame = Wnd.OpenWindow("Interface/EasyUI/ini/WndFrameNone.ini", __name)
 	end
 	frame:SetName(__name)
 	frame:Show()
 	self.__this = frame
 	self:SetSelf(self.__this)
-	if __data.title then
-		self:SetTitle(__data.title)
+	if __data.type and __data.type ~= "NONE" then
+		frame:Lookup("Btn_Close").OnLButtonClick = function()
+			Wnd.CloseWindow(__name)
+		end
+		if __data.title then
+			self:SetTitle(__data.title)
+		end
 	end
 end
 
@@ -392,7 +400,10 @@ function WndComboBox:SetSize(__w)
 	handle:Lookup("Text_Default"):SetSize(__w, 25)
 	local btn = self.__this:Lookup("Btn_ComboBox")
 	btn:SetRelPos(__w - 25, 3)
-	btn:Lookup("", ""):SetSize(__w, 25)
+	local h = btn:Lookup("", "")
+	h:SetSize(__w, 25)
+	local __x, __y = handle:GetAbsPos()
+	h:SetAbsPos(__x, __y)
 end
 
 function WndComboBox:SetText(__text)
@@ -468,7 +479,7 @@ function WndRadioBox:Check(__check)
 	self.__this:Check(__check)
 end
 
-function WndCheckBox:Enable(__enable)
+function WndRadioBox:Enable(__enable)
 	if __enable then
 		self.__text:SetFontColor(255, 255, 255)
 		self.__this:Enable(true)
@@ -640,20 +651,78 @@ function WndScroll:ctor(__parent, __name, __data)
 	local hwnd = _Append(__parent, "Interface/EasyUI/ini/WndScroll.ini", "WndScroll", __name)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
-	self.__this:Lookup("Btn_Up").OnLButtonHold = function()
-		self.__this:Lookup("Scroll_Info"):ScrollPrev(1)
+	if __data.x and __data.y then
+		self:SetRelPos(__data.x, __data.y)
 	end
-	self.__this:Lookup("Btn_Up").OnLButtonDown = function()
-		self.__this:Lookup("Scroll_Info"):ScrollPrev(1)
+	if __data.w and __data.h then
+		self:SetSize(__data.w, __data.h)
 	end
-	self.__this:Lookup("Btn_Down").OnLButtonHold = function()
-		self.__this:Lookup("Scroll_Info"):ScrollNext(1)
+	self.__up = self.__this:Lookup("Btn_Up")
+	self.__down = self.__this:Lookup("Btn_Down")
+	self.__scroll = self.__this:Lookup("Scroll_List")
+	self.__handle = self.__this:Lookup("", "")
+	self.__up.OnLButtonHold = function()
+		self.__scroll:ScrollPrev(1)
 	end
-	self.__this:Lookup("Btn_Down").OnLButtonDown = function()
-		self.__this:Lookup("Scroll_Info"):ScrollNext(1)
+	self.__up.OnLButtonDown = function()
+		self.__scroll:ScrollPrev(1)
 	end
-	
+	self.__down.OnLButtonHold = function()
+		self.__scroll:ScrollNext(1)
+	end
+	self.__down.OnLButtonDown = function()
+		self.__scroll:ScrollNext(1)
+	end
+	self.__handle.OnItemMouseWheel = function()
+		local __dist = Station.GetMessageWheelDelta()
+		self.__scroll:ScrollNext(__dist)
+		return 1
+	end
+	self.__scroll.OnScrollBarPosChanged = function()
+		local __value = this:GetScrollPos()
+		if __value == 0 then
+			self.__up:Enable(0)
+		else
+			self.__up:Enable(1)
+		end
+		if __value == this:GetStepCount() then
+			self.__down:Enable(0)
+		else
+			self.__down:Enable(1)
+		end
+		self.__handle:SetItemStartRelPos(0, -__value * 10)
+	end
+	self:OnUpdateScorllList()
 end
+
+function WndScroll:OnUpdateScorllList()
+	self.__handle:FormatAllItemPos()
+	local __w, __h = self.__handle:GetSize()
+	local __wAll, __hAll = self.__handle:GetAllItemSize()
+	local __count = math.ceil((__hAll - __h) / 10)
+
+	self.__scroll:SetStepCount(__count)
+	if __count > 0 then
+		self.__scroll:Show()
+		self.__up:Show()
+		self.__down:Show()
+	else
+		self.__scroll:Hide()
+		self.__up:Hide()
+		self.__down:Hide()
+	end
+end
+
+function WndScroll:SetSize(__w, __h)
+	self.__this:SetSize(__w, __h)
+	self.__handle:SetSize(__w, __h)
+	self.__scroll:SetSize(15, __handle - 40)
+	self.__scroll:SetRelPos(__w - 17, 20)
+	self.__up:SetRelPos(__w - 20, 3)
+	self.__down:SetRelPos(__w - 20, __h - 20)
+end
+
+EasyUI.CreateScroll = WndScroll.new
 --[[
 /script local f=EasyUI.CreateFrame("test")
 local b=EasyUI.CreateButton(f,"b1",{text="Click Me",x=50,y=50,enable=false})
@@ -681,4 +750,6 @@ local s=EasyUI.CreateCSlider(f,"s1",{x=50,y=300,min=0,max=100,step=1,value=20})
 s:OnChanged(function(arg0) Output(arg0) end)
 local c3=EasyUI.CreateColorBox(f,"c3",{text="Color",x=50,y=350,r=255,g=255,b=0})
 c3:OnChanged(function(arg0) Output(arg0) end)
+/script local f=EasyUI.CreateFrame("test")
+local s5=EasyUI.CreateScroll(f,"s5",{x=300,y=50})
 ]]
