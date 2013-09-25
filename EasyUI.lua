@@ -63,6 +63,10 @@ local WndBase = class()
 function WndBase:ctor(__this)
 end
 
+function WndBase:GetName()
+	return self.__this:GetName()
+end
+
 function WndBase:SetSelf(__this)
 	self.__this = __this
 end
@@ -107,7 +111,7 @@ function WndFrame:ctor(__name, __data)
 	else
 
 	end
-	local frame = Wnd.OpenWindow("interface/EasyUI/ini/WndFrame.ini", __name)
+	local frame = Wnd.OpenWindow("Interface/EasyUI/ini/WndFrame.ini", __name)
 	frame:Lookup("Btn_Close").OnLButtonClick = function()
 		Wnd.CloseWindow(__name)
 	end
@@ -130,10 +134,71 @@ end
 
 EasyUI.CreateFrame = WndFrame.new
 
+local WndWindow = class(WndBase)
+function WndWindow:ctor(__parent, __name, __data)
+	__data = __data or {}
+	local hwnd = _Append(__parent, "Interface/EasyUI/ini/WndWindow.ini", "WndWindow", __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	if __data.w and __data.h then
+		self:SetSize(__data.w, __data.h)
+	end
+	if __data.x and __data.y then
+		self:SetRelPos(__data.x, __data.y)
+	end
+end
+
+function WndWindow:SetSize(...)
+	self.__this:SetSize(...)
+	self.__this:Lookup("", ""):SetSize(...)
+end
+
+EasyUI.CreateWindow = WndWindow.new
+
+local WndPageSet = class(WndBase)
+function WndPageSet:ctor(__parent, __name, __data)
+	__data = __data or {}
+	local hwnd = _Append(__parent, "Interface/EasyUI/ini/WndPageSet.ini", "WndPageSet", __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	if __data.w and __data.h then
+		self:SetSize(__data.w, __data.h)
+	end
+	if __data.x and __data.y then
+		self:SetRelPos(__data.x, __data.y)
+	end
+end
+
+function WndPageSet:AddPage(...)
+	self.__this:AddPage(...)
+end
+
+function WndPageSet:GetActivePage()
+	return self.__this:GetActivePage()
+end
+
+function WndPageSet:GetActiveCheckBox()
+	return self.__this:GetActiveCheckBox()
+end
+
+function WndPageSet:ActivePage(...)
+	self.__this:ActivePage(...)
+end
+
+function WndPageSet:GetActivePageIndex()
+	return self.__this:GetActivePageIndex()
+end
+
+function WndPageSet:GetLastActivePageIndex()
+	return self.__this:GetLastActivePageIndex()
+end
+
+EasyUI.CreatePageSet = WndPageSet.new
+
 local WndButton = class(WndBase)
 function WndButton:ctor(__parent, __name, __data)
 	__data = __data or {}
-	local hwnd = _Append(__parent, "interface/EasyUI/ini/WndButton.ini", "WndButton", __name)
+	local hwnd = _Append(__parent, "Interface/EasyUI/ini/WndButton.ini", "WndButton", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
@@ -174,7 +239,7 @@ EasyUI.CreateButton = WndButton.new
 local WndEdit = class(WndBase)
 function WndEdit:ctor(__parent, __name, __data)
 	__data = __data or {}
-	local hwnd = _Append(__parent, "interface/EasyUI/ini/WndEdit.ini", "WndEdit", __name)
+	local hwnd = _Append(__parent, "Interface/EasyUI/ini/WndEdit.ini", "WndEdit", __name)
 	self.__edit = hwnd:Lookup("Edit_Default")
 	self.__edit:SetText(__data.text or "")
 	self.__this = hwnd
@@ -222,7 +287,10 @@ function WndEdit:Enable(__enable)
 end
 
 function WndEdit:OnChanged(__action)
-	self.__edit.OnEditChanged = __action
+	self.__edit.OnEditChanged = function()
+		local __text = self.__edit:GetText()
+		__action(__text)
+	end
 end
 
 
@@ -231,7 +299,7 @@ EasyUI.CreateEdit = WndEdit.new
 local WndCheckBox = class(WndBase)
 function WndCheckBox:ctor(__parent, __name, __data)
 	__data = __data or {}
-	local hwnd = _Append(__parent, "interface/EasyUI/ini/WndCheckBox.ini", "WndCheckBox", __name)
+	local hwnd = _Append(__parent, "Interface/EasyUI/ini/WndCheckBox.ini", "WndCheckBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
@@ -245,6 +313,10 @@ function WndCheckBox:ctor(__parent, __name, __data)
 	if __data.enable ~= nil then
 		self:Enable(__data.enable)
 	end
+end
+
+function WndCheckBox:SetSize(__w)
+	self.__text:SetSize(__w - 28, 25)
 end
 
 function WndCheckBox:Check(__check)
@@ -270,7 +342,318 @@ function WndCheckBox:OnCheck(__action)
 	self.__this.OnCheckBoxUncheck = function() __action(false) end
 end
 
+function WndCheckBox:SetText(__text)
+	self.__text:SetText(__text)
+end
+
+function WndCheckBox:GetText()
+	return self.__text:GetText()
+end
+
+function WndCheckBox:SetFontColor(...)
+	self.__text:SetFontColor(...)
+end
+
+function WndCheckBox:GetFontColor()
+	return self.__text:GetFontColor()
+end
+
+function WndCheckBox:SetFontScheme(...)
+	self.__text:SetFontScheme(...)
+end
+
+function WndCheckBox:GetFontScheme()
+	return self.__text:GetFontScheme()
+end
+
 EasyUI.CreateCheckBox = WndCheckBox.new
+
+local WndComboBox = class(WndBase)
+function WndComboBox:ctor(__parent, __name, __data)
+	__data = __data or {}
+	local hwnd = _Append(__parent, "Interface/EasyUI/ini/WndComboBox.ini", "WndComboBox", __name)
+	self.__text = hwnd:Lookup("", "Text_Default")
+	self.__text:SetText(__data.text or "")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	if __data.x and __data.y then
+		self:SetRelPos(__data.x, __data.y)
+	end
+	if __data.w then
+		self:SetSize(__data.w)
+	end
+end
+
+function WndComboBox:SetSize(__w)
+	self.__this:SetSize(__w, 25)
+	local handle = self.__this:Lookup("", "")
+	handle:SetSize(__w, 25)
+	handle:Lookup("Image_ComboBoxBg"):SetSize(__w,25)
+	handle:Lookup("Text_Default"):SetSize(__w, 25)
+	local btn = self.__this:Lookup("Btn_ComboBox")
+	btn:SetRelPos(__w - 25, 3)
+	btn:Lookup("", ""):SetSize(__w, 25)
+end
+
+function WndComboBox:SetText(__text)
+	self.__text:SetText(__text)
+end
+
+function WndComboBox:GetText()
+	return self.__text:GetText()
+end
+
+function WndComboBox:OnClick(__action)
+	self.__this:Lookup("Btn_ComboBox").OnLButtonClick = function()
+		local __x, __y = self:GetAbsPos()
+		local __w, __h = self:GetSize()
+		local __menu = __action()
+		__menu.nMiniWidth = __w
+		__menu.x = __x
+		__menu.y = __y + __h
+		PopupMenu(__menu)
+	end
+end
+
+EasyUI.CreateComboBox = WndComboBox.new
+
+local WndRadioBox = class(WndBase)
+local __RadioBoxGroups = {}
+function WndRadioBox:ctor(__parent, __name, __data)
+	__data = __data or {}
+	local hwnd = _Append(__parent, "Interface/EasyUI/ini/WndRadioBox.ini", "WndRadioBox", __name)
+	self.__text = hwnd:Lookup("", "Text_Default")
+	self.__text:SetText(__data.text or "")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	if __data.x and __data.y then
+		self:SetRelPos(__data.x, __data.y)
+	end
+	if __data.w then
+		self:SetSize(__data.w)
+	end
+	if __data.check then
+		self:Check(__data.check)
+	end
+	if __data.enable then
+		self:Enable(__data.enable)
+	end
+	self.__this.__group = __data.group
+	self:SetGroup(__data.group)
+end
+
+function WndRadioBox:SetSize(__w)
+	self.__text:SetSize(__w - 28, 25)
+end
+
+function WndRadioBox:SetGroup(__group)
+	if __group then
+		if not __RadioBoxGroups[__group] then
+			__RadioBoxGroups[__group] = {}
+		end
+		table.insert(__RadioBoxGroups[__group], self)
+	end
+	self.__group = __group
+end
+
+function WndRadioBox:GetGroup()
+	return self.__group
+end
+
+function WndRadioBox:IsChecked()
+	return self.__this:IsCheckBoxChecked()
+end
+
+function WndRadioBox:Check(__check)
+	self.__this:Check(__check)
+end
+
+function WndCheckBox:Enable(__enable)
+	if __enable then
+		self.__text:SetFontColor(255, 255, 255)
+		self.__this:Enable(true)
+	else
+		self.__text:SetFontColor(192, 192, 192)
+		self.__this:Enable(false)
+	end
+end
+
+function WndRadioBox:OnCheck(__action)
+	self.__this.OnCheckBoxCheck = function()
+		if self.__group then
+			for k, v in pairs(__RadioBoxGroups[self.__group]) do
+				if v:GetGroup() == this.__group and v:GetName() ~= this:GetName() then
+					v:Check(false)
+				end
+			end
+		end
+		__action(true)
+	end
+end
+
+function WndRadioBox:SetText(__text)
+	self.__text:SetText(__text)
+end
+
+function WndRadioBox:GetText()
+	return self.__text:GetText()
+end
+
+function WndRadioBox:SetFontColor(...)
+	self.__text:SetFontColor(...)
+end
+
+function WndRadioBox:GetFontColor()
+	return self.__text:GetFontColor()
+end
+
+function WndRadioBox:SetFontScheme(...)
+	self.__text:SetFontScheme(...)
+end
+
+function WndRadioBox:GetFontScheme()
+	return self.__text:GetFontScheme()
+end
+
+EasyUI.CreateRadioBox = WndRadioBox.new
+
+local WndCSlider = class(WndBase)
+function WndCSlider:ctor(__parent, __name, __data)
+	__data = __data or {}
+	local hwnd = _Append(__parent, "Interface/EasyUI/ini/WndCSlider.ini", "WndCSlider", __name)
+	self.__scroll = hwnd:Lookup("Scroll_Default")
+	self.__text = hwnd:Lookup("", "Text_Default")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self.__min = __data.min
+	self.__max = __data.max
+	self.__step = __data.step
+	self.__unit = __data.unit or ""
+	self.__scroll:SetStepCount(__data.step)
+	if __data.x and __data.y then
+		self:SetRelPos(__data.x, __data.y)
+	end
+	if __data.w then
+		self:SetSize(__data.w)
+	end
+	if __data.value then
+		self:UpdateScrollPos(__data.value)
+	end
+end
+
+function WndCSlider:SetSize(__w)
+	self.__this:SetSize(__w, 25)
+	self.__this:Lookup("", ""):SetSize(__w, 25)
+	self.__this:Lookup("", ""):Lookup("Image_BG"):SetSize(__w, 10)
+	self.__scroll:SetSize(__w, 25)
+	self.__text:SetRelPos(__w + 5, 2)
+	self.__this:Lookup("", ""):FormatAllItemPos()
+end
+
+function WndCSlider:GetValue(__step)
+	return self.__min + __step * (self.__max - self.__min) / self.__step
+end
+
+function WndCSlider:GetStep(__value)
+	return (__value - self.__min) * self.__step / (self.__max - self.__min)
+end
+
+function WndCSlider:ChangeToArea(__min, __max, __step)
+	return __min + (__max - __min) * (self:GetValue(__step) - self.__min) / (self.__max - self.__min)
+end
+
+function WndCSlider:ChangeToAreaFromValue(__min, __max, __value)
+	return __min + (__max - __min) * (__value - self.__min) / (self.__max - self.__min)
+end
+
+function WndCSlider:GetStepFromArea(__min, __max, __value)
+	return self:GetStep(self.__min + (self.__max - self.__min) * (__value - __min) / (__max - __min))
+end
+
+function WndCSlider:UpdateScrollPos(__value)
+	self.__text:SetText(__value .. self.__unit)
+	self.__scroll:SetScrollPos(self:GetStep(__value))
+end
+
+function WndCSlider:OnChanged(__action)
+	self.__scroll.OnScrollBarPosChanged = function()
+		local __step = this:GetScrollPos()
+		local __value = self:GetValue(__step)
+		__action(__value)
+		self.__text:SetText(__value .. self.__unit)
+	end
+end
+
+EasyUI.CreateCSlider = WndCSlider.new
+
+local WndColorBox = class(WndBase)
+function WndColorBox:ctor(__parent, __name, __data)
+	__data = __data or {}
+	local hwnd = _Append(__parent, "Interface/EasyUI/ini/WndColorBox.ini", "WndColorBox", __name)
+	self.__text = hwnd:Lookup("", "Text_Default")
+	self.__shadow = hwnd:Lookup("", "Shadow_Default")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self.__r = __data.r
+	self.__g = __data.g
+	self.__b = __data.b
+	self:SetText(__data.text)
+	self:SetColor(__data.r, __data.g, __data.b)
+	if __data.x and __data.y then
+		self:SetRelPos(__data.x, __data.y)
+	end
+	if __data.w then
+		self:SetSize(__data.w)
+	end
+end
+
+function WndColorBox:SetSize(__w)
+	self.__this:SetSize(__w, 25)
+	self.__this:Lookup("", ""):SetSize(__w, 25)
+	self.__text:SetText(__w - 25, 25)
+end
+
+function WndColorBox:SetText(__text)
+	self.__text:SetText(__text)
+end
+
+function WndColorBox:SetColor(...)
+	self.__shadow:SetColorRGB(...)
+	self.__text:SetFontColor(...)
+end
+
+function WndColorBox:OnChanged(__action)
+	self.__shadow.OnItemLButtonClick = function()
+		local fnChangeColor = function(r, g, b)
+			self:SetColor(r, g, b)
+			__action({r, g, b})
+		end
+		OpenColorTablePanel(fnChangeColor)
+	end
+end
+
+EasyUI.CreateColorBox = WndColorBox.new
+
+local WndScroll = class(WndBase)
+function WndScroll:ctor(__parent, __name, __data)
+	__data = __data or {}
+	local hwnd = _Append(__parent, "Interface/EasyUI/ini/WndScroll.ini", "WndScroll", __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self.__this:Lookup("Btn_Up").OnLButtonHold = function()
+		self.__this:Lookup("Scroll_Info"):ScrollPrev(1)
+	end
+	self.__this:Lookup("Btn_Up").OnLButtonDown = function()
+		self.__this:Lookup("Scroll_Info"):ScrollPrev(1)
+	end
+	self.__this:Lookup("Btn_Down").OnLButtonHold = function()
+		self.__this:Lookup("Scroll_Info"):ScrollNext(1)
+	end
+	self.__this:Lookup("Btn_Down").OnLButtonDown = function()
+		self.__this:Lookup("Scroll_Info"):ScrollNext(1)
+	end
+	
+end
 --[[
 /script local f=EasyUI.CreateFrame("test")
 local b=EasyUI.CreateButton(f,"b1",{text="Click Me",x=50,y=50,enable=false})
@@ -278,7 +661,24 @@ b:OnClick(function() Output("Click") end)
 b:OnEnter(function() Output("Enter") end)
 b:OnLeave(function() Output("Leave") end)
 local e=EasyUI.CreateEdit(f,"e1",{text="input words",x=50,y=100})
-e:OnChanged(function() Output("Changed") end)
+e:OnChanged(function(arg0) Output(arg0) end)
 local c=EasyUI.CreateCheckBox(f,"c1",{text="Check Me",x=50,y=150,check=true})
 c:OnCheck(function(arg0) Output(arg0) end)
+local d=EasyUI.CreateComboBox(f,"c2",{text="Menu",x=50,y=200})
+d:OnClick(function()
+	local m = {}
+	table.insert(m,{szOption="TEST1"})
+	table.insert(m,{szOption="TEST2"})
+	return m
+end)
+local r1=EasyUI.CreateRadioBox(f,"r1",{text="Select1",x=50,y=250,check=true,group="test1"})
+r1:OnCheck(function(arg0) Output(arg0) end)
+local r2=EasyUI.CreateRadioBox(f,"r2",{text="Select2",x=200,y=250,group="test1"})
+r2:OnCheck(function(arg0) Output(arg0) end)
+local r3=EasyUI.CreateRadioBox(f,"r3",{text="Select3",x=350,y=250,group="test1"})
+r3:OnCheck(function(arg0) Output(arg0) end)
+local s=EasyUI.CreateCSlider(f,"s1",{x=50,y=300,min=0,max=100,step=1,value=20})
+s:OnChanged(function(arg0) Output(arg0) end)
+local c3=EasyUI.CreateColorBox(f,"c3",{text="Color",x=50,y=350,r=255,g=255,b=0})
+c3:OnChanged(function(arg0) Output(arg0) end)
 ]]
