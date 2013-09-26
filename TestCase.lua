@@ -3,7 +3,7 @@ EasyUI = EasyUI or {}
 
 function EasyUI.TestCase()
 	--创建一个面板
-	local f=EasyUI.CreateFrame("test")
+	local f=EasyUI.CreateFrame("test",{style="SMALL"})
 
 	--创建一个按钮
 	local b=EasyUI.CreateButton(f,"b1",{text="Click Me",x=50,y=50})
