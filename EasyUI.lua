@@ -101,7 +101,15 @@ function WndBase:Enable(__enable)
 	self.__this:Enable(__enable)
 end
 
-function WndBase:Destroy()
+function WndBase:SetParent(__parent)
+	self.__parent = __parent
+end
+
+function WndBase:GetParent()
+	return self.__parent
+end
+
+function WndBase:Remove()
 	if self.__this:GetType() == "WndFrame" then
 		Wnd.CloseWindow(self:GetName())
 	else
@@ -109,13 +117,17 @@ function WndBase:Destroy()
 	end
 end
 
-function WndBase:CreateItemHandle(...)
-	self.__this:CreateItemHandle(...)
+function WndBase:Show()
+	self.__this:Show()
 end
 
+function WndBase:Hide()
+	self.__this:Hide()
+end
 
 local WndFrame = class(WndBase)
 function WndFrame:ctor(__name, __data)
+	assert(__name ~= nil, "frame name can not be null.")
 	__data = __data or {}
 	local frame = nil
 	if __data.style == "THIN" then
@@ -134,12 +146,16 @@ function WndFrame:ctor(__name, __data)
 	self:SetSelf(self.__this)
 	if __data.style and __data.style ~= "NONE" then
 		frame:Lookup("Btn_Close").OnLButtonClick = function()
-			self:Destroy()
+			self:Remove()
 		end
 		if __data.title then
 			self:SetTitle(__data.title)
 		end
 	end
+end
+
+function WndFrame:GetHandle()
+	return self.__this:Lookup("", "")
 end
 
 function WndFrame:SetTitle(__title)
@@ -154,16 +170,18 @@ EasyUI.CreateFrame = WndFrame.new
 
 local WndWindow = class(WndBase)
 function WndWindow:ctor(__parent, __name, __data)
+	assert(__name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndWindow.ini", "WndWindow", __name)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
+	self:SetParent(__parent)
 	if __data.w and __data.h then
 		self:SetSize(__data.w, __data.h)
 	end
-	if __data.x and __data.y then
-		self:SetRelPos(__data.x, __data.y)
-	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
 end
 
 function WndWindow:SetSize(...)
@@ -179,16 +197,18 @@ EasyUI.CreateWindow = WndWindow.new
 
 local WndPageSet = class(WndBase)
 function WndPageSet:ctor(__parent, __name, __data)
+	assert(__name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndPageSet.ini", "WndPageSet", __name)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
+	self:SetParent(__parent)
 	if __data.w and __data.h then
 		self:SetSize(__data.w, __data.h)
 	end
-	if __data.x and __data.y then
-		self:SetRelPos(__data.x, __data.y)
-	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
 end
 
 function WndPageSet:AddPage(...)
@@ -219,21 +239,23 @@ EasyUI.CreatePageSet = WndPageSet.new
 
 local WndButton = class(WndBase)
 function WndButton:ctor(__parent, __name, __data)
+	assert(__name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndButton.ini", "WndButton", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
 	self:SetSelf(self.__this)
-	if __data.x and __data.y then
-		self:SetRelPos(__data.x, __data.y)
-	end
+	self:SetParent(__parent)
 	if __data.w and __data.h then
 		self:SetSize(__data.w, __data.h)
 	end
 	if __data.enable ~= nil then
 		self:Enable(__data.enable)
 	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
 end
 
 function WndButton:SetText(__text)
@@ -260,15 +282,14 @@ EasyUI.CreateButton = WndButton.new
 
 local WndEdit = class(WndBase)
 function WndEdit:ctor(__parent, __name, __data)
+	assert(__name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndEdit.ini", "WndEdit", __name)
 	self.__edit = hwnd:Lookup("Edit_Default")
 	self.__edit:SetText(__data.text or "")
 	self.__this = hwnd
 	self:SetSelf(self.__this)
-	if __data.x and __data.y then
-		self:SetRelPos(__data.x, __data.y)
-	end
+	self:SetParent(__parent)
 	if __data.w and __data.h then
 		self:SetSize(__data.w, __data.h)
 	end
@@ -281,6 +302,9 @@ function WndEdit:ctor(__parent, __name, __data)
 	if __data.enable ~= nil then
 		self:Enable(__data.enable)
 	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
 end
 
 function WndEdit:SetSize(__w, __h)
@@ -308,7 +332,7 @@ function WndEdit:Enable(__enable)
 	end
 end
 
-function WndEdit:OnChanged(__action)
+function WndEdit:OnChange(__action)
 	self.__edit.OnEditChanged = function()
 		local __text = self.__edit:GetText()
 		__action(__text)
@@ -320,21 +344,23 @@ EasyUI.CreateEdit = WndEdit.new
 
 local WndCheckBox = class(WndBase)
 function WndCheckBox:ctor(__parent, __name, __data)
+	assert(__name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndCheckBox.ini", "WndCheckBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
 	self:SetSelf(self.__this)
-	if __data.x and __data.y then
-		self:SetRelPos(__data.x, __data.y)
-	end
+	self:SetParent(__parent)
 	if __data.check then
 		self:Check(__data.check)
 	end
 	if __data.enable ~= nil then
 		self:Enable(__data.enable)
 	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
 end
 
 function WndCheckBox:SetSize(__w)
@@ -392,18 +418,20 @@ EasyUI.CreateCheckBox = WndCheckBox.new
 
 local WndComboBox = class(WndBase)
 function WndComboBox:ctor(__parent, __name, __data)
+	assert(__name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndComboBox.ini", "WndComboBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
 	self:SetSelf(self.__this)
-	if __data.x and __data.y then
-		self:SetRelPos(__data.x, __data.y)
-	end
+	self:SetParent(__parent)
 	if __data.w then
 		self:SetSize(__data.w)
 	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
 end
 
 function WndComboBox:SetSize(__w)
@@ -445,15 +473,14 @@ EasyUI.CreateComboBox = WndComboBox.new
 local WndRadioBox = class(WndBase)
 local __RadioBoxGroups = {}
 function WndRadioBox:ctor(__parent, __name, __data)
+	assert(__name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndRadioBox.ini", "WndRadioBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
 	self:SetSelf(self.__this)
-	if __data.x and __data.y then
-		self:SetRelPos(__data.x, __data.y)
-	end
+	self:SetParent(__parent)
 	if __data.w then
 		self:SetSize(__data.w)
 	end
@@ -465,6 +492,9 @@ function WndRadioBox:ctor(__parent, __name, __data)
 	end
 	self.__this.__group = __data.group
 	self:SetGroup(__data.group)
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
 end
 
 function WndRadioBox:SetSize(__w)
@@ -544,26 +574,28 @@ EasyUI.CreateRadioBox = WndRadioBox.new
 
 local WndCSlider = class(WndBase)
 function WndCSlider:ctor(__parent, __name, __data)
+	assert(__name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndCSlider.ini", "WndCSlider", __name)
 	self.__scroll = hwnd:Lookup("Scroll_Default")
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__this = hwnd
 	self:SetSelf(self.__this)
+	self:SetParent(__parent)
 	self.__min = __data.min
 	self.__max = __data.max
 	self.__step = __data.step
 	self.__unit = __data.unit or ""
 	self.__scroll:SetStepCount(__data.step)
-	if __data.x and __data.y then
-		self:SetRelPos(__data.x, __data.y)
-	end
 	if __data.w then
 		self:SetSize(__data.w)
 	end
 	if __data.value then
 		self:UpdateScrollPos(__data.value)
 	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
 end
 
 function WndCSlider:SetSize(__w)
@@ -600,7 +632,7 @@ function WndCSlider:UpdateScrollPos(__value)
 	self.__scroll:SetScrollPos(self:GetStep(__value))
 end
 
-function WndCSlider:OnChanged(__action)
+function WndCSlider:OnChange(__action)
 	self.__scroll.OnScrollBarPosChanged = function()
 		local __step = this:GetScrollPos()
 		local __value = self:GetValue(__step)
@@ -613,23 +645,25 @@ EasyUI.CreateCSlider = WndCSlider.new
 
 local WndColorBox = class(WndBase)
 function WndColorBox:ctor(__parent, __name, __data)
+	assert(__name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndColorBox.ini", "WndColorBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__shadow = hwnd:Lookup("", "Shadow_Default")
 	self.__this = hwnd
 	self:SetSelf(self.__this)
+	self:SetParent(__parent)
 	self.__r = __data.r
 	self.__g = __data.g
 	self.__b = __data.b
 	self:SetText(__data.text)
 	self:SetColor(__data.r, __data.g, __data.b)
-	if __data.x and __data.y then
-		self:SetRelPos(__data.x, __data.y)
-	end
 	if __data.w then
 		self:SetSize(__data.w)
 	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
 end
 
 function WndColorBox:SetSize(__w)
@@ -647,7 +681,7 @@ function WndColorBox:SetColor(...)
 	self.__text:SetFontColor(...)
 end
 
-function WndColorBox:OnChanged(__action)
+function WndColorBox:OnChange(__action)
 	self.__shadow.OnItemLButtonClick = function()
 		local fnChangeColor = function(r, g, b)
 			self:SetColor(r, g, b)
@@ -661,17 +695,16 @@ EasyUI.CreateColorBox = WndColorBox.new
 
 local WndScroll = class(WndBase)
 function WndScroll:ctor(__parent, __name, __data)
+	assert(__name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndScroll.ini", "WndScroll", __name)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
+	self:SetParent(__parent)
 	self.__up = self.__this:Lookup("Btn_Up")
 	self.__down = self.__this:Lookup("Btn_Down")
 	self.__scroll = self.__this:Lookup("Scroll_List")
 	self.__handle = self.__this:Lookup("", "")
-	if __data.x and __data.y then
-		self:SetRelPos(__data.x, __data.y)
-	end
 	if __data.w and __data.h then
 		self:SetSize(__data.w, __data.h)
 	end
@@ -690,23 +723,26 @@ function WndScroll:ctor(__parent, __name, __data)
 	self.__handle.OnItemMouseWheel = function()
 		local __dist = Station.GetMessageWheelDelta()
 		self.__scroll:ScrollNext(__dist)
-		return 1
+		return true
 	end
 	self.__scroll.OnScrollBarPosChanged = function()
 		local __value = this:GetScrollPos()
 		if __value == 0 then
-			self.__up:Enable(0)
+			self.__up:Enable(false)
 		else
-			self.__up:Enable(1)
+			self.__up:Enable(true)
 		end
 		if __value == this:GetStepCount() then
-			self.__down:Enable(0)
+			self.__down:Enable(false)
 		else
-			self.__down:Enable(1)
+			self.__down:Enable(true)
 		end
 		self.__handle:SetItemStartRelPos(0, -__value * 10)
 	end
-	self:OnUpdateScorllList()
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+	--self:OnUpdateScorllList()
 end
 
 function WndScroll:GetHandle()
@@ -779,15 +815,12 @@ function ItemBase:GetSize()
 	return self.__this:GetSize()
 end
 
-function ItemBase:SetRelPos(__x, __y)
-	local __px, __py = self:GetParent():GetAbsPos()
-	self.__this:SetAbsPos(__px + __x, __py + __y)
+function ItemBase:SetRelPos(...)
+	self.__this:SetRelPos(...)
 end
 
 function ItemBase:GetRelPos()
-	local __px, __py = self:GetParent():GetAbsPos()
-	local __x, __y = self:GetAbsPos()
-	return __x - __px, __y - __px
+	return self.__this:GetRelPos()
 end
 
 function ItemBase:SetAbsPos(...)
@@ -806,11 +839,15 @@ function ItemBase:GetPosType()
 	return self.__this:GetPosType()
 end
 
-function ItemBase:GetParent()
-	return self.__this:GetParent()
+function ItemBase:SetParent(__parent)
+	self.__parent = __parent
 end
 
-function ItemBase:Destroy()
+function ItemBase:GetParent()
+	return self.__parent
+end
+
+function ItemBase:Remove()
 	self:GetParent():RemoveItem(self.__this)
 end
 
@@ -824,8 +861,9 @@ end
 
 local ItemHandle = class(ItemBase)
 function ItemHandle:ctor(__parent, __name, __data)
+	assert(__name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local __string = "<text>w=10 h=10 handletype=0 firstitempostype=0 eventid=257</text>"
+	local __string = "<handle>w=10 h=10 handletype=0 firstitempostype=0 eventid=257</handle>"
 	if __data.w then
 		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
 	end
@@ -844,17 +882,18 @@ function ItemHandle:ctor(__parent, __name, __data)
 	local hwnd = _AppendItem(__parent, __string, __name)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
+	self:SetParent(__parent)
 	local __x = __data.x or 0
 	local __y = __data.y or 0
 	self:SetRelPos(__x, __y)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	__parent:FormatAllItemPos()
 end
 
-function ItemHandle:AppendItemFromString(...)
-	self.__this:AppendItemFromString(...)
-end
-
-function ItemHandle:AppendItemFromIni(...)
-	self.__this:AppendItemFromIni(...)
+function ItemHandle:GetHandle()
+	return self.__this
 end
 
 function ItemHandle:FormatAllItemPos()
@@ -865,10 +904,13 @@ function ItemHandle:GetItemCount()
 	self.__this:GetItemCount()
 end
 
+EasyUI.CreateHandle = ItemHandle.new
+
 local ItemText = class(ItemBase)
 function ItemText:ctor(__parent, __name, __data)
+	assert(__name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local __string = "<text>w=150 h=30 valign=1 font=162 eventid=257 </text>"
+	local __string = "<text>w=150 h=30 valign=1 font=18 eventid=257 </text>"
 	if __data.w then
 		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
 	end
@@ -887,10 +929,15 @@ function ItemText:ctor(__parent, __name, __data)
 	local hwnd = _AppendItem(__parent, __string, __name)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
+	self:SetParent(__parent)
 	self:SetText(__data.text or "")
 	local __x = __data.x or 0
 	local __y = __data.y or 0
 	self:SetRelPos(__x, __y)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	__parent:FormatAllItemPos()
 end
 
 function ItemText:SetText(...)
@@ -923,13 +970,13 @@ RegisterEvent("CALL_LUA_ERROR", function()
 	OutputMessage("MSG_SYS", arg0)
 end)
 --[[
-/script local f=EasyUI.CreateFrame("test",{stype="SMALL"})
+/script local f=EasyUI.CreateFrame("test",{style="SMALL"})
 local b=EasyUI.CreateButton(f,"b1",{text="Click Me",x=50,y=50})
 b:OnClick(function() Output("Click") end)
 b:OnEnter(function() Output("Enter") end)
 b:OnLeave(function() Output("Leave") end)
 local e=EasyUI.CreateEdit(f,"e1",{text="input words",x=50,y=100})
-e:OnChanged(function(arg0) Output(arg0) end)
+e:OnChange(function(arg0) Output(arg0) end)
 local c=EasyUI.CreateCheckBox(f,"c1",{text="Check Me",x=50,y=150,check=true})
 c:OnCheck(function(arg0) Output(arg0) end)
 local d=EasyUI.CreateComboBox(f,"c2",{text="Menu",x=50,y=200})
@@ -946,9 +993,9 @@ r2:OnCheck(function(arg0) Output(arg0) end)
 local r3=EasyUI.CreateRadioBox(f,"r3",{text="Select3",x=350,y=250,group="test1"})
 r3:OnCheck(function(arg0) Output(arg0) end)
 local s=EasyUI.CreateCSlider(f,"s1",{x=50,y=300,min=0,max=100,step=1,value=20})
-s:OnChanged(function(arg0) Output(arg0) end)
+s:OnChange(function(arg0) Output(arg0) end)
 local c3=EasyUI.CreateColorBox(f,"c3",{text="Color",x=50,y=350,r=255,g=255,b=0})
-c3:OnChanged(function(arg0) Output(arg0) end)
+c3:OnChange(function(arg0) Output(arg0) end)
 local s5=EasyUI.CreateScroll(f,"s5",{x=300,y=50})
 /script local f=EasyUI.CreateFrame("test",{style="SMALL"})
 local win=EasyUI.CreateWindow(f,"w1",{x=10,y=10,w=300,h=300})
@@ -961,8 +1008,8 @@ b:OnClick(function() txt:Hide() end)
 /script local f=EasyUI.CreateFrame("test",{title="Test Title",style="SMALL"})
 local scr=EasyUI.CreateScroll(f,"ScrollTest",{x=20,y=20,w=200,h=200})
 for i=0, 20 do
-	local txt=EasyUI.CreateText(scr,"txt"..i,{text="ssssssssss",x=5,y=5+i*25})
-	scr:OnUpdateScorllList()
+	local hd=EasyUI.CreateHandle(scr,"hd"..i,{x=5,y=i*20,w=50,h=20})
+	EasyUI.CreateText(hd,"txt"..i,{text="AAAAAAA"})
 end
-
+scr:OnUpdateScorllList()
 ]]
