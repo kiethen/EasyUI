@@ -1,5 +1,6 @@
 local _class = {}
 
+-- Lua OOP
 local function class(super)
 	local class_type = {}
 	class_type.ctor = false
@@ -43,8 +44,7 @@ local function class(super)
 	return class_type
 end
 
-EasyUI = EasyUI or {}
-
+-- Append WndType Control
 local _AppendWnd = function(__parent, __ini, __type, __name)
 	if __parent.__addon then
 		__parent = __parent:GetSelf()
@@ -56,9 +56,11 @@ local _AppendWnd = function(__parent, __ini, __type, __name)
 	return hwnd
 end
 
+-- Base Class of WndType Control
 local WndBase = class()
 function WndBase:ctor(__this)
 	self.__addon = true
+	self.__listeners = {self}
 end
 
 function WndBase:GetName()
@@ -109,8 +111,16 @@ function WndBase:GetParent()
 	return self.__parent
 end
 
-function WndBase:Remove()
-	if self.__this:GetType() == "WndFrame" then
+function WndBase:SetType(__type)
+	self.__type = __type
+end
+
+function WndBase:GetType()
+	return self.__type
+end
+
+function WndBase:Destroy()
+	if self:GetType() == "WndFrame" then
 		Wnd.CloseWindow(self:GetName())
 	else
 		self.__this:Destroy()
@@ -123,6 +133,17 @@ end
 
 function WndBase:Hide()
 	self.__this:Hide()
+end
+
+function WndBase:_FireEvent(__event, ...)
+	for __k, __v in pairs(self.__listeners) do
+		if __v[__event] then
+			local res, err = pcall(__v[__event], ...)
+			if not res then
+				OutputMessage("MSG_SYS", "ERROR:" .. err .."\n")
+			end
+		end
+	end
 end
 
 local WndFrame = class(WndBase)
@@ -144,13 +165,22 @@ function WndFrame:ctor(__name, __data)
 	frame:SetName(__name)
 	self.__this = frame
 	self:SetSelf(self.__this)
+	self:SetType("WndFrame")
 	if __data.style and __data.style ~= "NONE" then
 		frame:Lookup("Btn_Close").OnLButtonClick = function()
-			self:Remove()
+			self:Destroy()
 		end
 		if __data.title then
 			self:SetTitle(__data.title)
 		end
+	end
+
+	--Bind Frame Events
+	frame.OnFrameCreate = function()
+		self:_FireEvent("OnCreate")
+	end
+	frame.OnFrameBreathe = function()
+		self:_FireEvent("OnUpdate")
 	end
 end
 
@@ -158,7 +188,7 @@ function WndFrame:GetHandle()
 	return self.__this:Lookup("", "")
 end
 
-function WndWindow:ClearHandle()
+function WndFrame:ClearHandle()
 	self.__this:Lookup("", ""):Clear()
 end
 
@@ -170,8 +200,6 @@ function WndFrame:GetTitle(__title)
 	return self.__this:Lookup("", "Text_Title"):GetText()
 end
 
-EasyUI.CreateFrame = WndFrame.new
-
 local WndWindow = class(WndBase)
 function WndWindow:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -180,6 +208,7 @@ function WndWindow:ctor(__parent, __name, __data)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
+	self:SetType("WndWindow")
 	if __data.w and __data.h then
 		self:SetSize(__data.w, __data.h)
 	end
@@ -201,8 +230,6 @@ function WndWindow:ClearHandle()
 	self.__this:Lookup("", ""):Clear()
 end
 
-EasyUI.CreateWindow = WndWindow.new
-
 local WndPageSet = class(WndBase)
 function WndPageSet:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -211,6 +238,7 @@ function WndPageSet:ctor(__parent, __name, __data)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
+	self:SetType("WndPageSet")
 	if __data.w and __data.h then
 		self:SetSize(__data.w, __data.h)
 	end
@@ -243,8 +271,6 @@ function WndPageSet:GetLastActivePageIndex()
 	return self.__this:GetLastActivePageIndex()
 end
 
-EasyUI.CreatePageSet = WndPageSet.new
-
 local WndButton = class(WndBase)
 function WndButton:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -255,6 +281,7 @@ function WndButton:ctor(__parent, __name, __data)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
+	self:SetType("WndButton")
 	if __data.w and __data.h then
 		self:SetSize(__data.w, __data.h)
 	end
@@ -264,6 +291,17 @@ function WndButton:ctor(__parent, __name, __data)
 	local __x = __data.x or 0
 	local __y = __data.y or 0
 	self:SetRelPos(__x, __y)
+
+	--Bind Button Events
+	self.__this.OnLButtonClick = function()
+		self:_FireEvent("OnClick")
+	end
+	self.__this.OnMouseEnter = function()
+		self:_FireEvent("OnEnter")
+	end
+	self.__this.OnMouseLeave = function()
+		self:_FireEvent("OnLeave")
+	end
 end
 
 function WndButton:SetText(__text)
@@ -274,19 +312,24 @@ function WndButton:GetText()
 	return self.__text:GetText()
 end
 
-function WndButton:OnClick(__action)
-	self.__this.OnLButtonClick = __action
+local WndUIButton = class(WndBase)
+function WndUIButton:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndUIButton.ini", "WndUIButton", __name)
+	self.__text = hwnd:Lookup("", "Text_Default")
+	self.__text:SetText(__data.text or "")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetType("WndUIButton")
+	if __data.w and __data.h then
+		self:SetSize(__data.w, __data.h)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
 end
-
-function WndButton:OnEnter(__action)
-	self.__this.OnMouseEnter = __action
-end
-
-function WndButton:OnLeave(__action)
-	self.__this.OnMouseLeave = __action
-end
-
-EasyUI.CreateButton = WndButton.new
 
 local WndEdit = class(WndBase)
 function WndEdit:ctor(__parent, __name, __data)
@@ -298,6 +341,7 @@ function WndEdit:ctor(__parent, __name, __data)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
+	self:SetType("WndEdit")
 	if __data.w and __data.h then
 		self:SetSize(__data.w, __data.h)
 	end
@@ -313,6 +357,12 @@ function WndEdit:ctor(__parent, __name, __data)
 	local __x = __data.x or 0
 	local __y = __data.y or 0
 	self:SetRelPos(__x, __y)
+
+	--Bind Edit Events
+	self.__edit.OnEditChanged = function()
+		local __text = self.__edit:GetText()
+		self:_FireEvent("OnChange", __text)
+	end
 end
 
 function WndEdit:SetSize(__w, __h)
@@ -340,16 +390,6 @@ function WndEdit:Enable(__enable)
 	end
 end
 
-function WndEdit:OnChange(__action)
-	self.__edit.OnEditChanged = function()
-		local __text = self.__edit:GetText()
-		__action(__text)
-	end
-end
-
-
-EasyUI.CreateEdit = WndEdit.new
-
 local WndCheckBox = class(WndBase)
 function WndCheckBox:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -360,6 +400,7 @@ function WndCheckBox:ctor(__parent, __name, __data)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
+	self:SetType("WndCheckBox")
 	if __data.check then
 		self:Check(__data.check)
 	end
@@ -369,6 +410,14 @@ function WndCheckBox:ctor(__parent, __name, __data)
 	local __x = __data.x or 0
 	local __y = __data.y or 0
 	self:SetRelPos(__x, __y)
+
+	--Bind CheckBox Events
+	self.__this.OnCheckBoxCheck = function() 
+		self:_FireEvent("OnCheck", true)
+	end
+	self.__this.OnCheckBoxUncheck = function()
+		self:_FireEvent("OnCheck", false)
+	end
 end
 
 function WndCheckBox:SetSize(__w)
@@ -391,11 +440,6 @@ end
 
 function WndCheckBox:IsChecked()
 	return self.__this:IsCheckBoxChecked()
-end
-
-function WndCheckBox:OnCheck(__action)
-	self.__this.OnCheckBoxCheck = function() __action(true) end
-	self.__this.OnCheckBoxUncheck = function() __action(false) end
 end
 
 function WndCheckBox:SetText(__text)
@@ -422,8 +466,6 @@ function WndCheckBox:GetFontScheme()
 	return self.__text:GetFontScheme()
 end
 
-EasyUI.CreateCheckBox = WndCheckBox.new
-
 local WndComboBox = class(WndBase)
 function WndComboBox:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -434,12 +476,24 @@ function WndComboBox:ctor(__parent, __name, __data)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
+	self:SetType("WndComboBox")
 	if __data.w then
 		self:SetSize(__data.w)
 	end
 	local __x = __data.x or 0
 	local __y = __data.y or 0
 	self:SetRelPos(__x, __y)
+
+	--Bind ComboBox Events
+	self.__this:Lookup("Btn_ComboBox").OnLButtonClick = function()
+		local __x, __y = self:GetAbsPos()
+		local __w, __h = self:GetSize()
+		local __menu = {}
+		__menu.nMiniWidth = __w
+		__menu.x = __x
+		__menu.y = __y + __h
+		self:_FireEvent("OnClick", __menu)
+	end
 end
 
 function WndComboBox:SetSize(__w)
@@ -464,20 +518,6 @@ function WndComboBox:GetText()
 	return self.__text:GetText()
 end
 
-function WndComboBox:OnClick(__action)
-	self.__this:Lookup("Btn_ComboBox").OnLButtonClick = function()
-		local __x, __y = self:GetAbsPos()
-		local __w, __h = self:GetSize()
-		local __menu = __action()
-		__menu.nMiniWidth = __w
-		__menu.x = __x
-		__menu.y = __y + __h
-		PopupMenu(__menu)
-	end
-end
-
-EasyUI.CreateComboBox = WndComboBox.new
-
 local WndRadioBox = class(WndBase)
 local __RadioBoxGroups = {}
 function WndRadioBox:ctor(__parent, __name, __data)
@@ -489,6 +529,7 @@ function WndRadioBox:ctor(__parent, __name, __data)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
+	self:SetType("WndRadioBox")
 	if __data.w then
 		self:SetSize(__data.w)
 	end
@@ -503,6 +544,18 @@ function WndRadioBox:ctor(__parent, __name, __data)
 	local __x = __data.x or 0
 	local __y = __data.y or 0
 	self:SetRelPos(__x, __y)
+
+	--Bind RadioBox Events
+	self.__this.OnCheckBoxCheck = function()
+		if self.__group then
+			for k, v in pairs(__RadioBoxGroups[self.__group]) do
+				if v:GetGroup() == this.__group and v:GetName() ~= this:GetName() then
+					v:Check(false)
+				end
+			end
+		end
+		self:_FireEvent("OnCheck", true)
+	end
 end
 
 function WndRadioBox:SetSize(__w)
@@ -541,19 +594,6 @@ function WndRadioBox:Enable(__enable)
 	end
 end
 
-function WndRadioBox:OnCheck(__action)
-	self.__this.OnCheckBoxCheck = function()
-		if self.__group then
-			for k, v in pairs(__RadioBoxGroups[self.__group]) do
-				if v:GetGroup() == this.__group and v:GetName() ~= this:GetName() then
-					v:Check(false)
-				end
-			end
-		end
-		__action(true)
-	end
-end
-
 function WndRadioBox:SetText(__text)
 	self.__text:SetText(__text)
 end
@@ -578,7 +618,68 @@ function WndRadioBox:GetFontScheme()
 	return self.__text:GetFontScheme()
 end
 
-EasyUI.CreateRadioBox = WndRadioBox.new
+local WndUICheckBox = class(WndBase)
+local __UICheckBoxGroups = {}
+function WndUICheckBox:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndUICheckBox.ini", "WndUICheckBox", __name)
+	self.__text = hwnd:Lookup("", "Text_Default")
+	self.__text:SetText(__data.text or "")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetType("WndUICheckBox")
+	if __data.w and __data.h then
+		self:SetSize(__data.w, __data.h)
+	end
+	if __data.check then
+		self:Check(__data.check)
+	end
+	self.__this.__group = __data.group
+	self:SetGroup(__data.group)
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+
+	--Bind UICheckBox Events
+	self.__this.OnCheckBoxCheck = function()
+		if self.__group then
+			for k, v in pairs(__UICheckBoxGroups[self.__group]) do
+				if v:GetGroup() == this.__group and v:GetName() ~= this:GetName() then
+					v:Check(false)
+				end
+			end
+		end
+		self:_FireEvent("OnCheck", true)
+	end
+end
+
+function WndUICheckBox:SetGroup(__group)
+	if __group then
+		if not __UICheckBoxGroups[__group] then
+			__UICheckBoxGroups[__group] = {}
+		end
+		table.insert(__UICheckBoxGroups[__group], self)
+	end
+	self.__group = __group
+end
+
+function WndUICheckBox:GetGroup()
+	return self.__group
+end
+
+function WndUICheckBox:Check(__check)
+	self.__this:Check(__check)
+end
+
+function WndUICheckBox:SetText(__text)
+	self.__text:SetText(__text)
+end
+
+function WndUICheckBox:SetAnimation(...)
+	self.__this:SetAnimation(...)
+end
 
 local WndCSlider = class(WndBase)
 function WndCSlider:ctor(__parent, __name, __data)
@@ -590,6 +691,7 @@ function WndCSlider:ctor(__parent, __name, __data)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
+	self:SetType("WndCSlider")
 	self.__min = __data.min
 	self.__max = __data.max
 	self.__step = __data.step
@@ -604,6 +706,14 @@ function WndCSlider:ctor(__parent, __name, __data)
 	local __x = __data.x or 0
 	local __y = __data.y or 0
 	self:SetRelPos(__x, __y)
+
+	--Bind CSlider Events
+	self.__scroll.OnScrollBarPosChanged = function()
+		local __step = this:GetScrollPos()
+		local __value = self:GetValue(__step)
+		self.__text:SetText(__value .. self.__unit)
+		self:_FireEvent("OnChange", __value)
+	end
 end
 
 function WndCSlider:SetSize(__w)
@@ -640,17 +750,6 @@ function WndCSlider:UpdateScrollPos(__value)
 	self.__scroll:SetScrollPos(self:GetStep(__value))
 end
 
-function WndCSlider:OnChange(__action)
-	self.__scroll.OnScrollBarPosChanged = function()
-		local __step = this:GetScrollPos()
-		local __value = self:GetValue(__step)
-		__action(__value)
-		self.__text:SetText(__value .. self.__unit)
-	end
-end
-
-EasyUI.CreateCSlider = WndCSlider.new
-
 local WndColorBox = class(WndBase)
 function WndColorBox:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -661,6 +760,7 @@ function WndColorBox:ctor(__parent, __name, __data)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
+	self:SetType("WndColorBox")
 	self.__r = __data.r
 	self.__g = __data.g
 	self.__b = __data.b
@@ -672,6 +772,15 @@ function WndColorBox:ctor(__parent, __name, __data)
 	local __x = __data.x or 0
 	local __y = __data.y or 0
 	self:SetRelPos(__x, __y)
+
+	--Bind ColorBox Events
+	self.__shadow.OnItemLButtonClick = function()
+		local fnChangeColor = function(r, g, b)
+			self:SetColor(r, g, b)
+			self:_FireEvent("OnChange", {r, g, b})
+		end
+		OpenColorTablePanel(fnChangeColor)
+	end
 end
 
 function WndColorBox:SetSize(__w)
@@ -689,18 +798,6 @@ function WndColorBox:SetColor(...)
 	self.__text:SetFontColor(...)
 end
 
-function WndColorBox:OnChange(__action)
-	self.__shadow.OnItemLButtonClick = function()
-		local fnChangeColor = function(r, g, b)
-			self:SetColor(r, g, b)
-			__action({r, g, b})
-		end
-		OpenColorTablePanel(fnChangeColor)
-	end
-end
-
-EasyUI.CreateColorBox = WndColorBox.new
-
 local WndScroll = class(WndBase)
 function WndScroll:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -709,6 +806,7 @@ function WndScroll:ctor(__parent, __name, __data)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
+	self:SetType("WndScroll")
 	self.__up = self.__this:Lookup("Btn_Up")
 	self.__down = self.__this:Lookup("Btn_Down")
 	self.__scroll = self.__this:Lookup("Scroll_List")
@@ -757,6 +855,10 @@ function WndScroll:GetHandle()
 	return self.__handle
 end
 
+function WndScroll:SetHandleStyle(...)
+	self.__handle:SetHandleStyle(...)
+end
+
 function WndScroll:ClearHandle()
 	self.__handle:Clear()
 end
@@ -788,9 +890,6 @@ function WndScroll:SetSize(__w, __h)
 	self.__down:SetRelPos(__w - 20, __h - 20)
 end
 
-EasyUI.CreateScroll = WndScroll.new
-
-
 local _AppendItem = function(__parent, __string, __name)
 	if __parent.__addon then
 		__parent = __parent:GetHandle()
@@ -805,6 +904,7 @@ end
 local ItemBase = class()
 function ItemBase:ctor(__this)
 	self.__addon = true
+	self.__listeners = {self}
 end
 
 function ItemBase:SetName(...)
@@ -859,8 +959,20 @@ function ItemBase:SetAlpha(...)
 	self.__this:SetAlpha(...)
 end
 
+function ItemBase:SetTip(...)
+	self.__this:SetTip(...)
+end
+
+function ItemBase:GetTip()
+	self.__this:GetTip()
+end
+
 function ItemBase:GetAlpha()
 	return self.__this:GetAlpha()
+end
+
+function ItemBase:GetType()
+	return self.__this:GetType()
 end
 
 function ItemBase:SetPosType(...)
@@ -879,7 +991,7 @@ function ItemBase:GetParent()
 	return self.__parent
 end
 
-function ItemBase:Remove()
+function ItemBase:Destroy()
 	self:GetParent():RemoveItem(self.__this)
 end
 
@@ -895,11 +1007,23 @@ function ItemBase:IsVisible()
 	return self.__this:IsVisible()
 end
 
+function ItemBase:_FireEvent(__event, ...)
+	for __k, __v in pairs(self.__listeners) do
+		if __v[__event] then
+			local res, err = pcall(__v[__event], ...)
+			if not res then
+				OutputMessage("MSG_SYS", "ERROR:" .. err .. "\n")
+			end
+		end
+	end
+end
+
+
 local ItemHandle = class(ItemBase)
 function ItemHandle:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local __string = "<handle>w=10 h=10 handletype=0 firstitempostype=0 eventid=257</handle>"
+	local __string = "<handle>w=10 h=10 eventid=272</handle>"
 	if __data.w then
 		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
 	end
@@ -926,6 +1050,17 @@ function ItemHandle:ctor(__parent, __name, __data)
 		__parent = __parent:GetHandle()
 	end
 	__parent:FormatAllItemPos()
+
+	--Bind Handle Events
+	self.__this.OnItemLButtonClick = function()
+		self:_FireEvent("OnClick")
+	end
+	self.__this.OnItemMouseEnter = function()
+		self:_FireEvent("OnEnter")
+	end
+	self.__this.OnItemMouseLeave = function()
+		self:_FireEvent("OnLeave")
+	end
 end
 
 function ItemHandle:GetHandle()
@@ -936,6 +1071,42 @@ function ItemHandle:FormatAllItemPos()
 	self.__this:FormatAllItemPos()
 end
 
+function ItemHandle:SetHandleStyle(...)
+	self.__this:SetHandleStyle(...)
+end
+
+function ItemHandle:GetItemStartRelPos()
+	return self.__this:GetItemStartRelPos()
+end
+
+function ItemHandle:SetItemStartRelPos(...)
+	self.__this:SetItemStartRelPos(...)
+end
+
+function ItemHandle:SetSizeByAllItemSize()
+	self.__this:SetSizeByAllItemSize()
+end
+
+function ItemHandle:GetAllItemSize()
+	return self.__this:GetAllItemSize()
+end
+
+function ItemHandle:GetVisibleItemCount()
+	return self.__this:GetVisibleItemCount()
+end
+
+function ItemHandle:EnableFormatWhenAppend(...)
+	self.__this:EnableFormatWhenAppend(...)
+end
+
+function ItemHandle:ExchangeItemIndex(...)
+	self.__this:ExchangeItemIndex(...)
+end
+
+function ItemHandle:Sort()
+	self.__this:Sort()
+end
+
 function ItemHandle:GetItemCount()
 	self.__this:GetItemCount()
 end
@@ -944,13 +1115,11 @@ function ItemHandle:ClearHandle()
 	self.__this:Clear()
 end
 
-EasyUI.CreateHandle = ItemHandle.new
-
 local ItemText = class(ItemBase)
 function ItemText:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local __string = "<text>w=150 h=30 valign=1 font=18 eventid=257 </text>"
+	local __string = "<text>w=150 h=30 valign=1 font=18 eventid=256 </text>"
 	if __data.w then
 		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
 	end
@@ -978,6 +1147,14 @@ function ItemText:ctor(__parent, __name, __data)
 		__parent = __parent:GetHandle()
 	end
 	__parent:FormatAllItemPos()
+
+	--Bind Text Events
+	self.__this.OnItemMouseEnter = function()
+		self:_FireEvent("OnEnter")
+	end
+	self.__this.OnItemMouseLeave = function()
+		self:_FireEvent("OnLeave")
+	end
 end
 
 function ItemText:SetText(...)
@@ -996,6 +1173,106 @@ function ItemText:GetFontScheme()
 	return self.__this:GetFontScheme()
 end
 
+function ItemText:GetTextLen()
+	return self.__this:GetTextLen()
+end
+
+function ItemText:SetVAlign(...)
+	self.__this:SetVAlign(...)
+end
+
+function ItemText:GetVAlign()
+	return self.__this:GetVAlign()
+end
+
+function ItemText:SetHAlign(...)
+	self.__this:SetHAlign(...)
+end
+
+function ItemText:GetHAlign()
+	return self.__this:GetHAlign()
+end
+
+function ItemText:SetRowSpacing(...)
+	self.__this:SetRowSpacing(...)
+end
+
+function ItemText:GetRowSpacing()
+	return self.__this:GetRowSpacing()
+end
+
+function ItemText:SetMultiLine(...)
+	self.__this:SetMultiLine(...)
+end
+
+function ItemText:IsMultiLine()
+	return self.__this:IsMultiLine()
+end
+
+function ItemText:FormatTextForDraw(...)
+	self.__this:FormatTextForDraw(...)
+end
+
+function ItemText:AutoSize()
+	self.__this:AutoSize()
+end
+
+function ItemText:SetCenterEachLine(...)
+	self.__this:SetCenterEachLine(...)
+end
+
+function ItemText:IsCenterEachLine()
+	return self.__this:IsCenterEachLine()
+end
+
+function ItemText:SetRichText(...)
+	self.__this:SetRichText(...)
+end
+
+function ItemText:IsRichText()
+	return self.__this:IsRichText()
+end
+
+function ItemText:GetFontScale()
+	return self.__this:GetFontScale()
+end
+
+function ItemText:SetFontScale(...)
+	self.__this:SetFontScale(...)
+end
+
+function ItemText:SetFontID(...)
+	self.__this:SetFontID(...)
+end
+
+function ItemText:SetFontBorder(...)
+	self.__this:SetFontBorder(...)
+end
+
+function ItemText:SetFontShadow(...)
+	self.__this:SetFontShadow(...)
+end
+
+function ItemText:GetFontID()
+	return self.__this:GetFontID()
+end
+
+function ItemText:GetFontBoder()
+	return self.__this:GetFontBoder()
+end
+
+function ItemText:GetFontProjection()
+	return self.__this:GetFontProjection()
+end
+
+function ItemText:GetTextExtent()
+	return self.__this:GetTextExtent()
+end
+
+function ItemText:GetTextPosExtent()
+	return self.__this:GetTextPosExtent()
+end
+
 function ItemText:SetFontColor(...)
 	self.__this:SetFontColor(...)
 end
@@ -1007,12 +1284,10 @@ end
 function ItemText:SetFontSpacing(...)
 	self.__this:SetFontSpacing(...)
 end
+
 function ItemText:GetFontSpacing()
 	return self.__this:GetFontSpacing()
 end
-
-
-EasyUI.CreateText = ItemText.new
 
 local ItemBox = class(ItemBase)
 function ItemBox:ctor(__parent, __name, __data)
@@ -1039,6 +1314,17 @@ function ItemBox:ctor(__parent, __name, __data)
 		__parent = __parent:GetHandle()
 	end
 	__parent:FormatAllItemPos()
+
+	--Bind Box Events
+	self.__this.OnItemMouseEnter = function()
+		self:_FireEvent("OnEnter")
+	end
+	self.__this.OnItemMouseLeave = function()
+		self:_FireEvent("OnLeave")
+	end
+	self.__this.OnItemLButtonClick = function()
+		self:_FireEvent("OnClick")
+	end
 end
 
 function ItemBox:SetObject(...)
@@ -1177,11 +1463,6 @@ function ItemBox:ClearExtentAnimate()
 	self.__this:ClearExtentAnimate()
 end
 
-function ItemBox:OnEnter(__action)
-	return self.__this
-end
-
-EasyUI.CreateBox = ItemBox.new
 
 local ItemImage = class(ItemBase)
 function ItemImage:ctor(__parent, __name, __data)
@@ -1283,8 +1564,6 @@ function ItemImage:SetImage(__image, __frame)
 	end
 end
 
-EasyUI.CreateImage = ItemImage.new
-
 local ItemShadow = class(ItemBase)
 function ItemShadow:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -1360,8 +1639,6 @@ function ItemShadow:AppendCharacterID(...)
 	self.__this:AppendCharacterID(...)
 end
 
-EasyUI.CreateShadow = ItemShadow.new
-
 local ItemAnimate = class(ItemBase)
 function ItemAnimate:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -1419,11 +1696,11 @@ end
 function ItemAnimate:SetIdenticalInterval(...)
 	self.__this:SetIdenticalInterval(...)
 end
-  
+
 function ItemAnimate:IsFinished()
 	return self.__this:IsFinished()
 end
-   
+
 function ItemAnimate:SetAnimateType(...)
 	self.__this:SetAnimateType(...)
 end
@@ -1432,7 +1709,186 @@ function ItemAnimate:GetAnimateType()
 	return self.__this:GetAnimateType()
 end
 
-EasyUI.CreateAnimate = ItemAnimate.new
+local ItemTreeLeaf = class(ItemBase)
+function ItemTreeLeaf:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local __string = "<treeleaf>w=150 h=25 indentwidth=20 alwaysnode=1 indent=0 eventid=257 </treeleaf>"
+	if __data.w then
+		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
+	end
+	if __data.h then
+		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
+	end
+	if __data.eventid then
+		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
+	end
+	local hwnd = _AppendItem(__parent, __string, __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	__parent:FormatAllItemPos()
+
+	--Bind TreeLeaf Event
+	self.__this.OnItemLButtonDown =function()
+		self:_FireEvent("OnClick")
+	end
+end
+
+function ItemTreeLeaf:GetHandle(...)
+	return self.__this
+end
+
+function ItemTreeLeaf:FormatAllItemPos()
+	self.__this:FormatAllItemPos()
+end
+
+function ItemTreeLeaf:SetHandleStyle(...)
+	self.__this:SetHandleStyle(...)
+end
+
+function ItemTreeLeaf:SetRowHeight(...)
+	self.__this:SetRowHeight(...)
+end
+
+function ItemTreeLeaf:SetRowSpacing(...)
+	self.__this:SetRowSpacing(...)
+end
+
+function ItemTreeLeaf:ClearHandle()
+	self.__this:Clear()
+end
+
+function ItemTreeLeaf:GetItemStartRelPos()
+	return self.__this:GetItemStartRelPos()
+end
+
+function ItemTreeLeaf:SetItemStartRelPos(...)
+	self.__this:SetItemStartRelPos(...)
+end
+
+function ItemTreeLeaf:SetSizeByAllItemSize()
+	self.__this:SetSizeByAllItemSize()
+end
+
+function ItemTreeLeaf:GetAllItemSize()
+	return self.__this:GetAllItemSize()
+end
+
+function ItemTreeLeaf:GetItemCount()
+	return self.__this:GetItemCount()
+end
+
+function ItemTreeLeaf:GetVisibleItemCount()
+	return self.__this:GetVisibleItemCount()
+end
+
+function ItemTreeLeaf:EnableFormatWhenAppend(...)
+	self.__this:EnableFormatWhenAppend(...)
+end
+
+function ItemTreeLeaf:ExchangeItemIndex(...)
+	self.__this:ExchangeItemIndex(...)
+end
+
+function ItemTreeLeaf:Sort()
+	self.__this:Sort()
+end
+
+function ItemTreeLeaf:IsExpand()
+	return self.__this:IsExpand()
+end
+
+function ItemTreeLeaf:ExpandOrCollapse(...)
+	self.__this:ExpandOrCollapse(...)
+end
+
+function ItemTreeLeaf:Expand()
+	self.__this:Expand()
+end
+
+function ItemTreeLeaf:Collapse()
+	self.__this:Collapse()
+end
+
+function ItemTreeLeaf:SetIndent(...)
+	self.__this:SetIndent(...)
+end
+
+function ItemTreeLeaf:GetIndent()
+	return self.__this:GetIndent()
+end
+
+function ItemTreeLeaf:SetEachIndentWidth(...)
+	self.__this:SetEachIndentWidth(...)
+end
+
+function ItemTreeLeaf:GetEachIndentWidth()
+	return self.__this:GetEachIndentWidth()
+end
+
+function ItemTreeLeaf:SetNodeIconSize(...)
+	self.__this:SetNodeIconSize(...)
+end
+
+function ItemTreeLeaf:SetIconImage(...)
+	self.__this:SetIconImage(...)
+end
+
+function ItemTreeLeaf:PtInIcon(...)
+	return self.__this:PtInIcon(...)
+end
+
+function ItemTreeLeaf:AdjustNodeIconPos()
+	self.__this:AdjustNodeIconPos()
+end
+
+function ItemTreeLeaf:AutoSetIconSize()
+	self.__this:AutoSetIconSize()
+end
+
+function ItemTreeLeaf:SetShowIndex(...)
+	self.__this:SetShowIndex(...)
+end
+
+function ItemTreeLeaf:GetShowIndex()
+	return self.__this:GetShowIndex()
+end
+
+
+----------------------------------------------
+-- GUI Global Interface
+----------------------------------------------
+EasyUI = EasyUI or {}
+
+local _API = {
+	CreateFrame = WndFrame.new,
+	CreateWindow = WndWindow.new,
+	CreatePageSet = WndPageSet.new,
+	CreateButton = WndButton.new,
+	CreateEdit = WndEdit.new,
+	CreateCheckBox = WndCheckBox.new,
+	CreateComboBox = WndComboBox.new,
+	CreateRadioBox = WndRadioBox.new,
+	CreateCSlider = WndCSlider.new,
+	CreateColorBox = WndColorBox.new,
+	CreateScroll = WndScroll.new,
+	CreateUICheckBox = WndUICheckBox.new,
+	CreateHandle = ItemHandle.new,
+	CreateText = ItemText.new,
+	CreateImage = ItemImage.new,
+	CreateAnimate = ItemAnimate.new,
+	CreateShadow = ItemShadow.new,
+	CreateBox = ItemBox.new,
+	CreateTreeLeaf = ItemTreeLeaf.new,
+}
+setmetatable(EasyUI, { __metatable = true, __index = _API, __newindex = function() end })
 
 RegisterEvent("CALL_LUA_ERROR", function()
 	OutputMessage("MSG_SYS", arg0)
@@ -1490,5 +1946,7 @@ local box=EasyUI.CreateBox(f,"box",{x=50,y=300,w=35,h=35})
 box:SetObject(UI_OBJECT_NOT_NEED_KNOWN, 126)
 box:SetObjectIcon(Table_GetBuffIconID(126, 6))
 box:SetObjectIcon(2999)
+
+local tree=EasyUI.CreateTreeLeaf(f,"tree",{x=50,y=50})
 ]]
 
