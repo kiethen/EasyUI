@@ -158,6 +158,10 @@ function WndFrame:GetHandle()
 	return self.__this:Lookup("", "")
 end
 
+function WndWindow:ClearHandle()
+	self.__this:Lookup("", ""):Clear()
+end
+
 function WndFrame:SetTitle(__title)
 	self.__this:Lookup("", "Text_Title"):SetText(__title)
 end
@@ -170,7 +174,7 @@ EasyUI.CreateFrame = WndFrame.new
 
 local WndWindow = class(WndBase)
 function WndWindow:ctor(__parent, __name, __data)
-	assert(__name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndWindow.ini", "WndWindow", __name)
 	self.__this = hwnd
@@ -193,11 +197,15 @@ function WndWindow:GetHandle()
 	return self.__this:Lookup("", "")
 end
 
+function WndWindow:ClearHandle()
+	self.__this:Lookup("", ""):Clear()
+end
+
 EasyUI.CreateWindow = WndWindow.new
 
 local WndPageSet = class(WndBase)
 function WndPageSet:ctor(__parent, __name, __data)
-	assert(__name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndPageSet.ini", "WndPageSet", __name)
 	self.__this = hwnd
@@ -239,7 +247,7 @@ EasyUI.CreatePageSet = WndPageSet.new
 
 local WndButton = class(WndBase)
 function WndButton:ctor(__parent, __name, __data)
-	assert(__name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndButton.ini", "WndButton", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
@@ -282,7 +290,7 @@ EasyUI.CreateButton = WndButton.new
 
 local WndEdit = class(WndBase)
 function WndEdit:ctor(__parent, __name, __data)
-	assert(__name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndEdit.ini", "WndEdit", __name)
 	self.__edit = hwnd:Lookup("Edit_Default")
@@ -344,7 +352,7 @@ EasyUI.CreateEdit = WndEdit.new
 
 local WndCheckBox = class(WndBase)
 function WndCheckBox:ctor(__parent, __name, __data)
-	assert(__name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndCheckBox.ini", "WndCheckBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
@@ -418,7 +426,7 @@ EasyUI.CreateCheckBox = WndCheckBox.new
 
 local WndComboBox = class(WndBase)
 function WndComboBox:ctor(__parent, __name, __data)
-	assert(__name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndComboBox.ini", "WndComboBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
@@ -473,7 +481,7 @@ EasyUI.CreateComboBox = WndComboBox.new
 local WndRadioBox = class(WndBase)
 local __RadioBoxGroups = {}
 function WndRadioBox:ctor(__parent, __name, __data)
-	assert(__name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndRadioBox.ini", "WndRadioBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
@@ -574,7 +582,7 @@ EasyUI.CreateRadioBox = WndRadioBox.new
 
 local WndCSlider = class(WndBase)
 function WndCSlider:ctor(__parent, __name, __data)
-	assert(__name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndCSlider.ini", "WndCSlider", __name)
 	self.__scroll = hwnd:Lookup("Scroll_Default")
@@ -645,7 +653,7 @@ EasyUI.CreateCSlider = WndCSlider.new
 
 local WndColorBox = class(WndBase)
 function WndColorBox:ctor(__parent, __name, __data)
-	assert(__name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndColorBox.ini", "WndColorBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
@@ -695,7 +703,7 @@ EasyUI.CreateColorBox = WndColorBox.new
 
 local WndScroll = class(WndBase)
 function WndScroll:ctor(__parent, __name, __data)
-	assert(__name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndScroll.ini", "WndScroll", __name)
 	self.__this = hwnd
@@ -749,6 +757,10 @@ function WndScroll:GetHandle()
 	return self.__handle
 end
 
+function WndScroll:ClearHandle()
+	self.__handle:Clear()
+end
+
 function WndScroll:OnUpdateScorllList()
 	self.__handle:FormatAllItemPos()
 	local __w, __h = self.__handle:GetSize()
@@ -795,8 +807,20 @@ function ItemBase:ctor(__this)
 	self.__addon = true
 end
 
+function ItemBase:SetName(...)
+	self.__this:SetName(...)
+end
+
 function ItemBase:GetName()
 	return self.__this:GetName()
+end
+
+function ItemBase:Scale(...)
+	self.__this:Scale(...)
+end
+
+function ItemBase:LockShowAndHide(...)
+	self.__this:LockShowAndHide(...)
 end
 
 function ItemBase:SetSelf(__this)
@@ -831,6 +855,14 @@ function ItemBase:GetAbsPos()
 	return self.__this:GetAbsPos()
 end
 
+function ItemBase:SetAlpha(...)
+	self.__this:SetAlpha(...)
+end
+
+function ItemBase:GetAlpha()
+	return self.__this:GetAlpha()
+end
+
 function ItemBase:SetPosType(...)
 	self.__this:SetPosType(...)
 end
@@ -859,9 +891,13 @@ function ItemBase:Hide()
 	self.__this:Hide()
 end
 
+function ItemBase:IsVisible()
+	return self.__this:IsVisible()
+end
+
 local ItemHandle = class(ItemBase)
 function ItemHandle:ctor(__parent, __name, __data)
-	assert(__name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local __string = "<handle>w=10 h=10 handletype=0 firstitempostype=0 eventid=257</handle>"
 	if __data.w then
@@ -904,11 +940,15 @@ function ItemHandle:GetItemCount()
 	self.__this:GetItemCount()
 end
 
+function ItemHandle:ClearHandle()
+	self.__this:Clear()
+end
+
 EasyUI.CreateHandle = ItemHandle.new
 
 local ItemText = class(ItemBase)
 function ItemText:ctor(__parent, __name, __data)
-	assert(__name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local __string = "<text>w=150 h=30 valign=1 font=18 eventid=257 </text>"
 	if __data.w then
@@ -964,7 +1004,435 @@ function ItemText:GetFontColor()
 	return self.__this:GetFontColor()
 end
 
+function ItemText:SetFontSpacing(...)
+	self.__this:SetFontSpacing(...)
+end
+function ItemText:GetFontSpacing()
+	return self.__this:GetFontSpacing()
+end
+
+
 EasyUI.CreateText = ItemText.new
+
+local ItemBox = class(ItemBase)
+function ItemBox:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local __string = "<box>w=48 h=48 eventid=272 </box>"
+	if __data.w then
+		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
+	end
+	if __data.h then
+		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
+	end
+	if __data.eventid then
+		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
+	end
+	local hwnd = _AppendItem(__parent, __string, __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	__parent:FormatAllItemPos()
+end
+
+function ItemBox:SetObject(...)
+	self.__this:SetObject(...)
+end
+
+function ItemBox:GetObject()
+	return self.__this:GetObject()
+end
+
+function ItemBox:GetObjectType()
+	return self.__this:GetObjectType()
+end
+
+function ItemBox:GetObjectData()
+	return self.__this:GetObjectData()
+end
+
+function ItemBox:ClearObject()
+	return self.__this:ClearObject()
+end
+
+function ItemBox:IsEmpty()
+	return self.__this:IsEmpty()
+end
+
+function ItemBox:EnableObject(...)
+	self.__this:EnableObject(...)
+end
+
+function ItemBox:IsObjectEnable()
+	return self.__this:IsObjectEnable()
+end
+
+function ItemBox:SetObjectCoolDown(...)
+	self.__this:SetObjectCoolDown(...)
+end
+
+function ItemBox:IsObjectCoolDown()
+	return self.__this:IsObjectCoolDown()
+end
+
+function ItemBox:SetObjectSparking(...)
+	self.__this:SetObjectSparking(...)
+end
+
+function ItemBox:SetObjectInUse(...)
+	self.__this:SetObjectInUse(...)
+end
+
+function ItemBox:SetObjectStaring(...)
+	self.__this:SetObjectStaring(...)
+end
+
+function ItemBox:SetObjectSelected(...)
+	self.__this:SetObjectSelected(...)
+end
+
+function ItemBox:IsObjectSelected()
+	return self.__this:IsObjectSelected()
+end
+
+function ItemBox:SetObjectMouseOver(...)
+	self.__this:SetObjectMouseOver(...)
+end
+
+function ItemBox:IsObjectMouseOver()
+	return self.__this:IsObjectMouseOver()
+end
+
+function ItemBox:SetObjectPressed(...)
+	self.__this:SetObjectPressed(...)
+end
+
+function ItemBox:IsObjectPressed()
+	return self.__this:IsObjectPressed()
+end
+
+function ItemBox:SetCoolDownPercentage(...)
+	self.__this:SetCoolDownPercentage(...)
+end
+
+function ItemBox:GetCoolDownPercentage()
+	return self.__this:GetCoolDownPercentage()
+end
+
+function ItemBox:SetObjectIcon(...)
+	self.__this:SetObjectIcon(...)
+end
+
+function ItemBox:GetObjectIcon()
+	return self.__this:GetObjectIcon()
+end
+
+function ItemBox:ClearObjectIcon()
+	self.__this:ClearObjectIcon()
+end
+
+function ItemBox:SetOverText(...)
+	self.__this:SetOverText(...)
+end
+
+function ItemBox:GetOverText()
+	return self.__this:GetOverText()
+end
+
+function ItemBox:SetOverTextFontScheme(...)
+	self.__this:SetOverTextFontScheme(...)
+end
+
+function ItemBox:GetOverTextFontScheme()
+	return self.__this:GetOverTextFontScheme()
+end
+
+function ItemBox:SetOverTextPosition(...)
+	self.__this:SetOverTextPosition(...)
+end
+
+function ItemBox:GetOverTextPosition()
+	return self.__this:GetOverTextPosition()
+end
+
+function ItemBox:SetExtentImage(...)
+	self.__this:SetExtentImage(...)
+end
+
+function ItemBox:ClearExtentImage()
+	self.__this:ClearExtentImage()
+end
+
+function ItemBox:SetExtentAnimate(...)
+	self.__this:SetExtentAnimate(...)
+end
+
+function ItemBox:ClearExtentAnimate()
+	self.__this:ClearExtentAnimate()
+end
+
+function ItemBox:OnEnter(__action)
+	return self.__this
+end
+
+EasyUI.CreateBox = ItemBox.new
+
+local ItemImage = class(ItemBase)
+function ItemImage:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local __string = "<image>w=100 h=100 eventid=257 </image>"
+	if __data.w then
+		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
+	end
+	if __data.h then
+		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
+	end
+	if __data.eventid then
+		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
+	end
+	local hwnd = _AppendItem(__parent, __string, __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	if __data.image then
+		local __image = __data.image
+		local __frame = __data.frame or nil
+		self:SetImage(__image, __frame)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	__parent:FormatAllItemPos()
+end
+
+function ItemImage:SetFrame(...)
+	self.__this:SetFrame(...)
+end
+
+function ItemImage:GetFrame()
+	return self.__this:GetFrame()
+end
+
+function ItemImage:SetImageType(...)
+	self.__this:SetImageType(...)
+end
+
+function ItemImage:GetImageType()
+	return self.__this:GetImageType()
+end
+
+function ItemImage:SetPercentage(...)
+	self.__this:SetPercentage(...)
+end
+
+function ItemImage:GetPercentage()
+	return self.__this:GetPercentage()
+end
+
+function ItemImage:SetRotate(...)
+	self.__this:SetRotate(...)
+end
+
+function ItemImage:GetRotate()
+	return self.__this:GetRotate()
+end
+
+function ItemImage:GetImageID()
+	return self.__this:GetImageID()
+end
+
+function ItemImage:FromUITex(...)
+	self.__this:FromUITex(...)
+end
+
+function ItemImage:FromTextureFile(...)
+	self.__this:FromTextureFile(...)
+end
+
+function ItemImage:FromScene(...)
+	self.__this:FromScene(...)
+end
+
+function ItemImage:FromImageID(...)
+	self.__this:FromImageID(...)
+end
+
+function ItemImage:FromIconID(...)
+	self.__this:FromIconID(...)
+end
+
+function ItemImage:SetImage(__image, __frame)
+	if type(__image) == "string" then
+		if __frame then
+			self:FromUITex(__image, __frame)
+		else
+			self:FromTextureFile(__image)
+		end
+	elseif type(__image) == "number" then
+		self:FromIconID(__image)
+	end
+end
+
+EasyUI.CreateImage = ItemImage.new
+
+local ItemShadow = class(ItemBase)
+function ItemShadow:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local __string = "<shadow>w=15 h=15 eventid=277 </shadow>"
+	if __data.w then
+		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
+	end
+	if __data.h then
+		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
+	end
+	if __data.eventid then
+		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
+	end
+	local hwnd = _AppendItem(__parent, __string, __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	__parent:FormatAllItemPos()
+end
+
+function ItemShadow:SetShadowColor(...)
+	self.__this:SetShadowColor(...)
+end
+
+function ItemShadow:GetShadowColor()
+	return self.__this:GetShadowColor()
+end
+
+function ItemShadow:SetColorRGB(...)
+	self.__this:SetColorRGB(...)
+end
+
+function ItemShadow:GetColorRGB()
+	return self.__this:GetColorRGB()
+end
+
+function ItemShadow:SetTriangleFan(...)
+	self.__this:SetTriangleFan(...)
+end
+
+function ItemShadow:IsTriangleFan()
+	return self.__this:IsTriangleFan()
+end
+
+function ItemShadow:AppendTriangleFanPoint(...)
+	self.__this:AppendTriangleFanPoint(...)
+end
+
+function ItemShadow:SetD3DPT(...)
+	self.__this:SetD3DPT(...)
+end
+
+function ItemShadow:AppendTriangleFan3DPoint(...)
+	self.__this:AppendTriangleFan3DPoint(...)
+end
+
+function ItemShadow:ClearTriangleFanPoint()
+	self.__this:ClearTriangleFanPoint()
+end
+
+function ItemShadow:AppendDoodadID(...)
+	self.__this:AppendDoodadID(...)
+end
+
+function ItemShadow:AppendCharacterID(...)
+	self.__this:AppendCharacterID(...)
+end
+
+EasyUI.CreateShadow = ItemShadow.new
+
+local ItemAnimate = class(ItemBase)
+function ItemAnimate:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local __string = "<animate>w=30 h=30 </animate>"
+	if __data.w then
+		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
+	end
+	if __data.h then
+		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
+	end
+	local hwnd = _AppendItem(__parent, __string, __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	if __data.image then
+		local __image = __data.image
+		local __group = __data.group or 0
+		local __loop = __data.loop or -1
+		self:SetAnimate(__image, __group, __loop)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	__parent:FormatAllItemPos()
+end
+
+function ItemAnimate:SetGroup(...)
+	self.__this:SetGroup(...)
+end
+
+function ItemAnimate:SetLoopCount(...)
+	self.__this:SetLoopCount(...)
+end
+
+function ItemAnimate:SetImagePath(...)
+	self.__this:SetImagePath(...)
+end
+
+function ItemAnimate:SetAnimate(...)
+	self.__this:SetAnimate(...)
+end
+
+function ItemAnimate:AutoSize()
+	self.__this:AutoSize()
+end
+
+function ItemAnimate:Replay()
+	self.__this:Replay()
+end
+
+function ItemAnimate:SetIdenticalInterval(...)
+	self.__this:SetIdenticalInterval(...)
+end
+  
+function ItemAnimate:IsFinished()
+	return self.__this:IsFinished()
+end
+   
+function ItemAnimate:SetAnimateType(...)
+	self.__this:SetAnimateType(...)
+end
+
+function ItemAnimate:GetAnimateType()
+	return self.__this:GetAnimateType()
+end
+
+EasyUI.CreateAnimate = ItemAnimate.new
 
 RegisterEvent("CALL_LUA_ERROR", function()
 	OutputMessage("MSG_SYS", arg0)
@@ -1012,4 +1480,15 @@ for i=0, 20 do
 	EasyUI.CreateText(hd,"txt"..i,{text="AAAAAAA"})
 end
 scr:OnUpdateScorllList()
+local img=EasyUI.CreateImage(f,"img",{w=36,h=36,x=50,y=50,image="ui\\Image\\UICommon\\CommonPanel.UITex",frame=13})
+img:SetImage("ui\\Image\\UICommon\\CommonPanel.UITex",13)
+
+local ani=EasyUI.CreateAnimate(f,"img",{w=161,h=161,x=50,y=50,image="ui/Image/Common/SprintYellowPower1.UITex"})
+local sha=EasyUI.CreateShadow(f,"sha",{x=50,y=300,w=35,h=35})
+sha:SetColorRGB(255,255,0)
+local box=EasyUI.CreateBox(f,"box",{x=50,y=300,w=35,h=35})
+box:SetObject(UI_OBJECT_NOT_NEED_KNOWN, 126)
+box:SetObjectIcon(Table_GetBuffIconID(126, 6))
+box:SetObjectIcon(2999)
 ]]
+
