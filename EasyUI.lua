@@ -178,7 +178,7 @@ function WndFrame:ctor(__name, __data)
 	end
 
 	--Bind Frame Events
-	frame.OnFrameBreathe = function()
+	--[[frame.OnFrameBreathe = function()
 		self:_FireEvent("OnUpdate")
 	end
 	frame.OnFrameRender = function()
@@ -189,7 +189,7 @@ function WndFrame:ctor(__name, __data)
 	end
 	frame.OnFrameDragEnd = function()
 		self:_FireEvent("OnDragEnd")
-	end
+	end]]
 end
 
 function WndFrame:GetHandle()
@@ -1873,7 +1873,45 @@ function ItemTreeLeaf:GetShowIndex()
 	return self.__this:GetShowIndex()
 end
 
+-- Addon Class
+local CreateAddon = class()
+function CreateAddon:ctor(__name, __style)
+	self.__listeners = {self}
 
+	--Bind Addon Base Events
+	self.OnFrameCreate = function()
+		self:_FireEvent("OnCreate")
+	end
+	self.OnFrameBreathe = function()
+		self:_FireEvent("OnUpdate")
+	end
+	self.OnFrameRender = function()
+		self:_FireEvent("OnRender")
+	end
+	self.OnFrameDragEnd = function()
+		self:_FireEvent("OnDragEnd")
+	end
+	self.OnFrameDestroy = function()
+		self:_FireEvent("OnDestroy")
+	end
+	self.OnFrameKeyDown = function()
+		self:_FireEvent("OnKeyDown")
+	end
+	self.OnEvent = function(__event)
+		self:_FireEvent("OnScript", __event)
+	end
+end
+
+function CreateAddon:_FireEvent(__event, ...)
+	for __k, __v in pairs(self.__listeners) do
+		if __v[__event] then
+			local res, err = pcall(__v[__event], ...)
+			if not res then
+				OutputMessage("MSG_SYS", "ERROR:" .. err .. "\n")
+			end
+		end
+	end
+end
 ----------------------------------------------
 -- GUI Global Interface
 ----------------------------------------------
@@ -1899,6 +1937,7 @@ local _API = {
 	CreateShadow = ItemShadow.new,
 	CreateBox = ItemBox.new,
 	CreateTreeLeaf = ItemTreeLeaf.new,
+	CreateAddon = CreateAddon.new,
 }
 setmetatable(EasyUI, { __metatable = true, __index = _API, __newindex = function() end })
 

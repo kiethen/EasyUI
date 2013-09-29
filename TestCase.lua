@@ -67,7 +67,10 @@ function EasyTest.Case()
 	button1.OnLeave = function() Output("Leave") end
 
 	--创建一个按钮
-	local button2 = CreateButton(window1,"button2",{text = "禁用",x = 150,y = 0,w = 91,h = 26,enable = false})
+	local button2 = CreateButton(window1,"button2",{text = "打开",x = 150,y = 0,w = 91,h = 26})
+	button2.OnClick = function()
+		EasyTestAddon.Open()
+	end
 
 	--创建一个编辑框
 	local edit = CreateEdit(window1,"edit",{text = "编辑框测试",x = 50,y = 50})
