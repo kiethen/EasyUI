@@ -44,12 +44,14 @@ local function class(super)
 	return class_type
 end
 
+local __ini = "Interface/EasyUI/ini/%s.ini"
+
 -- Append WndType Control
-local _AppendWnd = function(__parent, __ini, __type, __name)
+local _AppendWnd = function(__parent, __type, __name)
 	if __parent.__addon then
 		__parent = __parent:GetSelf()
 	end
-	local hwnd = Wnd.OpenWindow(__ini, __name):Lookup(__type)
+	local hwnd = Wnd.OpenWindow(string.format(__ini, __type), __name):Lookup(__type)
 	hwnd:ChangeRelation(__parent, true, true)
 	hwnd:SetName(__name)
 	Wnd.CloseWindow(__name)
@@ -152,15 +154,15 @@ function WndFrame:ctor(__name, __data)
 	__data = __data or {}
 	local frame = nil
 	if __data.style == "THIN" then
-		frame = Wnd.OpenWindow("Interface/EasyUI/ini/WndFrameThin.ini", __name)
+		frame = Wnd.OpenWindow(string.format(__ini, "WndFrameThin"), __name)
 	elseif __data.style == "SMALL" then
-		frame = Wnd.OpenWindow("Interface/EasyUI/ini/WndFrameSmall.ini", __name)
+		frame = Wnd.OpenWindow(string.format(__ini, "WndFrameSmall"), __name)
 	elseif __data.style == "NORMAL" then
-		frame = Wnd.OpenWindow("Interface/EasyUI/ini/WndFrame.ini", __name)
+		frame = Wnd.OpenWindow(string.format(__ini, "WndFrame"), __name)
 	elseif __data.style == "LARGER" then
-		frame = Wnd.OpenWindow("Interface/EasyUI/ini/WndFrameLarger.ini", __name)
+		frame = Wnd.OpenWindow(string.format(__ini, "WndFrameLarger"), __name)
 	elseif __data.style == "NONE" then
-		frame = Wnd.OpenWindow("Interface/EasyUI/ini/WndFrameNone.ini", __name)
+		frame = Wnd.OpenWindow(string.format(__ini, "WndFrameNone"), __name)
 	end
 	frame:SetName(__name)
 	self.__this = frame
@@ -176,11 +178,17 @@ function WndFrame:ctor(__name, __data)
 	end
 
 	--Bind Frame Events
-	frame.OnFrameCreate = function()
-		self:_FireEvent("OnCreate")
-	end
 	frame.OnFrameBreathe = function()
 		self:_FireEvent("OnUpdate")
+	end
+	frame.OnFrameRender = function()
+		self:_FireEvent("OnRender")
+	end
+	frame.OnEvent = function(__event)
+		self:_FireEvent("OnEvent", __event)
+	end
+	frame.OnFrameDragEnd = function()
+		self:_FireEvent("OnDragEnd")
 	end
 end
 
@@ -200,11 +208,15 @@ function WndFrame:GetTitle(__title)
 	return self.__this:Lookup("", "Text_Title"):GetText()
 end
 
+function WndFrame:RegisterEvent(...)
+	self.__this:RegisterEvent(...)
+end
+
 local WndWindow = class(WndBase)
 function WndWindow:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndWindow.ini", "WndWindow", __name)
+	local hwnd = _AppendWnd(__parent, "WndWindow", __name)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
@@ -234,7 +246,7 @@ local WndPageSet = class(WndBase)
 function WndPageSet:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndPageSet.ini", "WndPageSet", __name)
+	local hwnd = _AppendWnd(__parent, "WndPageSet", __name)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
@@ -275,7 +287,7 @@ local WndButton = class(WndBase)
 function WndButton:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndButton.ini", "WndButton", __name)
+	local hwnd = _AppendWnd(__parent, "WndButton", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
@@ -316,7 +328,7 @@ local WndUIButton = class(WndBase)
 function WndUIButton:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndUIButton.ini", "WndUIButton", __name)
+	local hwnd = _AppendWnd(__parent, "WndUIButton", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
@@ -335,7 +347,7 @@ local WndEdit = class(WndBase)
 function WndEdit:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndEdit.ini", "WndEdit", __name)
+	local hwnd = _AppendWnd(__parent, "WndEdit", __name)
 	self.__edit = hwnd:Lookup("Edit_Default")
 	self.__edit:SetText(__data.text or "")
 	self.__this = hwnd
@@ -394,7 +406,7 @@ local WndCheckBox = class(WndBase)
 function WndCheckBox:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndCheckBox.ini", "WndCheckBox", __name)
+	local hwnd = _AppendWnd(__parent, "WndCheckBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
@@ -412,7 +424,7 @@ function WndCheckBox:ctor(__parent, __name, __data)
 	self:SetRelPos(__x, __y)
 
 	--Bind CheckBox Events
-	self.__this.OnCheckBoxCheck = function() 
+	self.__this.OnCheckBoxCheck = function()
 		self:_FireEvent("OnCheck", true)
 	end
 	self.__this.OnCheckBoxUncheck = function()
@@ -470,7 +482,7 @@ local WndComboBox = class(WndBase)
 function WndComboBox:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndComboBox.ini", "WndComboBox", __name)
+	local hwnd = _AppendWnd(__parent, "WndComboBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
@@ -523,7 +535,7 @@ local __RadioBoxGroups = {}
 function WndRadioBox:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndRadioBox.ini", "WndRadioBox", __name)
+	local hwnd = _AppendWnd(__parent, "WndRadioBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
@@ -623,7 +635,7 @@ local __UICheckBoxGroups = {}
 function WndUICheckBox:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndUICheckBox.ini", "WndUICheckBox", __name)
+	local hwnd = _AppendWnd(__parent, "WndUICheckBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
@@ -685,7 +697,7 @@ local WndCSlider = class(WndBase)
 function WndCSlider:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndCSlider.ini", "WndCSlider", __name)
+	local hwnd = _AppendWnd(__parent, "WndCSlider", __name)
 	self.__scroll = hwnd:Lookup("Scroll_Default")
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__this = hwnd
@@ -754,7 +766,7 @@ local WndColorBox = class(WndBase)
 function WndColorBox:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndColorBox.ini", "WndColorBox", __name)
+	local hwnd = _AppendWnd(__parent, "WndColorBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__shadow = hwnd:Lookup("", "Shadow_Default")
 	self.__this = hwnd
@@ -802,7 +814,7 @@ local WndScroll = class(WndBase)
 function WndScroll:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "Interface/EasyUI/ini/WndScroll.ini", "WndScroll", __name)
+	local hwnd = _AppendWnd(__parent, "WndScroll", __name)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
