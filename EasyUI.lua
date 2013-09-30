@@ -1,6 +1,16 @@
+
+----------------------------------------------
+-- EasyUI 界面库
+-- Author: crazy
+-- SinaWeibo: @南诏大将军
+-- CreatData: 2013.9.24
+----------------------------------------------
+
+----------------------------------------------
+-- Lua OOP
+----------------------------------------------
 local _class = {}
 
--- Lua OOP
 local function class(super)
 	local class_type = {}
 	class_type.ctor = false
@@ -46,862 +56,13 @@ end
 
 local __ini = "Interface/EasyUI/ini/%s.ini"
 
--- Append WndType Control
-local _AppendWnd = function(__parent, __type, __name)
-	if __parent.__addon then
-		__parent = __parent:GetSelf()
-	end
-	local hwnd = Wnd.OpenWindow(string.format(__ini, __type), __name):Lookup(__type)
-	hwnd:ChangeRelation(__parent, true, true)
-	hwnd:SetName(__name)
-	Wnd.CloseWindow(__name)
-	return hwnd
-end
-
--- Base Class of WndType Control
-local WndBase = class()
-function WndBase:ctor(__this)
-	self.__addon = true
-	self.__listeners = {self}
-end
-
-function WndBase:GetName()
-	return self.__this:GetName()
-end
-
-function WndBase:SetSelf(__this)
-	self.__this = __this
-end
-
-function WndBase:GetSelf()
-	return self.__this
-end
-
-function WndBase:SetSize(...)
-	self.__this:SetSize(...)
-end
-
-function WndBase:GetSize()
-	return self.__this:GetSize()
-end
-
-function WndBase:SetRelPos(...)
-	self.__this:SetRelPos(...)
-end
-
-function WndBase:GetRelPos()
-	return self.__this:GetRelPos()
-end
-
-function WndBase:SetAbsPos(...)
-	self.__this:SetAbsPos(...)
-end
-
-function WndBase:GetAbsPos()
-	return self.__this:GetAbsPos()
-end
-
-function WndBase:Enable(__enable)
-	self.__this:Enable(__enable)
-end
-
-function WndBase:SetParent(__parent)
-	self.__parent = __parent
-end
-
-function WndBase:GetParent()
-	return self.__parent
-end
-
-function WndBase:SetType(__type)
-	self.__type = __type
-end
-
-function WndBase:GetType()
-	return self.__type
-end
-
-function WndBase:Destroy()
-	if self:GetType() == "WndFrame" then
-		Wnd.CloseWindow(self:GetName())
-	else
-		self.__this:Destroy()
-	end
-end
-
-function WndBase:Show()
-	self.__this:Show()
-end
-
-function WndBase:Hide()
-	self.__this:Hide()
-end
-
-function WndBase:_FireEvent(__event, ...)
-	for __k, __v in pairs(self.__listeners) do
-		if __v[__event] then
-			local res, err = pcall(__v[__event], ...)
-			if not res then
-				OutputMessage("MSG_SYS", "ERROR:" .. err .."\n")
-			end
-		end
-	end
-end
-
-local WndFrame = class(WndBase)
-function WndFrame:ctor(__name, __data)
-	assert(__name ~= nil, "frame name can not be null.")
-	__data = __data or {}
-	local frame = nil
-	if __data.style == "THIN" then
-		frame = Wnd.OpenWindow(string.format(__ini, "WndFrameThin"), __name)
-	elseif __data.style == "SMALL" then
-		frame = Wnd.OpenWindow(string.format(__ini, "WndFrameSmall"), __name)
-	elseif __data.style == "NORMAL" then
-		frame = Wnd.OpenWindow(string.format(__ini, "WndFrame"), __name)
-	elseif __data.style == "LARGER" then
-		frame = Wnd.OpenWindow(string.format(__ini, "WndFrameLarger"), __name)
-	elseif __data.style == "NONE" then
-		frame = Wnd.OpenWindow(string.format(__ini, "WndFrameNone"), __name)
-	end
-	frame:SetName(__name)
-	self.__this = frame
-	self:SetSelf(self.__this)
-	self:SetType("WndFrame")
-	if __data.style and __data.style ~= "NONE" then
-		frame:Lookup("Btn_Close").OnLButtonClick = function()
-			self:Destroy()
-		end
-		if __data.title then
-			self:SetTitle(__data.title)
-		end
-	end
-
-	--Bind Frame Events
-	--[[frame.OnFrameBreathe = function()
-		self:_FireEvent("OnUpdate")
-	end
-	frame.OnFrameRender = function()
-		self:_FireEvent("OnRender")
-	end
-	frame.OnEvent = function(__event)
-		self:_FireEvent("OnEvent", __event)
-	end
-	frame.OnFrameDragEnd = function()
-		self:_FireEvent("OnDragEnd")
-	end]]
-end
-
-function WndFrame:GetHandle()
-	return self.__this:Lookup("", "")
-end
-
-function WndFrame:ClearHandle()
-	self.__this:Lookup("", ""):Clear()
-end
-
-function WndFrame:SetTitle(__title)
-	self.__this:Lookup("", "Text_Title"):SetText(__title)
-end
-
-function WndFrame:GetTitle(__title)
-	return self.__this:Lookup("", "Text_Title"):GetText()
-end
-
-function WndFrame:RegisterEvent(...)
-	self.__this:RegisterEvent(...)
-end
-
-local WndWindow = class(WndBase)
-function WndWindow:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "WndWindow", __name)
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndWindow")
-	if __data.w and __data.h then
-		self:SetSize(__data.w, __data.h)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-end
-
-function WndWindow:SetSize(...)
-	self.__this:SetSize(...)
-	self.__this:Lookup("", ""):SetSize(...)
-end
-
-function WndWindow:GetHandle()
-	return self.__this:Lookup("", "")
-end
-
-function WndWindow:ClearHandle()
-	self.__this:Lookup("", ""):Clear()
-end
-
-local WndPageSet = class(WndBase)
-function WndPageSet:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "WndPageSet", __name)
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndPageSet")
-	if __data.w and __data.h then
-		self:SetSize(__data.w, __data.h)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-end
-
-function WndPageSet:AddPage(...)
-	self.__this:AddPage(...)
-end
-
-function WndPageSet:GetActivePage()
-	return self.__this:GetActivePage()
-end
-
-function WndPageSet:GetActiveCheckBox()
-	return self.__this:GetActiveCheckBox()
-end
-
-function WndPageSet:ActivePage(...)
-	self.__this:ActivePage(...)
-end
-
-function WndPageSet:GetActivePageIndex()
-	return self.__this:GetActivePageIndex()
-end
-
-function WndPageSet:GetLastActivePageIndex()
-	return self.__this:GetLastActivePageIndex()
-end
-
-local WndButton = class(WndBase)
-function WndButton:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "WndButton", __name)
-	self.__text = hwnd:Lookup("", "Text_Default")
-	self.__text:SetText(__data.text or "")
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndButton")
-	if __data.w and __data.h then
-		self:SetSize(__data.w, __data.h)
-	end
-	if __data.enable ~= nil then
-		self:Enable(__data.enable)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-
-	--Bind Button Events
-	self.__this.OnLButtonClick = function()
-		self:_FireEvent("OnClick")
-	end
-	self.__this.OnMouseEnter = function()
-		self:_FireEvent("OnEnter")
-	end
-	self.__this.OnMouseLeave = function()
-		self:_FireEvent("OnLeave")
-	end
-end
-
-function WndButton:SetText(__text)
-	self.__text:SetText(__text)
-end
-
-function WndButton:GetText()
-	return self.__text:GetText()
-end
-
-local WndUIButton = class(WndBase)
-function WndUIButton:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "WndUIButton", __name)
-	self.__text = hwnd:Lookup("", "Text_Default")
-	self.__text:SetText(__data.text or "")
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndUIButton")
-	if __data.w and __data.h then
-		self:SetSize(__data.w, __data.h)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-end
-
-local WndEdit = class(WndBase)
-function WndEdit:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "WndEdit", __name)
-	self.__edit = hwnd:Lookup("Edit_Default")
-	self.__edit:SetText(__data.text or "")
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndEdit")
-	if __data.w and __data.h then
-		self:SetSize(__data.w, __data.h)
-	end
-	if __data.limit then
-		self:SetLimit(__data.limit)
-	end
-	if __data.multi ~= nil then
-		self:SetMultiLine(__data.multi)
-	end
-	if __data.enable ~= nil then
-		self:Enable(__data.enable)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-
-	--Bind Edit Events
-	self.__edit.OnEditChanged = function()
-		local __text = self.__edit:GetText()
-		self:_FireEvent("OnChange", __text)
-	end
-end
-
-function WndEdit:SetSize(__w, __h)
-	self.__this:SetSize(__w + 4, __h)
-	self.__this:Lookup("", ""):SetSize(__w + 4, __h)
-	self.__this:Lookup("", "Image_Default"):SetSize(__w + 4, __h)
-	self.__edit:SetSize(__w, __h)
-end
-
-function WndEdit:SetLimit(__limit)
-	self.__edit:SetLimit(__limit)
-end
-
-function WndEdit:SetMultiLine(__multi)
-	self.__edit:SetMultiLine(__multi)
-end
-
-function WndEdit:Enable(__enable)
-	if __enable then
-		self.__edit:SetFontColor(255, 255, 255)
-		self.__edit:Enable(true)
-	else
-		self.__edit:SetFontColor(192, 192, 192)
-		self.__edit:Enable(false)
-	end
-end
-
-local WndCheckBox = class(WndBase)
-function WndCheckBox:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "WndCheckBox", __name)
-	self.__text = hwnd:Lookup("", "Text_Default")
-	self.__text:SetText(__data.text or "")
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndCheckBox")
-	if __data.check then
-		self:Check(__data.check)
-	end
-	if __data.enable ~= nil then
-		self:Enable(__data.enable)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-
-	--Bind CheckBox Events
-	self.__this.OnCheckBoxCheck = function()
-		self:_FireEvent("OnCheck", true)
-	end
-	self.__this.OnCheckBoxUncheck = function()
-		self:_FireEvent("OnCheck", false)
-	end
-end
-
-function WndCheckBox:SetSize(__w)
-	self.__text:SetSize(__w - 28, 25)
-end
-
-function WndCheckBox:Check(__check)
-	self.__this:Check(__check)
-end
-
-function WndCheckBox:Enable(__enable)
-	if __enable then
-		self.__text:SetFontColor(255, 255, 255)
-		self.__this:Enable(true)
-	else
-		self.__text:SetFontColor(192, 192, 192)
-		self.__this:Enable(false)
-	end
-end
-
-function WndCheckBox:IsChecked()
-	return self.__this:IsCheckBoxChecked()
-end
-
-function WndCheckBox:SetText(__text)
-	self.__text:SetText(__text)
-end
-
-function WndCheckBox:GetText()
-	return self.__text:GetText()
-end
-
-function WndCheckBox:SetFontColor(...)
-	self.__text:SetFontColor(...)
-end
-
-function WndCheckBox:GetFontColor()
-	return self.__text:GetFontColor()
-end
-
-function WndCheckBox:SetFontScheme(...)
-	self.__text:SetFontScheme(...)
-end
-
-function WndCheckBox:GetFontScheme()
-	return self.__text:GetFontScheme()
-end
-
-local WndComboBox = class(WndBase)
-function WndComboBox:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "WndComboBox", __name)
-	self.__text = hwnd:Lookup("", "Text_Default")
-	self.__text:SetText(__data.text or "")
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndComboBox")
-	if __data.w then
-		self:SetSize(__data.w)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-
-	--Bind ComboBox Events
-	self.__this:Lookup("Btn_ComboBox").OnLButtonClick = function()
-		local __x, __y = self:GetAbsPos()
-		local __w, __h = self:GetSize()
-		local __menu = {}
-		__menu.nMiniWidth = __w
-		__menu.x = __x
-		__menu.y = __y + __h
-		self:_FireEvent("OnClick", __menu)
-	end
-end
-
-function WndComboBox:SetSize(__w)
-	self.__this:SetSize(__w, 25)
-	local handle = self.__this:Lookup("", "")
-	handle:SetSize(__w, 25)
-	handle:Lookup("Image_ComboBoxBg"):SetSize(__w,25)
-	handle:Lookup("Text_Default"):SetSize(__w, 25)
-	local btn = self.__this:Lookup("Btn_ComboBox")
-	btn:SetRelPos(__w - 25, 3)
-	local h = btn:Lookup("", "")
-	h:SetSize(__w, 25)
-	local __x, __y = handle:GetAbsPos()
-	h:SetAbsPos(__x, __y)
-end
-
-function WndComboBox:SetText(__text)
-	self.__text:SetText(__text)
-end
-
-function WndComboBox:GetText()
-	return self.__text:GetText()
-end
-
-local WndRadioBox = class(WndBase)
-local __RadioBoxGroups = {}
-function WndRadioBox:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "WndRadioBox", __name)
-	self.__text = hwnd:Lookup("", "Text_Default")
-	self.__text:SetText(__data.text or "")
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndRadioBox")
-	if __data.w then
-		self:SetSize(__data.w)
-	end
-	if __data.check then
-		self:Check(__data.check)
-	end
-	if __data.enable then
-		self:Enable(__data.enable)
-	end
-	self.__this.__group = __data.group
-	self:SetGroup(__data.group)
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-
-	--Bind RadioBox Events
-	self.__this.OnCheckBoxCheck = function()
-		if self.__group then
-			for k, v in pairs(__RadioBoxGroups[self.__group]) do
-				if v:GetGroup() == this.__group and v:GetName() ~= this:GetName() then
-					v:Check(false)
-				end
-			end
-		end
-		self:_FireEvent("OnCheck", true)
-	end
-end
-
-function WndRadioBox:SetSize(__w)
-	self.__text:SetSize(__w - 28, 25)
-end
-
-function WndRadioBox:SetGroup(__group)
-	if __group then
-		if not __RadioBoxGroups[__group] then
-			__RadioBoxGroups[__group] = {}
-		end
-		table.insert(__RadioBoxGroups[__group], self)
-	end
-	self.__group = __group
-end
-
-function WndRadioBox:GetGroup()
-	return self.__group
-end
-
-function WndRadioBox:IsChecked()
-	return self.__this:IsCheckBoxChecked()
-end
-
-function WndRadioBox:Check(__check)
-	self.__this:Check(__check)
-end
-
-function WndRadioBox:Enable(__enable)
-	if __enable then
-		self.__text:SetFontColor(255, 255, 255)
-		self.__this:Enable(true)
-	else
-		self.__text:SetFontColor(192, 192, 192)
-		self.__this:Enable(false)
-	end
-end
-
-function WndRadioBox:SetText(__text)
-	self.__text:SetText(__text)
-end
-
-function WndRadioBox:GetText()
-	return self.__text:GetText()
-end
-
-function WndRadioBox:SetFontColor(...)
-	self.__text:SetFontColor(...)
-end
-
-function WndRadioBox:GetFontColor()
-	return self.__text:GetFontColor()
-end
-
-function WndRadioBox:SetFontScheme(...)
-	self.__text:SetFontScheme(...)
-end
-
-function WndRadioBox:GetFontScheme()
-	return self.__text:GetFontScheme()
-end
-
-local WndUICheckBox = class(WndBase)
-local __UICheckBoxGroups = {}
-function WndUICheckBox:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "WndUICheckBox", __name)
-	self.__text = hwnd:Lookup("", "Text_Default")
-	self.__text:SetText(__data.text or "")
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndUICheckBox")
-	if __data.w and __data.h then
-		self:SetSize(__data.w, __data.h)
-	end
-	if __data.check then
-		self:Check(__data.check)
-	end
-	self.__this.__group = __data.group
-	self:SetGroup(__data.group)
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-
-	--Bind UICheckBox Events
-	self.__this.OnCheckBoxCheck = function()
-		if self.__group then
-			for k, v in pairs(__UICheckBoxGroups[self.__group]) do
-				if v:GetGroup() == this.__group and v:GetName() ~= this:GetName() then
-					v:Check(false)
-				end
-			end
-		end
-		self:_FireEvent("OnCheck", true)
-	end
-end
-
-function WndUICheckBox:SetGroup(__group)
-	if __group then
-		if not __UICheckBoxGroups[__group] then
-			__UICheckBoxGroups[__group] = {}
-		end
-		table.insert(__UICheckBoxGroups[__group], self)
-	end
-	self.__group = __group
-end
-
-function WndUICheckBox:GetGroup()
-	return self.__group
-end
-
-function WndUICheckBox:Check(__check)
-	self.__this:Check(__check)
-end
-
-function WndUICheckBox:SetText(__text)
-	self.__text:SetText(__text)
-end
-
-function WndUICheckBox:SetAnimation(...)
-	self.__this:SetAnimation(...)
-end
-
-local WndCSlider = class(WndBase)
-function WndCSlider:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "WndCSlider", __name)
-	self.__scroll = hwnd:Lookup("Scroll_Default")
-	self.__text = hwnd:Lookup("", "Text_Default")
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndCSlider")
-	self.__min = __data.min
-	self.__max = __data.max
-	self.__step = __data.step
-	self.__unit = __data.unit or ""
-	self.__scroll:SetStepCount(__data.step)
-	if __data.w then
-		self:SetSize(__data.w)
-	end
-	if __data.value then
-		self:UpdateScrollPos(__data.value)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-
-	--Bind CSlider Events
-	self.__scroll.OnScrollBarPosChanged = function()
-		local __step = this:GetScrollPos()
-		local __value = self:GetValue(__step)
-		self.__text:SetText(__value .. self.__unit)
-		self:_FireEvent("OnChange", __value)
-	end
-end
-
-function WndCSlider:SetSize(__w)
-	self.__this:SetSize(__w, 25)
-	self.__this:Lookup("", ""):SetSize(__w, 25)
-	self.__this:Lookup("", ""):Lookup("Image_BG"):SetSize(__w, 10)
-	self.__scroll:SetSize(__w, 25)
-	self.__text:SetRelPos(__w + 5, 2)
-	self.__this:Lookup("", ""):FormatAllItemPos()
-end
-
-function WndCSlider:GetValue(__step)
-	return self.__min + __step * (self.__max - self.__min) / self.__step
-end
-
-function WndCSlider:GetStep(__value)
-	return (__value - self.__min) * self.__step / (self.__max - self.__min)
-end
-
-function WndCSlider:ChangeToArea(__min, __max, __step)
-	return __min + (__max - __min) * (self:GetValue(__step) - self.__min) / (self.__max - self.__min)
-end
-
-function WndCSlider:ChangeToAreaFromValue(__min, __max, __value)
-	return __min + (__max - __min) * (__value - self.__min) / (self.__max - self.__min)
-end
-
-function WndCSlider:GetStepFromArea(__min, __max, __value)
-	return self:GetStep(self.__min + (self.__max - self.__min) * (__value - __min) / (__max - __min))
-end
-
-function WndCSlider:UpdateScrollPos(__value)
-	self.__text:SetText(__value .. self.__unit)
-	self.__scroll:SetScrollPos(self:GetStep(__value))
-end
-
-local WndColorBox = class(WndBase)
-function WndColorBox:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "WndColorBox", __name)
-	self.__text = hwnd:Lookup("", "Text_Default")
-	self.__shadow = hwnd:Lookup("", "Shadow_Default")
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndColorBox")
-	self.__r = __data.r
-	self.__g = __data.g
-	self.__b = __data.b
-	self:SetText(__data.text)
-	self:SetColor(__data.r, __data.g, __data.b)
-	if __data.w then
-		self:SetSize(__data.w)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-
-	--Bind ColorBox Events
-	self.__shadow.OnItemLButtonClick = function()
-		local fnChangeColor = function(r, g, b)
-			self:SetColor(r, g, b)
-			self:_FireEvent("OnChange", {r, g, b})
-		end
-		OpenColorTablePanel(fnChangeColor)
-	end
-end
-
-function WndColorBox:SetSize(__w)
-	self.__this:SetSize(__w, 25)
-	self.__this:Lookup("", ""):SetSize(__w, 25)
-	self.__text:SetText(__w - 25, 25)
-end
-
-function WndColorBox:SetText(__text)
-	self.__text:SetText(__text)
-end
-
-function WndColorBox:SetColor(...)
-	self.__shadow:SetColorRGB(...)
-	self.__text:SetFontColor(...)
-end
-
-local WndScroll = class(WndBase)
-function WndScroll:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local hwnd = _AppendWnd(__parent, "WndScroll", __name)
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndScroll")
-	self.__up = self.__this:Lookup("Btn_Up")
-	self.__down = self.__this:Lookup("Btn_Down")
-	self.__scroll = self.__this:Lookup("Scroll_List")
-	self.__handle = self.__this:Lookup("", "")
-	if __data.w and __data.h then
-		self:SetSize(__data.w, __data.h)
-	end
-	self.__up.OnLButtonHold = function()
-		self.__scroll:ScrollPrev(1)
-	end
-	self.__up.OnLButtonDown = function()
-		self.__scroll:ScrollPrev(1)
-	end
-	self.__down.OnLButtonHold = function()
-		self.__scroll:ScrollNext(1)
-	end
-	self.__down.OnLButtonDown = function()
-		self.__scroll:ScrollNext(1)
-	end
-	self.__handle.OnItemMouseWheel = function()
-		local __dist = Station.GetMessageWheelDelta()
-		self.__scroll:ScrollNext(__dist)
-		return true
-	end
-	self.__scroll.OnScrollBarPosChanged = function()
-		local __value = this:GetScrollPos()
-		if __value == 0 then
-			self.__up:Enable(false)
-		else
-			self.__up:Enable(true)
-		end
-		if __value == this:GetStepCount() then
-			self.__down:Enable(false)
-		else
-			self.__down:Enable(true)
-		end
-		self.__handle:SetItemStartRelPos(0, -__value * 10)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-	--self:OnUpdateScorllList()
-end
-
-function WndScroll:GetHandle()
-	return self.__handle
-end
-
-function WndScroll:SetHandleStyle(...)
-	self.__handle:SetHandleStyle(...)
-end
-
-function WndScroll:ClearHandle()
-	self.__handle:Clear()
-end
-
-function WndScroll:OnUpdateScorllList()
-	self.__handle:FormatAllItemPos()
-	local __w, __h = self.__handle:GetSize()
-	local __wAll, __hAll = self.__handle:GetAllItemSize()
-	local __count = math.ceil((__hAll - __h) / 10)
-
-	self.__scroll:SetStepCount(__count)
-	if __count > 0 then
-		self.__scroll:Show()
-		self.__up:Show()
-		self.__down:Show()
-	else
-		self.__scroll:Hide()
-		self.__up:Hide()
-		self.__down:Hide()
-	end
-end
-
-function WndScroll:SetSize(__w, __h)
-	self.__this:SetSize(__w, __h)
-	self.__handle:SetSize(__w, __h)
-	self.__scroll:SetSize(15, __h - 40)
-	self.__scroll:SetRelPos(__w - 17, 20)
-	self.__up:SetRelPos(__w - 20, 3)
-	self.__down:SetRelPos(__w - 20, __h - 20)
-end
-
+-- Store UI Object By Name
+local _G = {}
+----------------------------------------------
+-- ItemNull Type Controls
+----------------------------------------------
+
+-- Append Control
 local _AppendItem = function(__parent, __string, __name)
 	if __parent.__addon then
 		__parent = __parent:GetHandle()
@@ -913,6 +74,7 @@ local _AppendItem = function(__parent, __string, __name)
 	return hwnd
 end
 
+-- Base Class of ItemType Control
 local ItemBase = class()
 function ItemBase:ctor(__this)
 	self.__addon = true
@@ -937,6 +99,7 @@ end
 
 function ItemBase:SetSelf(__this)
 	self.__this = __this
+	_G[self:GetName()] = self
 end
 
 function ItemBase:GetSelf()
@@ -1005,6 +168,10 @@ end
 
 function ItemBase:Destroy()
 	self:GetParent():RemoveItem(self.__this)
+	local __name = self:GetName()
+	if _G[__name] then
+		_G[__name] = nil
+	end
 end
 
 function ItemBase:Show()
@@ -1030,7 +197,49 @@ function ItemBase:_FireEvent(__event, ...)
 	end
 end
 
+-- This is only for WndScroll
+local ScrollItems = class(ItemBase)
+function ScrollItems:ctor(__parent, __type, __name)
+	assert(__parent ~= nil and __type ~= nil and __name ~= nil, "parent or name can not be null.")
+	local hwnd = __parent:AppendItemFromIni(string.format(__ini, "WndScroll"), __type, __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self.__this.OnItemMouseEnter = function()
+		self:_FireEvent("OnEnter")
+	end
+	self.__this.OnItemMouseLeave = function()
+		self:_FireEvent("OnLeave")
+	end
+	self.__this.OnItemLButtonClick = function()
+		self:_FireEvent("OnClick")
+	end
+end
 
+function ScrollItems:SetSize(__w, __h)
+	self.__this:SetSize(__w, __h)
+	local __cover = self.__this:Lookup("Image_Cover")
+	__cover:SetSize(__w - 10, __h - 4)
+	__cover:SetRelPos(0, 2)
+	local __text = self.__this:Lookup("Text_Item")
+	__text:SetSize(__w, __h - 5)
+	__text:SetRelPos(0, 3)
+	self.__this:FormatAllItemPos()
+end
+
+function ScrollItems:SetText(...)
+	self.__this:Lookup("Text_Item"):SetText(...)
+end
+
+function ScrollItems:SetFontColor(...)
+	self.__this:Lookup("Text_Item"):SetFontColor(...)
+end
+
+function ScrollItems:SetAlpha(...)
+	self.__this:Lookup("Image_Cover"):SetAlpha(...)
+end
+
+-- Handle Object
 local ItemHandle = class(ItemBase)
 function ItemHandle:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -1127,6 +336,7 @@ function ItemHandle:ClearHandle()
 	self.__this:Clear()
 end
 
+-- Text Object
 local ItemText = class(ItemBase)
 function ItemText:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -1301,6 +511,7 @@ function ItemText:GetFontSpacing()
 	return self.__this:GetFontSpacing()
 end
 
+-- Box Object
 local ItemBox = class(ItemBase)
 function ItemBox:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -1475,7 +686,7 @@ function ItemBox:ClearExtentAnimate()
 	self.__this:ClearExtentAnimate()
 end
 
-
+-- Image Object
 local ItemImage = class(ItemBase)
 function ItemImage:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -1576,6 +787,7 @@ function ItemImage:SetImage(__image, __frame)
 	end
 end
 
+-- Shadow Object
 local ItemShadow = class(ItemBase)
 function ItemShadow:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -1651,6 +863,7 @@ function ItemShadow:AppendCharacterID(...)
 	self.__this:AppendCharacterID(...)
 end
 
+-- ItemAnimate Object
 local ItemAnimate = class(ItemBase)
 function ItemAnimate:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -1721,6 +934,7 @@ function ItemAnimate:GetAnimateType()
 	return self.__this:GetAnimateType()
 end
 
+-- TreeLeaf Object
 local ItemTreeLeaf = class(ItemBase)
 function ItemTreeLeaf:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
@@ -1873,6 +1087,1003 @@ function ItemTreeLeaf:GetShowIndex()
 	return self.__this:GetShowIndex()
 end
 
+----------------------------------------------
+-- Wnd Type Controls
+----------------------------------------------
+
+-- Append Control
+local _AppendWnd = function(__parent, __type, __name)
+	if __parent.__addon then
+		__parent = __parent:GetSelf()
+	end
+	local hwnd = Wnd.OpenWindow(string.format(__ini, __type), __name):Lookup(__type)
+	hwnd:ChangeRelation(__parent, true, true)
+	hwnd:SetName(__name)
+	Wnd.CloseWindow(__name)
+	return hwnd
+end
+
+-- Base Class of WndType Control
+local WndBase = class()
+function WndBase:ctor(__this)
+	self.__addon = true
+	self.__listeners = {self}
+end
+
+function WndBase:GetName()
+	return self.__this:GetName()
+end
+
+function WndBase:SetSelf(__this)
+	self.__this = __this
+	_G[self:GetName()] = self
+end
+
+function WndBase:GetSelf()
+	return self.__this
+end
+
+function WndBase:SetSize(...)
+	self.__this:SetSize(...)
+end
+
+function WndBase:GetSize()
+	return self.__this:GetSize()
+end
+
+function WndBase:SetRelPos(...)
+	self.__this:SetRelPos(...)
+end
+
+function WndBase:GetRelPos()
+	return self.__this:GetRelPos()
+end
+
+function WndBase:SetAbsPos(...)
+	self.__this:SetAbsPos(...)
+end
+
+function WndBase:GetAbsPos()
+	return self.__this:GetAbsPos()
+end
+
+function WndBase:Enable(...)
+	self.__this:Enable(...)
+end
+
+function WndBase:SetParent(__parent)
+	self.__parent = __parent
+end
+
+function WndBase:GetParent()
+	return self.__parent
+end
+
+function WndBase:SetType(__type)
+	self.__type = __type
+end
+
+function WndBase:GetType()
+	return self.__type
+end
+
+function WndBase:Destroy()
+	local __name = self:GetName()
+	if self:GetType() == "WndFrame" then
+		Wnd.CloseWindow(__name)
+	else
+		self.__this:Destroy()
+	end
+	if _G[__name] then
+		_G[__name] = nil
+	end
+end
+
+function WndBase:Show()
+	self.__this:Show()
+end
+
+function WndBase:Hide()
+	self.__this:Hide()
+end
+
+function WndBase:IsVisible()
+	return self.__this:IsVisible()
+end
+
+function WndBase:ToggleVisible()
+	self.__this:ToggleVisible()
+end
+
+function WndBase:Scale(...)
+	self.__this:Scale(...)
+end
+
+function WndBase:CorrectPos(...)
+	self.__this:CorrectPos(...)
+end
+
+function WndBase:SetMousePenetrable(...)
+	self.__this:SetMousePenetrable(...)
+end
+
+function WndBase:SetAlpha(...)
+	self.__this:SetAlpha(...)
+end
+
+function WndBase:GetAlpha()
+	return self.__this:GetAlpha()
+end
+
+function WndBase:ChangeRelation(...)
+	self.__this:ChangeRelation(...)
+end
+
+function WndBase:SetPoint(...)
+	self.__this:SetPoint(...)
+end
+
+function WndBase:_FireEvent(__event, ...)
+	for __k, __v in pairs(self.__listeners) do
+		if __v[__event] then
+			local res, err = pcall(__v[__event], ...)
+			if not res then
+				OutputMessage("MSG_SYS", "ERROR:" .. err .."\n")
+			end
+		end
+	end
+end
+
+-- WndFrame Obejct
+local WndFrame = class(WndBase)
+function WndFrame:ctor(__name, __data)
+	assert(__name ~= nil, "frame name can not be null.")
+	__data = __data or {}
+	local frame = nil
+	if __data.style == "THIN" then
+		frame = Wnd.OpenWindow(string.format(__ini, "WndFrameThin"), __name)
+	elseif __data.style == "SMALL" then
+		frame = Wnd.OpenWindow(string.format(__ini, "WndFrameSmall"), __name)
+	elseif __data.style == "NORMAL" then
+		frame = Wnd.OpenWindow(string.format(__ini, "WndFrame"), __name)
+	elseif __data.style == "LARGER" then
+		frame = Wnd.OpenWindow(string.format(__ini, "WndFrameLarger"), __name)
+	elseif __data.style == "NONE" then
+		frame = Wnd.OpenWindow(string.format(__ini, "WndFrameNone"), __name)
+	end
+	frame:SetName(__name)
+	--self:Register(__name)
+	self.__this = frame
+	self:SetSelf(self.__this)
+	self:SetType("WndFrame")
+	if __data.style and __data.style ~= "NONE" then
+		frame:Lookup("Btn_Close").OnLButtonClick = function()
+			self:Destroy()
+		end
+		if __data.title then
+			self:SetTitle(__data.title)
+		end
+	end
+end
+
+function WndFrame:GetHandle()
+	return self.__this:Lookup("", "")
+end
+
+function WndFrame:ClearHandle()
+	self.__this:Lookup("", ""):Clear()
+end
+
+function WndFrame:SetTitle(...)
+	self.__this:Lookup("", "Text_Title"):SetText(...)
+end
+
+function WndFrame:GetTitle(...)
+	return self.__this:Lookup("", "Text_Title"):GetText()
+end
+
+function WndFrame:EnableDrag(...)
+	self.__this:EnableDrag(...)
+end
+
+function WndFrame:IsDragable()
+	return self.__this:IsDragable()
+end
+
+function WndFrame:SetDragArea(...)
+	self.__this:SetDragArea(...)
+end
+
+function WndFrame:RegisterEvent(...)
+	self.__this:RegisterEvent(...)
+end
+
+function WndFrame:FadeIn(...)
+	self.__this:FadeIn(...)
+end
+
+function WndFrame:FadeOut(...)
+	self.__this:FadeOut(...)
+end
+
+function WndFrame:IsAddOn()
+	return self.__this:IsAddOn()
+end
+
+-- WndWindow Object
+local WndWindow = class(WndBase)
+function WndWindow:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local hwnd = _AppendWnd(__parent, "WndWindow", __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetType("WndWindow")
+	if __data.w and __data.h then
+		self:SetSize(__data.w, __data.h)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+end
+
+function WndWindow:SetSize(...)
+	self.__this:SetSize(...)
+	self.__this:Lookup("", ""):SetSize(...)
+end
+
+function WndWindow:GetHandle()
+	return self.__this:Lookup("", "")
+end
+
+function WndWindow:ClearHandle()
+	self.__this:Lookup("", ""):Clear()
+end
+
+-- WndPageSet Object
+local WndPageSet = class(WndBase)
+function WndPageSet:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local hwnd = _AppendWnd(__parent, "WndPageSet", __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetType("WndPageSet")
+	if __data.w and __data.h then
+		self:SetSize(__data.w, __data.h)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+end
+
+function WndPageSet:AddPage(...)
+	self.__this:AddPage(...)
+end
+
+function WndPageSet:GetActivePage()
+	return self.__this:GetActivePage()
+end
+
+function WndPageSet:GetActiveCheckBox()
+	return self.__this:GetActiveCheckBox()
+end
+
+function WndPageSet:ActivePage(...)
+	self.__this:ActivePage(...)
+end
+
+function WndPageSet:GetActivePageIndex()
+	return self.__this:GetActivePageIndex()
+end
+
+function WndPageSet:GetLastActivePageIndex()
+	return self.__this:GetLastActivePageIndex()
+end
+
+-- WndButton Object
+local WndButton = class(WndBase)
+function WndButton:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local hwnd = _AppendWnd(__parent, "WndButton", __name)
+	self.__text = hwnd:Lookup("", "Text_Default")
+	self:SetText(__data.text or "")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetType("WndButton")
+	if __data.w and __data.h then
+		self:SetSize(__data.w, __data.h)
+	end
+	if __data.enable ~= nil then
+		self:Enable(__data.enable)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+
+	--Bind Button Events
+	self.__this.OnLButtonClick = function()
+		self:_FireEvent("OnClick")
+	end
+	self.__this.OnMouseEnter = function()
+		self:_FireEvent("OnEnter")
+	end
+	self.__this.OnMouseLeave = function()
+		self:_FireEvent("OnLeave")
+	end
+end
+
+function WndButton:SetText(...)
+	self.__text:SetText(...)
+end
+
+function WndButton:GetText()
+	return self.__text:GetText()
+end
+
+function WndButton:IsEnabled()
+	return self.__this:IsEnabled()
+end
+
+function WndButton:SetSize(...)
+	self.__this:SetSize(...)
+	self.__this:Lookup("", ""):SetSize(...)
+	self.__text:SetSize(...)
+end
+
+-- WndUIButton Object
+local WndUIButton = class(WndBase)
+function WndUIButton:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local hwnd = _AppendWnd(__parent, "WndUIButton", __name)
+	self.__text = hwnd:Lookup("", "Text_Default")
+	self.__text:SetText(__data.text or "")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetType("WndUIButton")
+	if __data.w and __data.h then
+		self:SetSize(__data.w, __data.h)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+end
+
+-- WndEdit Object
+local WndEdit = class(WndBase)
+function WndEdit:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local hwnd = _AppendWnd(__parent, "WndEdit", __name)
+	self.__edit = hwnd:Lookup("Edit_Default")
+	self:SetText(__data.text or "")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetType("WndEdit")
+	if __data.w and __data.h then
+		self:SetSize(__data.w, __data.h)
+	end
+	if __data.limit then
+		self:SetLimit(__data.limit)
+	end
+	if __data.multi ~= nil then
+		self:SetMultiLine(__data.multi)
+	end
+	if __data.enable ~= nil then
+		self:Enable(__data.enable)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+
+	--Bind Edit Events
+	self.__edit.OnEditChanged = function()
+		local __text = self.__edit:GetText()
+		self:_FireEvent("OnChange", __text)
+	end
+	self.__edit.OnSetFocus = function()
+		self:_FireEvent("OnSetFocus")
+	end
+	self.__edit.OnKillFocus = function()
+		self:_FireEvent("OnKillFocus")
+	end
+end
+
+function WndEdit:SetSize(__w, __h)
+	self.__this:SetSize(__w + 4, __h)
+	self.__this:Lookup("", ""):SetSize(__w + 4, __h)
+	self.__this:Lookup("", "Image_Default"):SetSize(__w + 4, __h)
+	self.__edit:SetSize(__w, __h)
+end
+
+function WndEdit:SetLimit(__limit)
+	self.__edit:SetLimit(__limit)
+end
+
+function WndEdit:SetMultiLine(__multi)
+	self.__edit:SetMultiLine(__multi)
+end
+
+function WndEdit:Enable(__enable)
+	if __enable then
+		self.__edit:SetFontColor(255, 255, 255)
+		self.__edit:Enable(true)
+	else
+		self.__edit:SetFontColor(192, 192, 192)
+		self.__edit:Enable(false)
+	end
+end
+
+function WndEdit:SelectAll()
+	self.__this:SelectAll()
+end
+
+function WndEdit:SetText(...)
+	self.__edit:SetText(...)
+end
+
+function WndEdit:ClearText()
+	self.__edit:ClearText()
+end
+
+function WndEdit:SetType(...)
+	self.__edit:SetType(...)
+end
+
+function WndEdit:SetFontScheme(...)
+	self.__edit:SetFontScheme(...)
+end
+
+function WndEdit:SetFontColor(...)
+	self.__edit:SetFontColor(...)
+end
+
+function WndEdit:SetSelectFontScheme(...)
+	self.__edit:SetSelectFontScheme(...)
+end
+
+-- WndCheckBox Object
+local WndCheckBox = class(WndBase)
+function WndCheckBox:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local hwnd = _AppendWnd(__parent, "WndCheckBox", __name)
+	self.__text = hwnd:Lookup("", "Text_Default")
+	self.__text:SetText(__data.text or "")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetType("WndCheckBox")
+	if __data.check then
+		self:Check(__data.check)
+	end
+	if __data.enable ~= nil then
+		self:Enable(__data.enable)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+
+	--Bind CheckBox Events
+	self.__this.OnCheckBoxCheck = function()
+		self:_FireEvent("OnCheck", true)
+	end
+	self.__this.OnCheckBoxUncheck = function()
+		self:_FireEvent("OnCheck", false)
+	end
+end
+
+function WndCheckBox:SetSize(__w)
+	self.__text:SetSize(__w - 28, 25)
+end
+
+function WndCheckBox:Check(__check)
+	self.__this:Check(__check)
+end
+
+function WndCheckBox:Enable(__enable)
+	if __enable then
+		self.__text:SetFontColor(255, 255, 255)
+		self.__this:Enable(true)
+	else
+		self.__text:SetFontColor(192, 192, 192)
+		self.__this:Enable(false)
+	end
+end
+
+function WndCheckBox:IsChecked()
+	return self.__this:IsCheckBoxChecked()
+end
+
+function WndCheckBox:SetText(__text)
+	self.__text:SetText(__text)
+end
+
+function WndCheckBox:GetText()
+	return self.__text:GetText()
+end
+
+function WndCheckBox:SetFontColor(...)
+	self.__text:SetFontColor(...)
+end
+
+function WndCheckBox:GetFontColor()
+	return self.__text:GetFontColor()
+end
+
+function WndCheckBox:SetFontScheme(...)
+	self.__text:SetFontScheme(...)
+end
+
+function WndCheckBox:GetFontScheme()
+	return self.__text:GetFontScheme()
+end
+
+-- WndComboBox Object
+local WndComboBox = class(WndBase)
+function WndComboBox:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local hwnd = _AppendWnd(__parent, "WndComboBox", __name)
+	self.__text = hwnd:Lookup("", "Text_Default")
+	self.__text:SetText(__data.text or "")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetType("WndComboBox")
+	if __data.w then
+		self:SetSize(__data.w)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+
+	--Bind ComboBox Events
+	self.__this:Lookup("Btn_ComboBox").OnLButtonClick = function()
+		local __x, __y = self:GetAbsPos()
+		local __w, __h = self:GetSize()
+		local __menu = {}
+		__menu.nMiniWidth = __w
+		__menu.x = __x
+		__menu.y = __y + __h
+		self:_FireEvent("OnClick", __menu)
+	end
+end
+
+function WndComboBox:SetSize(__w)
+	self.__this:SetSize(__w, 25)
+	local handle = self.__this:Lookup("", "")
+	handle:SetSize(__w, 25)
+	handle:Lookup("Image_ComboBoxBg"):SetSize(__w,25)
+	handle:Lookup("Text_Default"):SetSize(__w, 25)
+	local btn = self.__this:Lookup("Btn_ComboBox")
+	btn:SetRelPos(__w - 25, 3)
+	local h = btn:Lookup("", "")
+	h:SetSize(__w, 25)
+	local __x, __y = handle:GetAbsPos()
+	h:SetAbsPos(__x, __y)
+end
+
+function WndComboBox:SetText(__text)
+	self.__text:SetText(__text)
+end
+
+function WndComboBox:GetText()
+	return self.__text:GetText()
+end
+
+-- WndRadioBox Object
+local WndRadioBox = class(WndBase)
+local __RadioBoxGroups = {}
+function WndRadioBox:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local hwnd = _AppendWnd(__parent, "WndRadioBox", __name)
+	self.__text = hwnd:Lookup("", "Text_Default")
+	self.__text:SetText(__data.text or "")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetType("WndRadioBox")
+	if __data.w then
+		self:SetSize(__data.w)
+	end
+	if __data.check then
+		self:Check(__data.check)
+	end
+	if __data.enable then
+		self:Enable(__data.enable)
+	end
+	self.__this.__group = __data.group
+	self:SetGroup(__data.group)
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+
+	--Bind RadioBox Events
+	self.__this.OnCheckBoxCheck = function()
+		if self.__group then
+			for k, v in pairs(__RadioBoxGroups[self.__group]) do
+				if v:GetGroup() == this.__group and v:GetName() ~= this:GetName() then
+					v:Check(false)
+				end
+			end
+		end
+		self:_FireEvent("OnCheck", true)
+	end
+end
+
+function WndRadioBox:SetSize(__w)
+	self.__text:SetSize(__w - 28, 25)
+end
+
+function WndRadioBox:SetGroup(__group)
+	if __group then
+		if not __RadioBoxGroups[__group] then
+			__RadioBoxGroups[__group] = {}
+		end
+		table.insert(__RadioBoxGroups[__group], self)
+	end
+	self.__group = __group
+end
+
+function WndRadioBox:GetGroup()
+	return self.__group
+end
+
+function WndRadioBox:IsChecked()
+	return self.__this:IsCheckBoxChecked()
+end
+
+function WndRadioBox:Check(__check)
+	self.__this:Check(__check)
+end
+
+function WndRadioBox:Enable(__enable)
+	if __enable then
+		self.__text:SetFontColor(255, 255, 255)
+		self.__this:Enable(true)
+	else
+		self.__text:SetFontColor(192, 192, 192)
+		self.__this:Enable(false)
+	end
+end
+
+function WndRadioBox:SetText(__text)
+	self.__text:SetText(__text)
+end
+
+function WndRadioBox:GetText()
+	return self.__text:GetText()
+end
+
+function WndRadioBox:SetFontColor(...)
+	self.__text:SetFontColor(...)
+end
+
+function WndRadioBox:GetFontColor()
+	return self.__text:GetFontColor()
+end
+
+function WndRadioBox:SetFontScheme(...)
+	self.__text:SetFontScheme(...)
+end
+
+function WndRadioBox:GetFontScheme()
+	return self.__text:GetFontScheme()
+end
+
+-- WndUICheckBox Object
+local WndUICheckBox = class(WndBase)
+local __UICheckBoxGroups = {}
+function WndUICheckBox:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local hwnd = _AppendWnd(__parent, "WndUICheckBox", __name)
+	self.__text = hwnd:Lookup("", "Text_Default")
+	self.__text:SetText(__data.text or "")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetType("WndUICheckBox")
+	if __data.w and __data.h then
+		self:SetSize(__data.w, __data.h)
+	end
+	if __data.check then
+		self:Check(__data.check)
+	end
+	self.__this.__group = __data.group
+	self:SetGroup(__data.group)
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+
+	--Bind UICheckBox Events
+	self.__this.OnCheckBoxCheck = function()
+		if self.__group then
+			for k, v in pairs(__UICheckBoxGroups[self.__group]) do
+				if v:GetGroup() == this.__group and v:GetName() ~= this:GetName() then
+					v:Check(false)
+				end
+			end
+		end
+		self:_FireEvent("OnCheck", true)
+	end
+end
+
+function WndUICheckBox:SetGroup(__group)
+	if __group then
+		if not __UICheckBoxGroups[__group] then
+			__UICheckBoxGroups[__group] = {}
+		end
+		table.insert(__UICheckBoxGroups[__group], self)
+	end
+	self.__group = __group
+end
+
+function WndUICheckBox:GetGroup()
+	return self.__group
+end
+
+function WndUICheckBox:Check(__check)
+	self.__this:Check(__check)
+end
+
+function WndUICheckBox:SetText(__text)
+	self.__text:SetText(__text)
+end
+
+function WndUICheckBox:SetAnimation(...)
+	self.__this:SetAnimation(...)
+end
+
+-- WndCSlider Object
+local WndCSlider = class(WndBase)
+function WndCSlider:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local hwnd = _AppendWnd(__parent, "WndCSlider", __name)
+	self.__scroll = hwnd:Lookup("Scroll_Default")
+	self.__text = hwnd:Lookup("", "Text_Default")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetType("WndCSlider")
+	self.__min = __data.min
+	self.__max = __data.max
+	self.__step = __data.step
+	self.__unit = __data.unit or ""
+	self.__scroll:SetStepCount(__data.step)
+	if __data.w then
+		self:SetSize(__data.w)
+	end
+	if __data.value then
+		self:UpdateScrollPos(__data.value)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+
+	--Bind CSlider Events
+	self.__scroll.OnScrollBarPosChanged = function()
+		local __step = this:GetScrollPos()
+		local __value = self:GetValue(__step)
+		self.__text:SetText(__value .. self.__unit)
+		self:_FireEvent("OnChange", __value)
+	end
+end
+
+function WndCSlider:SetSize(__w)
+	self.__this:SetSize(__w, 25)
+	self.__this:Lookup("", ""):SetSize(__w, 25)
+	self.__this:Lookup("", ""):Lookup("Image_BG"):SetSize(__w, 10)
+	self.__scroll:SetSize(__w, 25)
+	self.__text:SetRelPos(__w + 5, 2)
+	self.__this:Lookup("", ""):FormatAllItemPos()
+end
+
+function WndCSlider:GetValue(__step)
+	return self.__min + __step * (self.__max - self.__min) / self.__step
+end
+
+function WndCSlider:GetStep(__value)
+	return (__value - self.__min) * self.__step / (self.__max - self.__min)
+end
+
+function WndCSlider:ChangeToArea(__min, __max, __step)
+	return __min + (__max - __min) * (self:GetValue(__step) - self.__min) / (self.__max - self.__min)
+end
+
+function WndCSlider:ChangeToAreaFromValue(__min, __max, __value)
+	return __min + (__max - __min) * (__value - self.__min) / (self.__max - self.__min)
+end
+
+function WndCSlider:GetStepFromArea(__min, __max, __value)
+	return self:GetStep(self.__min + (self.__max - self.__min) * (__value - __min) / (__max - __min))
+end
+
+function WndCSlider:UpdateScrollPos(__value)
+	self.__text:SetText(__value .. self.__unit)
+	self.__scroll:SetScrollPos(self:GetStep(__value))
+end
+
+-- WndColorBox Object
+local WndColorBox = class(WndBase)
+function WndColorBox:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local hwnd = _AppendWnd(__parent, "WndColorBox", __name)
+	self.__text = hwnd:Lookup("", "Text_Default")
+	self.__shadow = hwnd:Lookup("", "Shadow_Default")
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetType("WndColorBox")
+	self.__r = __data.r
+	self.__g = __data.g
+	self.__b = __data.b
+	self:SetText(__data.text)
+	self:SetColor(__data.r, __data.g, __data.b)
+	if __data.w then
+		self:SetSize(__data.w)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+
+	--Bind ColorBox Events
+	self.__shadow.OnItemLButtonClick = function()
+		local fnChangeColor = function(r, g, b)
+			self:SetColor(r, g, b)
+			self:_FireEvent("OnChange", {r, g, b})
+		end
+		OpenColorTablePanel(fnChangeColor)
+	end
+end
+
+function WndColorBox:SetSize(__w)
+	self.__this:SetSize(__w, 25)
+	self.__this:Lookup("", ""):SetSize(__w, 25)
+	self.__text:SetText(__w - 25, 25)
+end
+
+function WndColorBox:SetText(__text)
+	self.__text:SetText(__text)
+end
+
+function WndColorBox:SetColor(...)
+	self.__shadow:SetColorRGB(...)
+	self.__text:SetFontColor(...)
+end
+
+-- WndScroll Object
+local WndScroll = class(WndBase)
+function WndScroll:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local hwnd = _AppendWnd(__parent, "WndScroll", __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetType("WndScroll")
+	self.__up = self.__this:Lookup("Btn_Up")
+	self.__down = self.__this:Lookup("Btn_Down")
+	self.__scroll = self.__this:Lookup("Scroll_List")
+	self.__handle = self.__this:Lookup("", "")
+	if __data.w and __data.h then
+		self:SetSize(__data.w, __data.h)
+	end
+	self.__up.OnLButtonHold = function()
+		self.__scroll:ScrollPrev(1)
+	end
+	self.__up.OnLButtonDown = function()
+		self.__scroll:ScrollPrev(1)
+	end
+	self.__down.OnLButtonHold = function()
+		self.__scroll:ScrollNext(1)
+	end
+	self.__down.OnLButtonDown = function()
+		self.__scroll:ScrollNext(1)
+	end
+	self.__handle.OnItemMouseWheel = function()
+		local __dist = Station.GetMessageWheelDelta()
+		self.__scroll:ScrollNext(__dist)
+		return true
+	end
+	self.__scroll.OnScrollBarPosChanged = function()
+		local __value = this:GetScrollPos()
+		if __value == 0 then
+			self.__up:Enable(false)
+		else
+			self.__up:Enable(true)
+		end
+		if __value == this:GetStepCount() then
+			self.__down:Enable(false)
+		else
+			self.__down:Enable(true)
+		end
+		self.__handle:SetItemStartRelPos(0, -__value * 10)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+end
+
+function WndScroll:GetHandle()
+	return self.__handle
+end
+
+function WndScroll:AddItem(__name)
+	local __item = ScrollItems.new(self:GetHandle(), "Handle_Item", "Item_" .. __name)
+	__item:Show()
+	local __cover = __item:GetSelf():Lookup("Image_Cover")
+	__item.OnEnter = function()
+		__cover:Show()
+	end
+	__item.OnLeave = function()
+		__cover:Hide()
+	end
+	return __item
+end
+
+function WndScroll:SetHandleStyle(...)
+	self.__handle:SetHandleStyle(...)
+end
+
+function WndScroll:ClearHandle()
+	self.__handle:Clear()
+end
+
+function WndScroll:ScrollPagePrev()
+	self.__scroll:ScrollPagePrev()
+end
+
+function WndScroll:ScrollPageNext()
+	self.__scroll:ScrollPageNext()
+end
+
+function WndScroll:ScrollHome()
+	self.__scroll:ScrollHome()
+end
+
+function WndScroll:ScrollEnd()
+	self.__scroll:ScrollEnd()
+end
+
+function WndScroll:OnUpdateScorllList()
+	self.__handle:FormatAllItemPos()
+	local __w, __h = self.__handle:GetSize()
+	local __wAll, __hAll = self.__handle:GetAllItemSize()
+	local __count = math.ceil((__hAll - __h) / 10)
+
+	self.__scroll:SetStepCount(__count)
+	if __count > 0 then
+		self.__scroll:Show()
+		self.__up:Show()
+		self.__down:Show()
+	else
+		self.__scroll:Hide()
+		self.__up:Hide()
+		self.__down:Hide()
+	end
+end
+
+function WndScroll:SetSize(__w, __h)
+	self.__this:SetSize(__w, __h)
+	self.__handle:SetSize(__w, __h)
+	self.__scroll:SetSize(15, __h - 40)
+	self.__scroll:SetRelPos(__w - 17, 20)
+	self.__up:SetRelPos(__w - 20, 3)
+	self.__down:SetRelPos(__w - 20, __h - 20)
+end
+
 -- Addon Class
 local CreateAddon = class()
 function CreateAddon:ctor(__name, __style)
@@ -1912,6 +2123,16 @@ function CreateAddon:_FireEvent(__event, ...)
 		end
 	end
 end
+
+-- Get UI Object By Name
+local function Fetch(__name)
+	for k, v in pairs(_G) do
+		if __name == k then
+			return v
+		end
+	end
+	return nil 
+end
 ----------------------------------------------
 -- GUI Global Interface
 ----------------------------------------------
@@ -1938,66 +2159,10 @@ local _API = {
 	CreateBox = ItemBox.new,
 	CreateTreeLeaf = ItemTreeLeaf.new,
 	CreateAddon = CreateAddon.new,
+	Fetch = Fetch,
 }
 setmetatable(EasyUI, { __metatable = true, __index = _API, __newindex = function() end })
 
 RegisterEvent("CALL_LUA_ERROR", function()
 	OutputMessage("MSG_SYS", arg0)
 end)
---[[
-/script local f=EasyUI.CreateFrame("test",{style="SMALL"})
-local b=EasyUI.CreateButton(f,"b1",{text="Click Me",x=50,y=50})
-b:OnClick(function() Output("Click") end)
-b:OnEnter(function() Output("Enter") end)
-b:OnLeave(function() Output("Leave") end)
-local e=EasyUI.CreateEdit(f,"e1",{text="input words",x=50,y=100})
-e:OnChange(function(arg0) Output(arg0) end)
-local c=EasyUI.CreateCheckBox(f,"c1",{text="Check Me",x=50,y=150,check=true})
-c:OnCheck(function(arg0) Output(arg0) end)
-local d=EasyUI.CreateComboBox(f,"c2",{text="Menu",x=50,y=200})
-d:OnClick(function()
-	local m = {}
-	table.insert(m,{szOption="TEST1"})
-	table.insert(m,{szOption="TEST2"})
-	return m
-end)
-local r1=EasyUI.CreateRadioBox(f,"r1",{text="Select1",x=50,y=250,check=true,group="test1"})
-r1:OnCheck(function(arg0) Output(arg0) end)
-local r2=EasyUI.CreateRadioBox(f,"r2",{text="Select2",x=200,y=250,group="test1"})
-r2:OnCheck(function(arg0) Output(arg0) end)
-local r3=EasyUI.CreateRadioBox(f,"r3",{text="Select3",x=350,y=250,group="test1"})
-r3:OnCheck(function(arg0) Output(arg0) end)
-local s=EasyUI.CreateCSlider(f,"s1",{x=50,y=300,min=0,max=100,step=1,value=20})
-s:OnChange(function(arg0) Output(arg0) end)
-local c3=EasyUI.CreateColorBox(f,"c3",{text="Color",x=50,y=350,r=255,g=255,b=0})
-c3:OnChange(function(arg0) Output(arg0) end)
-local s5=EasyUI.CreateScroll(f,"s5",{x=300,y=50})
-/script local f=EasyUI.CreateFrame("test",{style="SMALL"})
-local win=EasyUI.CreateWindow(f,"w1",{x=10,y=10,w=300,h=300})
-local txt=EasyUI.CreateText(win,"txt1",{text="ssssssssss",x=20,y=20})
-tet:SetFontColor(255,255,0)
-local b=EasyUI.CreateButton(f,"b1",{text="Click Me",x=50,y=50})
-b:OnClick(function() txt:Hide() end)
-
-
-/script local f=EasyUI.CreateFrame("test",{title="Test Title",style="SMALL"})
-local scr=EasyUI.CreateScroll(f,"ScrollTest",{x=20,y=20,w=200,h=200})
-for i=0, 20 do
-	local hd=EasyUI.CreateHandle(scr,"hd"..i,{x=5,y=i*20,w=50,h=20})
-	EasyUI.CreateText(hd,"txt"..i,{text="AAAAAAA"})
-end
-scr:OnUpdateScorllList()
-local img=EasyUI.CreateImage(f,"img",{w=36,h=36,x=50,y=50,image="ui\\Image\\UICommon\\CommonPanel.UITex",frame=13})
-img:SetImage("ui\\Image\\UICommon\\CommonPanel.UITex",13)
-
-local ani=EasyUI.CreateAnimate(f,"img",{w=161,h=161,x=50,y=50,image="ui/Image/Common/SprintYellowPower1.UITex"})
-local sha=EasyUI.CreateShadow(f,"sha",{x=50,y=300,w=35,h=35})
-sha:SetColorRGB(255,255,0)
-local box=EasyUI.CreateBox(f,"box",{x=50,y=300,w=35,h=35})
-box:SetObject(UI_OBJECT_NOT_NEED_KNOWN, 126)
-box:SetObjectIcon(Table_GetBuffIconID(126, 6))
-box:SetObjectIcon(2999)
-
-local tree=EasyUI.CreateTreeLeaf(f,"tree",{x=50,y=50})
-]]
-
