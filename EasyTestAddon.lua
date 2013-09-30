@@ -10,12 +10,22 @@ EasyTestAddon.OnCreate = function()
 end
 
 -- 事件回调
-EasyTestAddon.OnScript = function(event)
+EasyTestAddon.OnEvent = function(event)
 	if event == "DO_SKILL_CAST" then
 		if arg0 == UI_GetClientPlayerID() then
 			Output(Table_GetSkillName(arg1, arg2))
 		end
 	end
+end
+
+-- 窗体渲染回调，只有在NONE类型Frame上才有效
+EasyTestAddon.OnRender = function()
+	Output("OnRender")
+end
+
+-- 窗体刷新回调
+EasyTestAddon.OnUpdate = function()
+	Output("OnUpdate")
 end
 
 -- 窗体销毁回调

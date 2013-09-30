@@ -1898,7 +1898,7 @@ function CreateAddon:ctor(__name, __style)
 		self:_FireEvent("OnKeyDown")
 	end
 	self.OnEvent = function(__event)
-		self:_FireEvent("OnScript", __event)
+		self:_FireEvent("OnEvent", __event)
 	end
 end
 
