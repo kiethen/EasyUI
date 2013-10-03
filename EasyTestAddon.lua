@@ -1,5 +1,4 @@
-local CreateAddon = EasyUI["CreateAddon"]
-local CreateFrame = EasyUI["CreateFrame"]
+
 
 -- 创建插件
 EasyTestAddon = CreateAddon("EasyTestAddon")
@@ -45,5 +44,5 @@ end
 
 -- 界面创建
 EasyTestAddon.Open = function()
-	EasyTestAddon.frame = CreateFrame("EasyTestAddon", {style = "SMALL"})
+	EasyTestAddon.frame = EasyTestAddon:Append("Frame", "EasyTestAddon", {style = "SMALL"})
 end

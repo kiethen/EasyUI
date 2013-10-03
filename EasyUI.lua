@@ -56,1037 +56,6 @@ end
 
 local __ini = "Interface/EasyUI/ini/%s.ini"
 
--- Store UI Object By Name
-local _G = {}
-----------------------------------------------
--- ItemNull Type Controls
-----------------------------------------------
-
--- Append Control
-local _AppendItem = function(__parent, __string, __name)
-	if __parent.__addon then
-		__parent = __parent:GetHandle()
-	end
-	local __count = __parent:GetItemCount()
-	__parent:AppendItemFromString(__string)
-	local hwnd = __parent:Lookup(__count)
-	hwnd:SetName(__name)
-	return hwnd
-end
-
--- Base Class of ItemType Control
-local ItemBase = class()
-function ItemBase:ctor(__this)
-	self.__addon = true
-	self.__listeners = {self}
-end
-
-function ItemBase:SetName(...)
-	self.__this:SetName(...)
-end
-
-function ItemBase:GetName()
-	return self.__this:GetName()
-end
-
-function ItemBase:Scale(...)
-	self.__this:Scale(...)
-end
-
-function ItemBase:LockShowAndHide(...)
-	self.__this:LockShowAndHide(...)
-end
-
-function ItemBase:SetSelf(__this)
-	self.__this = __this
-	_G[self:GetName()] = self
-end
-
-function ItemBase:GetSelf()
-	return self.__this
-end
-
-function ItemBase:SetSize(...)
-	self.__this:SetSize(...)
-end
-
-function ItemBase:GetSize()
-	return self.__this:GetSize()
-end
-
-function ItemBase:SetRelPos(...)
-	self.__this:SetRelPos(...)
-end
-
-function ItemBase:GetRelPos()
-	return self.__this:GetRelPos()
-end
-
-function ItemBase:SetAbsPos(...)
-	self.__this:SetAbsPos(...)
-end
-
-function ItemBase:GetAbsPos()
-	return self.__this:GetAbsPos()
-end
-
-function ItemBase:SetAlpha(...)
-	self.__this:SetAlpha(...)
-end
-
-function ItemBase:SetTip(...)
-	self.__this:SetTip(...)
-end
-
-function ItemBase:GetTip()
-	self.__this:GetTip()
-end
-
-function ItemBase:GetAlpha()
-	return self.__this:GetAlpha()
-end
-
-function ItemBase:GetType()
-	return self.__this:GetType()
-end
-
-function ItemBase:SetPosType(...)
-	self.__this:SetPosType(...)
-end
-
-function ItemBase:GetPosType()
-	return self.__this:GetPosType()
-end
-
-function ItemBase:SetParent(__parent)
-	self.__parent = __parent
-end
-
-function ItemBase:GetParent()
-	return self.__parent
-end
-
-function ItemBase:Destroy()
-	self:GetParent():RemoveItem(self.__this)
-	local __name = self:GetName()
-	if _G[__name] then
-		_G[__name] = nil
-	end
-end
-
-function ItemBase:Show()
-	self.__this:Show()
-end
-
-function ItemBase:Hide()
-	self.__this:Hide()
-end
-
-function ItemBase:IsVisible()
-	return self.__this:IsVisible()
-end
-
-function ItemBase:_FireEvent(__event, ...)
-	for __k, __v in pairs(self.__listeners) do
-		if __v[__event] then
-			local res, err = pcall(__v[__event], ...)
-			if not res then
-				OutputMessage("MSG_SYS", "ERROR:" .. err .. "\n")
-			end
-		end
-	end
-end
-
--- This is only for WndScroll
-local ScrollItems = class(ItemBase)
-function ScrollItems:ctor(__parent, __type, __name)
-	assert(__parent ~= nil and __type ~= nil and __name ~= nil, "parent or name can not be null.")
-	local hwnd = __parent:AppendItemFromIni(string.format(__ini, "WndScroll"), __type, __name)
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self.__this.OnItemMouseEnter = function()
-		self:_FireEvent("OnEnter")
-	end
-	self.__this.OnItemMouseLeave = function()
-		self:_FireEvent("OnLeave")
-	end
-	self.__this.OnItemLButtonClick = function()
-		self:_FireEvent("OnClick")
-	end
-end
-
-function ScrollItems:SetSize(__w, __h)
-	self.__this:SetSize(__w, __h)
-	local __cover = self.__this:Lookup("Image_Cover")
-	__cover:SetSize(__w - 10, __h - 4)
-	__cover:SetRelPos(0, 2)
-	local __text = self.__this:Lookup("Text_Item")
-	__text:SetSize(__w, __h - 5)
-	__text:SetRelPos(0, 3)
-	self.__this:FormatAllItemPos()
-end
-
-function ScrollItems:SetText(...)
-	self.__this:Lookup("Text_Item"):SetText(...)
-end
-
-function ScrollItems:SetFontColor(...)
-	self.__this:Lookup("Text_Item"):SetFontColor(...)
-end
-
-function ScrollItems:SetAlpha(...)
-	self.__this:Lookup("Image_Cover"):SetAlpha(...)
-end
-
--- Handle Object
-local ItemHandle = class(ItemBase)
-function ItemHandle:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local __string = "<handle>w=10 h=10 eventid=272</handle>"
-	if __data.w then
-		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
-	end
-	if __data.h then
-		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
-	end
-	if __data.handletype then
-		__string = string.gsub(__string, "handletype=%d+", string.format("handletype=%d", __data.handletype))
-	end
-	if __data.firstitempostype then
-		__string = string.gsub(__string, "firstitempostype=%d+", string.format("firstitempostype=%d", __data.firstitempostype))
-	end
-	if __data.eventid then
-		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
-	end
-	local hwnd = _AppendItem(__parent, __string, __name)
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-	if __parent.__addon then
-		__parent = __parent:GetHandle()
-	end
-	__parent:FormatAllItemPos()
-
-	--Bind Handle Events
-	self.__this.OnItemLButtonClick = function()
-		self:_FireEvent("OnClick")
-	end
-	self.__this.OnItemMouseEnter = function()
-		self:_FireEvent("OnEnter")
-	end
-	self.__this.OnItemMouseLeave = function()
-		self:_FireEvent("OnLeave")
-	end
-end
-
-function ItemHandle:GetHandle()
-	return self.__this
-end
-
-function ItemHandle:FormatAllItemPos()
-	self.__this:FormatAllItemPos()
-end
-
-function ItemHandle:SetHandleStyle(...)
-	self.__this:SetHandleStyle(...)
-end
-
-function ItemHandle:GetItemStartRelPos()
-	return self.__this:GetItemStartRelPos()
-end
-
-function ItemHandle:SetItemStartRelPos(...)
-	self.__this:SetItemStartRelPos(...)
-end
-
-function ItemHandle:SetSizeByAllItemSize()
-	self.__this:SetSizeByAllItemSize()
-end
-
-function ItemHandle:GetAllItemSize()
-	return self.__this:GetAllItemSize()
-end
-
-function ItemHandle:GetVisibleItemCount()
-	return self.__this:GetVisibleItemCount()
-end
-
-function ItemHandle:EnableFormatWhenAppend(...)
-	self.__this:EnableFormatWhenAppend(...)
-end
-
-function ItemHandle:ExchangeItemIndex(...)
-	self.__this:ExchangeItemIndex(...)
-end
-
-function ItemHandle:Sort()
-	self.__this:Sort()
-end
-
-function ItemHandle:GetItemCount()
-	self.__this:GetItemCount()
-end
-
-function ItemHandle:ClearHandle()
-	self.__this:Clear()
-end
-
--- Text Object
-local ItemText = class(ItemBase)
-function ItemText:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local __string = "<text>w=150 h=30 valign=1 font=18 eventid=256 </text>"
-	if __data.w then
-		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
-	end
-	if __data.h then
-		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
-	end
-	if __data.valign then
-		__string = string.gsub(__string, "valign=%d+", string.format("valign=%d", __data.valign))
-	end
-	if __data.font then
-		__string = string.gsub(__string, "font=%d+", string.format("font=%d", __data.font))
-	end
-	if __data.eventid then
-		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
-	end
-	local hwnd = _AppendItem(__parent, __string, __name)
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetText(__data.text or "")
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-	if __parent.__addon then
-		__parent = __parent:GetHandle()
-	end
-	__parent:FormatAllItemPos()
-
-	--Bind Text Events
-	self.__this.OnItemMouseEnter = function()
-		self:_FireEvent("OnEnter")
-	end
-	self.__this.OnItemMouseLeave = function()
-		self:_FireEvent("OnLeave")
-	end
-end
-
-function ItemText:SetText(...)
-	self.__this:SetText(...)
-end
-
-function ItemText:GetText()
-	return self.__this:GetText()
-end
-
-function ItemText:SetFontScheme(...)
-	self.__this:SetFontScheme(...)
-end
-
-function ItemText:GetFontScheme()
-	return self.__this:GetFontScheme()
-end
-
-function ItemText:GetTextLen()
-	return self.__this:GetTextLen()
-end
-
-function ItemText:SetVAlign(...)
-	self.__this:SetVAlign(...)
-end
-
-function ItemText:GetVAlign()
-	return self.__this:GetVAlign()
-end
-
-function ItemText:SetHAlign(...)
-	self.__this:SetHAlign(...)
-end
-
-function ItemText:GetHAlign()
-	return self.__this:GetHAlign()
-end
-
-function ItemText:SetRowSpacing(...)
-	self.__this:SetRowSpacing(...)
-end
-
-function ItemText:GetRowSpacing()
-	return self.__this:GetRowSpacing()
-end
-
-function ItemText:SetMultiLine(...)
-	self.__this:SetMultiLine(...)
-end
-
-function ItemText:IsMultiLine()
-	return self.__this:IsMultiLine()
-end
-
-function ItemText:FormatTextForDraw(...)
-	self.__this:FormatTextForDraw(...)
-end
-
-function ItemText:AutoSize()
-	self.__this:AutoSize()
-end
-
-function ItemText:SetCenterEachLine(...)
-	self.__this:SetCenterEachLine(...)
-end
-
-function ItemText:IsCenterEachLine()
-	return self.__this:IsCenterEachLine()
-end
-
-function ItemText:SetRichText(...)
-	self.__this:SetRichText(...)
-end
-
-function ItemText:IsRichText()
-	return self.__this:IsRichText()
-end
-
-function ItemText:GetFontScale()
-	return self.__this:GetFontScale()
-end
-
-function ItemText:SetFontScale(...)
-	self.__this:SetFontScale(...)
-end
-
-function ItemText:SetFontID(...)
-	self.__this:SetFontID(...)
-end
-
-function ItemText:SetFontBorder(...)
-	self.__this:SetFontBorder(...)
-end
-
-function ItemText:SetFontShadow(...)
-	self.__this:SetFontShadow(...)
-end
-
-function ItemText:GetFontID()
-	return self.__this:GetFontID()
-end
-
-function ItemText:GetFontBoder()
-	return self.__this:GetFontBoder()
-end
-
-function ItemText:GetFontProjection()
-	return self.__this:GetFontProjection()
-end
-
-function ItemText:GetTextExtent()
-	return self.__this:GetTextExtent()
-end
-
-function ItemText:GetTextPosExtent()
-	return self.__this:GetTextPosExtent()
-end
-
-function ItemText:SetFontColor(...)
-	self.__this:SetFontColor(...)
-end
-
-function ItemText:GetFontColor()
-	return self.__this:GetFontColor()
-end
-
-function ItemText:SetFontSpacing(...)
-	self.__this:SetFontSpacing(...)
-end
-
-function ItemText:GetFontSpacing()
-	return self.__this:GetFontSpacing()
-end
-
--- Box Object
-local ItemBox = class(ItemBase)
-function ItemBox:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local __string = "<box>w=48 h=48 eventid=272 </box>"
-	if __data.w then
-		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
-	end
-	if __data.h then
-		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
-	end
-	if __data.eventid then
-		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
-	end
-	local hwnd = _AppendItem(__parent, __string, __name)
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-	if __parent.__addon then
-		__parent = __parent:GetHandle()
-	end
-	__parent:FormatAllItemPos()
-
-	--Bind Box Events
-	self.__this.OnItemMouseEnter = function()
-		self:_FireEvent("OnEnter")
-	end
-	self.__this.OnItemMouseLeave = function()
-		self:_FireEvent("OnLeave")
-	end
-	self.__this.OnItemLButtonClick = function()
-		self:_FireEvent("OnClick")
-	end
-end
-
-function ItemBox:SetObject(...)
-	self.__this:SetObject(...)
-end
-
-function ItemBox:GetObject()
-	return self.__this:GetObject()
-end
-
-function ItemBox:GetObjectType()
-	return self.__this:GetObjectType()
-end
-
-function ItemBox:GetObjectData()
-	return self.__this:GetObjectData()
-end
-
-function ItemBox:ClearObject()
-	return self.__this:ClearObject()
-end
-
-function ItemBox:IsEmpty()
-	return self.__this:IsEmpty()
-end
-
-function ItemBox:EnableObject(...)
-	self.__this:EnableObject(...)
-end
-
-function ItemBox:IsObjectEnable()
-	return self.__this:IsObjectEnable()
-end
-
-function ItemBox:SetObjectCoolDown(...)
-	self.__this:SetObjectCoolDown(...)
-end
-
-function ItemBox:IsObjectCoolDown()
-	return self.__this:IsObjectCoolDown()
-end
-
-function ItemBox:SetObjectSparking(...)
-	self.__this:SetObjectSparking(...)
-end
-
-function ItemBox:SetObjectInUse(...)
-	self.__this:SetObjectInUse(...)
-end
-
-function ItemBox:SetObjectStaring(...)
-	self.__this:SetObjectStaring(...)
-end
-
-function ItemBox:SetObjectSelected(...)
-	self.__this:SetObjectSelected(...)
-end
-
-function ItemBox:IsObjectSelected()
-	return self.__this:IsObjectSelected()
-end
-
-function ItemBox:SetObjectMouseOver(...)
-	self.__this:SetObjectMouseOver(...)
-end
-
-function ItemBox:IsObjectMouseOver()
-	return self.__this:IsObjectMouseOver()
-end
-
-function ItemBox:SetObjectPressed(...)
-	self.__this:SetObjectPressed(...)
-end
-
-function ItemBox:IsObjectPressed()
-	return self.__this:IsObjectPressed()
-end
-
-function ItemBox:SetCoolDownPercentage(...)
-	self.__this:SetCoolDownPercentage(...)
-end
-
-function ItemBox:GetCoolDownPercentage()
-	return self.__this:GetCoolDownPercentage()
-end
-
-function ItemBox:SetObjectIcon(...)
-	self.__this:SetObjectIcon(...)
-end
-
-function ItemBox:GetObjectIcon()
-	return self.__this:GetObjectIcon()
-end
-
-function ItemBox:ClearObjectIcon()
-	self.__this:ClearObjectIcon()
-end
-
-function ItemBox:SetOverText(...)
-	self.__this:SetOverText(...)
-end
-
-function ItemBox:GetOverText()
-	return self.__this:GetOverText()
-end
-
-function ItemBox:SetOverTextFontScheme(...)
-	self.__this:SetOverTextFontScheme(...)
-end
-
-function ItemBox:GetOverTextFontScheme()
-	return self.__this:GetOverTextFontScheme()
-end
-
-function ItemBox:SetOverTextPosition(...)
-	self.__this:SetOverTextPosition(...)
-end
-
-function ItemBox:GetOverTextPosition()
-	return self.__this:GetOverTextPosition()
-end
-
-function ItemBox:SetExtentImage(...)
-	self.__this:SetExtentImage(...)
-end
-
-function ItemBox:ClearExtentImage()
-	self.__this:ClearExtentImage()
-end
-
-function ItemBox:SetExtentAnimate(...)
-	self.__this:SetExtentAnimate(...)
-end
-
-function ItemBox:ClearExtentAnimate()
-	self.__this:ClearExtentAnimate()
-end
-
--- Image Object
-local ItemImage = class(ItemBase)
-function ItemImage:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local __string = "<image>w=100 h=100 eventid=257 </image>"
-	if __data.w then
-		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
-	end
-	if __data.h then
-		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
-	end
-	if __data.eventid then
-		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
-	end
-	local hwnd = _AppendItem(__parent, __string, __name)
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	if __data.image then
-		local __image = __data.image
-		local __frame = __data.frame or nil
-		self:SetImage(__image, __frame)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-	if __parent.__addon then
-		__parent = __parent:GetHandle()
-	end
-	__parent:FormatAllItemPos()
-end
-
-function ItemImage:SetFrame(...)
-	self.__this:SetFrame(...)
-end
-
-function ItemImage:GetFrame()
-	return self.__this:GetFrame()
-end
-
-function ItemImage:SetImageType(...)
-	self.__this:SetImageType(...)
-end
-
-function ItemImage:GetImageType()
-	return self.__this:GetImageType()
-end
-
-function ItemImage:SetPercentage(...)
-	self.__this:SetPercentage(...)
-end
-
-function ItemImage:GetPercentage()
-	return self.__this:GetPercentage()
-end
-
-function ItemImage:SetRotate(...)
-	self.__this:SetRotate(...)
-end
-
-function ItemImage:GetRotate()
-	return self.__this:GetRotate()
-end
-
-function ItemImage:GetImageID()
-	return self.__this:GetImageID()
-end
-
-function ItemImage:FromUITex(...)
-	self.__this:FromUITex(...)
-end
-
-function ItemImage:FromTextureFile(...)
-	self.__this:FromTextureFile(...)
-end
-
-function ItemImage:FromScene(...)
-	self.__this:FromScene(...)
-end
-
-function ItemImage:FromImageID(...)
-	self.__this:FromImageID(...)
-end
-
-function ItemImage:FromIconID(...)
-	self.__this:FromIconID(...)
-end
-
-function ItemImage:SetImage(__image, __frame)
-	if type(__image) == "string" then
-		if __frame then
-			self:FromUITex(__image, __frame)
-		else
-			self:FromTextureFile(__image)
-		end
-	elseif type(__image) == "number" then
-		self:FromIconID(__image)
-	end
-end
-
--- Shadow Object
-local ItemShadow = class(ItemBase)
-function ItemShadow:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local __string = "<shadow>w=15 h=15 eventid=277 </shadow>"
-	if __data.w then
-		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
-	end
-	if __data.h then
-		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
-	end
-	if __data.eventid then
-		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
-	end
-	local hwnd = _AppendItem(__parent, __string, __name)
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-	if __parent.__addon then
-		__parent = __parent:GetHandle()
-	end
-	__parent:FormatAllItemPos()
-end
-
-function ItemShadow:SetShadowColor(...)
-	self.__this:SetShadowColor(...)
-end
-
-function ItemShadow:GetShadowColor()
-	return self.__this:GetShadowColor()
-end
-
-function ItemShadow:SetColorRGB(...)
-	self.__this:SetColorRGB(...)
-end
-
-function ItemShadow:GetColorRGB()
-	return self.__this:GetColorRGB()
-end
-
-function ItemShadow:SetTriangleFan(...)
-	self.__this:SetTriangleFan(...)
-end
-
-function ItemShadow:IsTriangleFan()
-	return self.__this:IsTriangleFan()
-end
-
-function ItemShadow:AppendTriangleFanPoint(...)
-	self.__this:AppendTriangleFanPoint(...)
-end
-
-function ItemShadow:SetD3DPT(...)
-	self.__this:SetD3DPT(...)
-end
-
-function ItemShadow:AppendTriangleFan3DPoint(...)
-	self.__this:AppendTriangleFan3DPoint(...)
-end
-
-function ItemShadow:ClearTriangleFanPoint()
-	self.__this:ClearTriangleFanPoint()
-end
-
-function ItemShadow:AppendDoodadID(...)
-	self.__this:AppendDoodadID(...)
-end
-
-function ItemShadow:AppendCharacterID(...)
-	self.__this:AppendCharacterID(...)
-end
-
--- ItemAnimate Object
-local ItemAnimate = class(ItemBase)
-function ItemAnimate:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local __string = "<animate>w=30 h=30 </animate>"
-	if __data.w then
-		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
-	end
-	if __data.h then
-		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
-	end
-	local hwnd = _AppendItem(__parent, __string, __name)
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	if __data.image then
-		local __image = __data.image
-		local __group = __data.group or 0
-		local __loop = __data.loop or -1
-		self:SetAnimate(__image, __group, __loop)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-	if __parent.__addon then
-		__parent = __parent:GetHandle()
-	end
-	__parent:FormatAllItemPos()
-end
-
-function ItemAnimate:SetGroup(...)
-	self.__this:SetGroup(...)
-end
-
-function ItemAnimate:SetLoopCount(...)
-	self.__this:SetLoopCount(...)
-end
-
-function ItemAnimate:SetImagePath(...)
-	self.__this:SetImagePath(...)
-end
-
-function ItemAnimate:SetAnimate(...)
-	self.__this:SetAnimate(...)
-end
-
-function ItemAnimate:AutoSize()
-	self.__this:AutoSize()
-end
-
-function ItemAnimate:Replay()
-	self.__this:Replay()
-end
-
-function ItemAnimate:SetIdenticalInterval(...)
-	self.__this:SetIdenticalInterval(...)
-end
-
-function ItemAnimate:IsFinished()
-	return self.__this:IsFinished()
-end
-
-function ItemAnimate:SetAnimateType(...)
-	self.__this:SetAnimateType(...)
-end
-
-function ItemAnimate:GetAnimateType()
-	return self.__this:GetAnimateType()
-end
-
--- TreeLeaf Object
-local ItemTreeLeaf = class(ItemBase)
-function ItemTreeLeaf:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
-	__data = __data or {}
-	local __string = "<treeleaf>w=150 h=25 indentwidth=20 alwaysnode=1 indent=0 eventid=257 </treeleaf>"
-	if __data.w then
-		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
-	end
-	if __data.h then
-		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
-	end
-	if __data.eventid then
-		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
-	end
-	local hwnd = _AppendItem(__parent, __string, __name)
-	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
-	if __parent.__addon then
-		__parent = __parent:GetHandle()
-	end
-	__parent:FormatAllItemPos()
-
-	--Bind TreeLeaf Event
-	self.__this.OnItemLButtonDown =function()
-		self:_FireEvent("OnClick")
-	end
-end
-
-function ItemTreeLeaf:GetHandle(...)
-	return self.__this
-end
-
-function ItemTreeLeaf:FormatAllItemPos()
-	self.__this:FormatAllItemPos()
-end
-
-function ItemTreeLeaf:SetHandleStyle(...)
-	self.__this:SetHandleStyle(...)
-end
-
-function ItemTreeLeaf:SetRowHeight(...)
-	self.__this:SetRowHeight(...)
-end
-
-function ItemTreeLeaf:SetRowSpacing(...)
-	self.__this:SetRowSpacing(...)
-end
-
-function ItemTreeLeaf:ClearHandle()
-	self.__this:Clear()
-end
-
-function ItemTreeLeaf:GetItemStartRelPos()
-	return self.__this:GetItemStartRelPos()
-end
-
-function ItemTreeLeaf:SetItemStartRelPos(...)
-	self.__this:SetItemStartRelPos(...)
-end
-
-function ItemTreeLeaf:SetSizeByAllItemSize()
-	self.__this:SetSizeByAllItemSize()
-end
-
-function ItemTreeLeaf:GetAllItemSize()
-	return self.__this:GetAllItemSize()
-end
-
-function ItemTreeLeaf:GetItemCount()
-	return self.__this:GetItemCount()
-end
-
-function ItemTreeLeaf:GetVisibleItemCount()
-	return self.__this:GetVisibleItemCount()
-end
-
-function ItemTreeLeaf:EnableFormatWhenAppend(...)
-	self.__this:EnableFormatWhenAppend(...)
-end
-
-function ItemTreeLeaf:ExchangeItemIndex(...)
-	self.__this:ExchangeItemIndex(...)
-end
-
-function ItemTreeLeaf:Sort()
-	self.__this:Sort()
-end
-
-function ItemTreeLeaf:IsExpand()
-	return self.__this:IsExpand()
-end
-
-function ItemTreeLeaf:ExpandOrCollapse(...)
-	self.__this:ExpandOrCollapse(...)
-end
-
-function ItemTreeLeaf:Expand()
-	self.__this:Expand()
-end
-
-function ItemTreeLeaf:Collapse()
-	self.__this:Collapse()
-end
-
-function ItemTreeLeaf:SetIndent(...)
-	self.__this:SetIndent(...)
-end
-
-function ItemTreeLeaf:GetIndent()
-	return self.__this:GetIndent()
-end
-
-function ItemTreeLeaf:SetEachIndentWidth(...)
-	self.__this:SetEachIndentWidth(...)
-end
-
-function ItemTreeLeaf:GetEachIndentWidth()
-	return self.__this:GetEachIndentWidth()
-end
-
-function ItemTreeLeaf:SetNodeIconSize(...)
-	self.__this:SetNodeIconSize(...)
-end
-
-function ItemTreeLeaf:SetIconImage(...)
-	self.__this:SetIconImage(...)
-end
-
-function ItemTreeLeaf:PtInIcon(...)
-	return self.__this:PtInIcon(...)
-end
-
-function ItemTreeLeaf:AdjustNodeIconPos()
-	self.__this:AdjustNodeIconPos()
-end
-
-function ItemTreeLeaf:AutoSetIconSize()
-	self.__this:AutoSetIconSize()
-end
-
-function ItemTreeLeaf:SetShowIndex(...)
-	self.__this:SetShowIndex(...)
-end
-
-function ItemTreeLeaf:GetShowIndex()
-	return self.__this:GetShowIndex()
-end
-
 ----------------------------------------------
 -- Wnd Type Controls
 ----------------------------------------------
@@ -1116,7 +85,6 @@ end
 
 function WndBase:SetSelf(__this)
 	self.__this = __this
-	_G[self:GetName()] = self
 end
 
 function WndBase:GetSelf()
@@ -1173,9 +141,6 @@ function WndBase:Destroy()
 		Wnd.CloseWindow(__name)
 	else
 		self.__this:Destroy()
-	end
-	if _G[__name] then
-		_G[__name] = nil
 	end
 end
 
@@ -1516,7 +481,7 @@ function WndEdit:Enable(__enable)
 		self.__edit:SetFontColor(255, 255, 255)
 		self.__edit:Enable(true)
 	else
-		self.__edit:SetFontColor(192, 192, 192)
+		self.__edit:SetFontColor(160, 160, 160)
 		self.__edit:Enable(false)
 	end
 end
@@ -1593,7 +558,7 @@ function WndCheckBox:Enable(__enable)
 		self.__text:SetFontColor(255, 255, 255)
 		self.__this:Enable(true)
 	else
-		self.__text:SetFontColor(192, 192, 192)
+		self.__text:SetFontColor(160, 160, 160)
 		self.__this:Enable(false)
 	end
 end
@@ -1751,7 +716,7 @@ function WndRadioBox:Enable(__enable)
 		self.__text:SetFontColor(255, 255, 255)
 		self.__this:Enable(true)
 	else
-		self.__text:SetFontColor(192, 192, 192)
+		self.__text:SetFontColor(160, 160, 160)
 		self.__this:Enable(false)
 	end
 end
@@ -1788,7 +753,7 @@ function WndUICheckBox:ctor(__parent, __name, __data)
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "WndUICheckBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
-	self.__text:SetText(__data.text or "")
+	self:SetText(__data.text or "")
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
@@ -1836,12 +801,18 @@ function WndUICheckBox:Check(__check)
 	self.__this:Check(__check)
 end
 
-function WndUICheckBox:SetText(__text)
-	self.__text:SetText(__text)
+function WndUICheckBox:SetText(...)
+	self.__text:SetText(...)
 end
 
 function WndUICheckBox:SetAnimation(...)
 	self.__this:SetAnimation(...)
+end
+
+function WndUICheckBox:SetSize(...)
+	self.__this:SetSize(...)
+	self.__this:Lookup("", ""):SetSize(...)
+	self.__text:SetSize(...)
 end
 
 -- WndCSlider Object
@@ -2084,10 +1055,1007 @@ function WndScroll:SetSize(__w, __h)
 	self.__down:SetRelPos(__w - 20, __h - 20)
 end
 
+----------------------------------------------
+-- ItemNull Type Controls
+----------------------------------------------
+
+-- Append Control
+local _AppendItem = function(__parent, __string, __name)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	local __count = __parent:GetItemCount()
+	__parent:AppendItemFromString(__string)
+	local hwnd = __parent:Lookup(__count)
+	hwnd:SetName(__name)
+	return hwnd
+end
+
+-- Base Class of ItemType Control
+local ItemBase = class()
+function ItemBase:ctor(__this)
+	self.__addon = true
+	self.__listeners = {self}
+end
+
+function ItemBase:SetName(...)
+	self.__this:SetName(...)
+end
+
+function ItemBase:GetName()
+	return self.__this:GetName()
+end
+
+function ItemBase:Scale(...)
+	self.__this:Scale(...)
+end
+
+function ItemBase:LockShowAndHide(...)
+	self.__this:LockShowAndHide(...)
+end
+
+function ItemBase:SetSelf(__this)
+	self.__this = __this
+end
+
+function ItemBase:GetSelf()
+	return self.__this
+end
+
+function ItemBase:SetSize(...)
+	self.__this:SetSize(...)
+end
+
+function ItemBase:GetSize()
+	return self.__this:GetSize()
+end
+
+function ItemBase:SetRelPos(...)
+	self.__this:SetRelPos(...)
+end
+
+function ItemBase:GetRelPos()
+	return self.__this:GetRelPos()
+end
+
+function ItemBase:SetAbsPos(...)
+	self.__this:SetAbsPos(...)
+end
+
+function ItemBase:GetAbsPos()
+	return self.__this:GetAbsPos()
+end
+
+function ItemBase:SetAlpha(...)
+	self.__this:SetAlpha(...)
+end
+
+function ItemBase:SetTip(...)
+	self.__this:SetTip(...)
+end
+
+function ItemBase:GetTip()
+	self.__this:GetTip()
+end
+
+function ItemBase:GetAlpha()
+	return self.__this:GetAlpha()
+end
+
+function ItemBase:GetType()
+	return self.__this:GetType()
+end
+
+function ItemBase:SetPosType(...)
+	self.__this:SetPosType(...)
+end
+
+function ItemBase:GetPosType()
+	return self.__this:GetPosType()
+end
+
+function ItemBase:SetParent(__parent)
+	self.__parent = __parent
+end
+
+function ItemBase:GetParent()
+	return self.__parent
+end
+
+function ItemBase:Destroy()
+	self:GetParent():RemoveItem(self.__this)
+end
+
+function ItemBase:Show()
+	self.__this:Show()
+end
+
+function ItemBase:Hide()
+	self.__this:Hide()
+end
+
+function ItemBase:IsVisible()
+	return self.__this:IsVisible()
+end
+
+function ItemBase:_FireEvent(__event, ...)
+	for __k, __v in pairs(self.__listeners) do
+		if __v[__event] then
+			local res, err = pcall(__v[__event], ...)
+			if not res then
+				OutputMessage("MSG_SYS", "ERROR:" .. err .. "\n")
+			end
+		end
+	end
+end
+
+-- Handle Object
+local ItemHandle = class(ItemBase)
+function ItemHandle:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local __string = "<handle>w=10 h=10 handletype=0 postype=0 eventid=272 </handle>"
+	if __data.w then
+		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
+	end
+	if __data.h then
+		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
+	end
+	if __data.handletype then
+		__string = string.gsub(__string, "handletype=%d+", string.format("handletype=%d", __data.handletype))
+	end
+	--[[if __data.firstpostype then
+		__string = string.gsub(__string, "firstpostype=%d+", string.format("firstpostype=%d", __data.firstpostype))
+	end]]
+	if __data.postype then
+		__string = string.gsub(__string, "postype=%d+", string.format("postype=%d", __data.postype))
+	end
+	if __data.eventid then
+		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
+	end
+	--Output(__string)
+	local hwnd = _AppendItem(__parent, __string, __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	__parent:FormatAllItemPos()
+
+	--Bind Handle Events
+	self.__this.OnItemLButtonClick = function()
+		self:_FireEvent("OnClick")
+	end
+	self.__this.OnItemMouseEnter = function()
+		self:_FireEvent("OnEnter")
+	end
+	self.__this.OnItemMouseLeave = function()
+		self:_FireEvent("OnLeave")
+	end
+end
+
+function ItemHandle:OnLClick(__fn)
+	self.__this.OnItemLButtonClick = __fn
+end
+
+function ItemHandle:GetHandle()
+	return self.__this
+end
+
+function ItemHandle:FormatAllItemPos()
+	self.__this:FormatAllItemPos()
+end
+
+function ItemHandle:SetHandleStyle(...)
+	self.__this:SetHandleStyle(...)
+end
+
+function ItemHandle:GetItemStartRelPos()
+	return self.__this:GetItemStartRelPos()
+end
+
+function ItemHandle:SetItemStartRelPos(...)
+	self.__this:SetItemStartRelPos(...)
+end
+
+function ItemHandle:SetSizeByAllItemSize()
+	self.__this:SetSizeByAllItemSize()
+end
+
+function ItemHandle:GetAllItemSize()
+	return self.__this:GetAllItemSize()
+end
+
+function ItemHandle:GetVisibleItemCount()
+	return self.__this:GetVisibleItemCount()
+end
+
+function ItemHandle:EnableFormatWhenAppend(...)
+	self.__this:EnableFormatWhenAppend(...)
+end
+
+function ItemHandle:ExchangeItemIndex(...)
+	self.__this:ExchangeItemIndex(...)
+end
+
+function ItemHandle:Sort()
+	self.__this:Sort()
+end
+
+function ItemHandle:GetItemCount()
+	self.__this:GetItemCount()
+end
+
+function ItemHandle:ClearHandle()
+	self.__this:Clear()
+end
+
+-- Text Object
+local ItemText = class(ItemBase)
+function ItemText:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local __string = "<text>w=150 h=30 valign=1 font=18 postype=0 </text>"
+	if __data.w then
+		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
+	end
+	if __data.h then
+		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
+	end
+	if __data.valign then
+		__string = string.gsub(__string, "valign=%d+", string.format("valign=%d", __data.valign))
+	end
+	if __data.font then
+		__string = string.gsub(__string, "font=%d+", string.format("font=%d", __data.font))
+	end
+	if __data.postype then
+		__string = string.gsub(__string, "postype=%d+", string.format("postype=%d", __data.postype))
+	end
+	local hwnd = _AppendItem(__parent, __string, __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	self:SetText(__data.text or "")
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	__parent:FormatAllItemPos()
+end
+
+function ItemText:SetText(...)
+	self.__this:SetText(...)
+end
+
+function ItemText:GetText()
+	return self.__this:GetText()
+end
+
+function ItemText:SetFontScheme(...)
+	self.__this:SetFontScheme(...)
+end
+
+function ItemText:GetFontScheme()
+	return self.__this:GetFontScheme()
+end
+
+function ItemText:GetTextLen()
+	return self.__this:GetTextLen()
+end
+
+function ItemText:SetVAlign(...)
+	self.__this:SetVAlign(...)
+end
+
+function ItemText:GetVAlign()
+	return self.__this:GetVAlign()
+end
+
+function ItemText:SetHAlign(...)
+	self.__this:SetHAlign(...)
+end
+
+function ItemText:GetHAlign()
+	return self.__this:GetHAlign()
+end
+
+function ItemText:SetRowSpacing(...)
+	self.__this:SetRowSpacing(...)
+end
+
+function ItemText:GetRowSpacing()
+	return self.__this:GetRowSpacing()
+end
+
+function ItemText:SetMultiLine(...)
+	self.__this:SetMultiLine(...)
+end
+
+function ItemText:IsMultiLine()
+	return self.__this:IsMultiLine()
+end
+
+function ItemText:FormatTextForDraw(...)
+	self.__this:FormatTextForDraw(...)
+end
+
+function ItemText:AutoSize()
+	self.__this:AutoSize()
+end
+
+function ItemText:SetCenterEachLine(...)
+	self.__this:SetCenterEachLine(...)
+end
+
+function ItemText:IsCenterEachLine()
+	return self.__this:IsCenterEachLine()
+end
+
+function ItemText:SetRichText(...)
+	self.__this:SetRichText(...)
+end
+
+function ItemText:IsRichText()
+	return self.__this:IsRichText()
+end
+
+function ItemText:GetFontScale()
+	return self.__this:GetFontScale()
+end
+
+function ItemText:SetFontScale(...)
+	self.__this:SetFontScale(...)
+end
+
+function ItemText:SetFontID(...)
+	self.__this:SetFontID(...)
+end
+
+function ItemText:SetFontBorder(...)
+	self.__this:SetFontBorder(...)
+end
+
+function ItemText:SetFontShadow(...)
+	self.__this:SetFontShadow(...)
+end
+
+function ItemText:GetFontID()
+	return self.__this:GetFontID()
+end
+
+function ItemText:GetFontBoder()
+	return self.__this:GetFontBoder()
+end
+
+function ItemText:GetFontProjection()
+	return self.__this:GetFontProjection()
+end
+
+function ItemText:GetTextExtent()
+	return self.__this:GetTextExtent()
+end
+
+function ItemText:GetTextPosExtent()
+	return self.__this:GetTextPosExtent()
+end
+
+function ItemText:SetFontColor(...)
+	self.__this:SetFontColor(...)
+end
+
+function ItemText:GetFontColor()
+	return self.__this:GetFontColor()
+end
+
+function ItemText:SetFontSpacing(...)
+	self.__this:SetFontSpacing(...)
+end
+
+function ItemText:GetFontSpacing()
+	return self.__this:GetFontSpacing()
+end
+
+-- Box Object
+local ItemBox = class(ItemBase)
+function ItemBox:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local __string = "<box>w=48 h=48 postype=0 eventid=272 </box>"
+	if __data.w then
+		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
+	end
+	if __data.h then
+		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
+	end
+	if __data.postype then
+		__string = string.gsub(__string, "postype=%d+", string.format("postype=%d", __data.postype))
+	end
+	if __data.eventid then
+		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
+	end
+	local hwnd = _AppendItem(__parent, __string, __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	__parent:FormatAllItemPos()
+
+	--Bind Box Events
+	self.__this.OnItemMouseEnter = function()
+		self:_FireEvent("OnEnter")
+	end
+	self.__this.OnItemMouseLeave = function()
+		self:_FireEvent("OnLeave")
+	end
+	self.__this.OnItemLButtonClick = function()
+		self:_FireEvent("OnClick")
+	end
+end
+
+function ItemBox:SetObject(...)
+	self.__this:SetObject(...)
+end
+
+function ItemBox:GetObject()
+	return self.__this:GetObject()
+end
+
+function ItemBox:GetObjectType()
+	return self.__this:GetObjectType()
+end
+
+function ItemBox:GetObjectData()
+	return self.__this:GetObjectData()
+end
+
+function ItemBox:ClearObject()
+	return self.__this:ClearObject()
+end
+
+function ItemBox:IsEmpty()
+	return self.__this:IsEmpty()
+end
+
+function ItemBox:EnableObject(...)
+	self.__this:EnableObject(...)
+end
+
+function ItemBox:IsObjectEnable()
+	return self.__this:IsObjectEnable()
+end
+
+function ItemBox:SetObjectCoolDown(...)
+	self.__this:SetObjectCoolDown(...)
+end
+
+function ItemBox:IsObjectCoolDown()
+	return self.__this:IsObjectCoolDown()
+end
+
+function ItemBox:SetObjectSparking(...)
+	self.__this:SetObjectSparking(...)
+end
+
+function ItemBox:SetObjectInUse(...)
+	self.__this:SetObjectInUse(...)
+end
+
+function ItemBox:SetObjectStaring(...)
+	self.__this:SetObjectStaring(...)
+end
+
+function ItemBox:SetObjectSelected(...)
+	self.__this:SetObjectSelected(...)
+end
+
+function ItemBox:IsObjectSelected()
+	return self.__this:IsObjectSelected()
+end
+
+function ItemBox:SetObjectMouseOver(...)
+	self.__this:SetObjectMouseOver(...)
+end
+
+function ItemBox:IsObjectMouseOver()
+	return self.__this:IsObjectMouseOver()
+end
+
+function ItemBox:SetObjectPressed(...)
+	self.__this:SetObjectPressed(...)
+end
+
+function ItemBox:IsObjectPressed()
+	return self.__this:IsObjectPressed()
+end
+
+function ItemBox:SetCoolDownPercentage(...)
+	self.__this:SetCoolDownPercentage(...)
+end
+
+function ItemBox:GetCoolDownPercentage()
+	return self.__this:GetCoolDownPercentage()
+end
+
+function ItemBox:SetObjectIcon(...)
+	self.__this:SetObjectIcon(...)
+end
+
+function ItemBox:GetObjectIcon()
+	return self.__this:GetObjectIcon()
+end
+
+function ItemBox:ClearObjectIcon()
+	self.__this:ClearObjectIcon()
+end
+
+function ItemBox:SetOverText(...)
+	self.__this:SetOverText(...)
+end
+
+function ItemBox:GetOverText()
+	return self.__this:GetOverText()
+end
+
+function ItemBox:SetOverTextFontScheme(...)
+	self.__this:SetOverTextFontScheme(...)
+end
+
+function ItemBox:GetOverTextFontScheme()
+	return self.__this:GetOverTextFontScheme()
+end
+
+function ItemBox:SetOverTextPosition(...)
+	self.__this:SetOverTextPosition(...)
+end
+
+function ItemBox:GetOverTextPosition()
+	return self.__this:GetOverTextPosition()
+end
+
+function ItemBox:SetExtentImage(...)
+	self.__this:SetExtentImage(...)
+end
+
+function ItemBox:ClearExtentImage()
+	self.__this:ClearExtentImage()
+end
+
+function ItemBox:SetExtentAnimate(...)
+	self.__this:SetExtentAnimate(...)
+end
+
+function ItemBox:ClearExtentAnimate()
+	self.__this:ClearExtentAnimate()
+end
+
+-- Image Object
+local ItemImage = class(ItemBase)
+function ItemImage:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local __string = "<image>w=100 h=100 postype=0 lockshowhide=0 </image>"
+	if __data.w then
+		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
+	end
+	if __data.h then
+		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
+	end
+	if __data.postype then
+		__string = string.gsub(__string, "postype=%d+", string.format("postype=%d", __data.postype))
+	end
+	if __data.lockshowhide then
+		__string = string.gsub(__string, "lockshowhide=%d+", string.format("lockshowhide=%d", __data.lockshowhide))
+	end
+	local hwnd = _AppendItem(__parent, __string, __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	if __data.image then
+		local __image = __data.image
+		local __frame = __data.frame or nil
+		self:SetImage(__image, __frame)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	__parent:FormatAllItemPos()
+end
+
+function ItemImage:SetFrame(...)
+	self.__this:SetFrame(...)
+end
+
+function ItemImage:GetFrame()
+	return self.__this:GetFrame()
+end
+
+function ItemImage:SetImageType(...)
+	self.__this:SetImageType(...)
+end
+
+function ItemImage:GetImageType()
+	return self.__this:GetImageType()
+end
+
+function ItemImage:SetPercentage(...)
+	self.__this:SetPercentage(...)
+end
+
+function ItemImage:GetPercentage()
+	return self.__this:GetPercentage()
+end
+
+function ItemImage:SetRotate(...)
+	self.__this:SetRotate(...)
+end
+
+function ItemImage:GetRotate()
+	return self.__this:GetRotate()
+end
+
+function ItemImage:GetImageID()
+	return self.__this:GetImageID()
+end
+
+function ItemImage:FromUITex(...)
+	self.__this:FromUITex(...)
+end
+
+function ItemImage:FromTextureFile(...)
+	self.__this:FromTextureFile(...)
+end
+
+function ItemImage:FromScene(...)
+	self.__this:FromScene(...)
+end
+
+function ItemImage:FromImageID(...)
+	self.__this:FromImageID(...)
+end
+
+function ItemImage:FromIconID(...)
+	self.__this:FromIconID(...)
+end
+
+function ItemImage:SetImage(__image, __frame)
+	if type(__image) == "string" then
+		if __frame then
+			self:FromUITex(__image, __frame)
+		else
+			self:FromTextureFile(__image)
+		end
+	elseif type(__image) == "number" then
+		self:FromIconID(__image)
+	end
+end
+
+-- Shadow Object
+local ItemShadow = class(ItemBase)
+function ItemShadow:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local __string = "<shadow>w=15 h=15 postype=0 eventid=277 </shadow>"
+	if __data.w then
+		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
+	end
+	if __data.h then
+		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
+	end
+	if __data.postype then
+		__string = string.gsub(__string, "postype=%d+", string.format("postype=%d", __data.postype))
+	end
+	if __data.eventid then
+		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
+	end
+	local hwnd = _AppendItem(__parent, __string, __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	__parent:FormatAllItemPos()
+end
+
+function ItemShadow:SetShadowColor(...)
+	self.__this:SetShadowColor(...)
+end
+
+function ItemShadow:GetShadowColor()
+	return self.__this:GetShadowColor()
+end
+
+function ItemShadow:SetColorRGB(...)
+	self.__this:SetColorRGB(...)
+end
+
+function ItemShadow:GetColorRGB()
+	return self.__this:GetColorRGB()
+end
+
+function ItemShadow:SetTriangleFan(...)
+	self.__this:SetTriangleFan(...)
+end
+
+function ItemShadow:IsTriangleFan()
+	return self.__this:IsTriangleFan()
+end
+
+function ItemShadow:AppendTriangleFanPoint(...)
+	self.__this:AppendTriangleFanPoint(...)
+end
+
+function ItemShadow:SetD3DPT(...)
+	self.__this:SetD3DPT(...)
+end
+
+function ItemShadow:AppendTriangleFan3DPoint(...)
+	self.__this:AppendTriangleFan3DPoint(...)
+end
+
+function ItemShadow:ClearTriangleFanPoint()
+	self.__this:ClearTriangleFanPoint()
+end
+
+function ItemShadow:AppendDoodadID(...)
+	self.__this:AppendDoodadID(...)
+end
+
+function ItemShadow:AppendCharacterID(...)
+	self.__this:AppendCharacterID(...)
+end
+
+-- ItemAnimate Object
+local ItemAnimate = class(ItemBase)
+function ItemAnimate:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local __string = "<animate>w=30 h=30 postype=0 </animate>"
+	if __data.w then
+		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
+	end
+	if __data.h then
+		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
+	end
+	if __data.postype then
+		__string = string.gsub(__string, "postype=%d+", string.format("postype=%d", __data.postype))
+	end
+	local hwnd = _AppendItem(__parent, __string, __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	if __data.image then
+		local __image = __data.image
+		local __group = __data.group or 0
+		local __loop = __data.loop or -1
+		self:SetAnimate(__image, __group, __loop)
+	end
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	__parent:FormatAllItemPos()
+end
+
+function ItemAnimate:SetGroup(...)
+	self.__this:SetGroup(...)
+end
+
+function ItemAnimate:SetLoopCount(...)
+	self.__this:SetLoopCount(...)
+end
+
+function ItemAnimate:SetImagePath(...)
+	self.__this:SetImagePath(...)
+end
+
+function ItemAnimate:SetAnimate(...)
+	self.__this:SetAnimate(...)
+end
+
+function ItemAnimate:AutoSize()
+	self.__this:AutoSize()
+end
+
+function ItemAnimate:Replay()
+	self.__this:Replay()
+end
+
+function ItemAnimate:SetIdenticalInterval(...)
+	self.__this:SetIdenticalInterval(...)
+end
+
+function ItemAnimate:IsFinished()
+	return self.__this:IsFinished()
+end
+
+function ItemAnimate:SetAnimateType(...)
+	self.__this:SetAnimateType(...)
+end
+
+function ItemAnimate:GetAnimateType()
+	return self.__this:GetAnimateType()
+end
+
+-- TreeLeaf Object
+local ItemTreeLeaf = class(ItemBase)
+function ItemTreeLeaf:ctor(__parent, __name, __data)
+	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	__data = __data or {}
+	local __string = "<treeleaf>w=150 h=25 indentwidth=20 alwaysnode=1 indent=0 eventid=257 </treeleaf>"
+	if __data.w then
+		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
+	end
+	if __data.h then
+		__string = string.gsub(__string, "h=%d+", string.format("h=%d", __data.h))
+	end
+	if __data.eventid then
+		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
+	end
+	local hwnd = _AppendItem(__parent, __string, __name)
+	self.__this = hwnd
+	self:SetSelf(self.__this)
+	self:SetParent(__parent)
+	local __x = __data.x or 0
+	local __y = __data.y or 0
+	self:SetRelPos(__x, __y)
+	if __parent.__addon then
+		__parent = __parent:GetHandle()
+	end
+	__parent:FormatAllItemPos()
+
+	--Bind TreeLeaf Event
+	self.__this.OnItemLButtonDown =function()
+		self:_FireEvent("OnClick")
+	end
+end
+
+function ItemTreeLeaf:GetHandle(...)
+	return self.__this
+end
+
+function ItemTreeLeaf:FormatAllItemPos()
+	self.__this:FormatAllItemPos()
+end
+
+function ItemTreeLeaf:SetHandleStyle(...)
+	self.__this:SetHandleStyle(...)
+end
+
+function ItemTreeLeaf:SetRowHeight(...)
+	self.__this:SetRowHeight(...)
+end
+
+function ItemTreeLeaf:SetRowSpacing(...)
+	self.__this:SetRowSpacing(...)
+end
+
+function ItemTreeLeaf:ClearHandle()
+	self.__this:Clear()
+end
+
+function ItemTreeLeaf:GetItemStartRelPos()
+	return self.__this:GetItemStartRelPos()
+end
+
+function ItemTreeLeaf:SetItemStartRelPos(...)
+	self.__this:SetItemStartRelPos(...)
+end
+
+function ItemTreeLeaf:SetSizeByAllItemSize()
+	self.__this:SetSizeByAllItemSize()
+end
+
+function ItemTreeLeaf:GetAllItemSize()
+	return self.__this:GetAllItemSize()
+end
+
+function ItemTreeLeaf:GetItemCount()
+	return self.__this:GetItemCount()
+end
+
+function ItemTreeLeaf:GetVisibleItemCount()
+	return self.__this:GetVisibleItemCount()
+end
+
+function ItemTreeLeaf:EnableFormatWhenAppend(...)
+	self.__this:EnableFormatWhenAppend(...)
+end
+
+function ItemTreeLeaf:ExchangeItemIndex(...)
+	self.__this:ExchangeItemIndex(...)
+end
+
+function ItemTreeLeaf:Sort()
+	self.__this:Sort()
+end
+
+function ItemTreeLeaf:IsExpand()
+	return self.__this:IsExpand()
+end
+
+function ItemTreeLeaf:ExpandOrCollapse(...)
+	self.__this:ExpandOrCollapse(...)
+end
+
+function ItemTreeLeaf:Expand()
+	self.__this:Expand()
+end
+
+function ItemTreeLeaf:Collapse()
+	self.__this:Collapse()
+end
+
+function ItemTreeLeaf:SetIndent(...)
+	self.__this:SetIndent(...)
+end
+
+function ItemTreeLeaf:GetIndent()
+	return self.__this:GetIndent()
+end
+
+function ItemTreeLeaf:SetEachIndentWidth(...)
+	self.__this:SetEachIndentWidth(...)
+end
+
+function ItemTreeLeaf:GetEachIndentWidth()
+	return self.__this:GetEachIndentWidth()
+end
+
+function ItemTreeLeaf:SetNodeIconSize(...)
+	self.__this:SetNodeIconSize(...)
+end
+
+function ItemTreeLeaf:SetIconImage(...)
+	self.__this:SetIconImage(...)
+end
+
+function ItemTreeLeaf:PtInIcon(...)
+	return self.__this:PtInIcon(...)
+end
+
+function ItemTreeLeaf:AdjustNodeIconPos()
+	self.__this:AdjustNodeIconPos()
+end
+
+function ItemTreeLeaf:AutoSetIconSize()
+	self.__this:AutoSetIconSize()
+end
+
+function ItemTreeLeaf:SetShowIndex(...)
+	self.__this:SetShowIndex(...)
+end
+
+function ItemTreeLeaf:GetShowIndex()
+	return self.__this:GetShowIndex()
+end
+
 -- Addon Class
 local CreateAddon = class()
-function CreateAddon:ctor(__name, __style)
+function CreateAddon:ctor(__name)
 	self.__listeners = {self}
+
+	-- Store UI Object By Name
+	self.__items = {}
 
 	--Bind Addon Base Events
 	self.OnFrameCreate = function()
@@ -2124,21 +2092,89 @@ function CreateAddon:_FireEvent(__event, ...)
 	end
 end
 
--- Get UI Object By Name
-local function Fetch(__name)
-	for k, v in pairs(_G) do
+function CreateAddon:Lookup(__name)
+	for k, v in pairs(self.__items) do
 		if __name == k then
 			return v
 		end
 	end
-	return nil 
+	return nil
 end
+
+function CreateAddon:Append(__type, ...)
+	local __h = nil
+	if __type == "Frame" then
+		__h = WndFrame.new(...)
+	elseif __type == "Window" then
+		__h = WndWindow.new(...)
+	elseif __type == "PageSet" then
+		__h = WndPageSet.new(...)
+	elseif __type == "Button" then
+		__h = WndButton.new(...)
+	elseif __type == "Edit" then
+		__h = WndEdit.new(...)
+	elseif __type == "CheckBox" then
+		__h = WndCheckBox.new(...)
+	elseif __type == "ComboBox" then
+		__h = WndComboBox.new(...)
+	elseif __type == "RadioBox" then
+		__h = WndRadioBox.new(...)
+	elseif __type == "CSlider" then
+		__h = WndCSlider.new(...)
+	elseif __type == "ColorBox" then
+		__h = WndColorBox.new(...)
+	elseif __type == "Scroll" then
+		__h = WndScroll.new(...)
+	elseif __type == "UICheckBox" then
+		__h = WndUICheckBox.new(...)
+	elseif __type == "Handle" then
+		__h = ItemHandle.new(...)
+	elseif __type == "Text" then
+		__h = ItemText.new(...)
+	elseif __type == "Image" then
+		__h = ItemImage.new(...)
+	elseif __type == "Animate" then
+		__h = ItemAnimate.new(...)
+	elseif __type == "Shadow" then
+		__h = ItemShadow.new(...)
+	elseif __type == "Box" then
+		__h = ItemBox.new(...)
+	elseif __type == "TreeLeaf" then
+		__h = ItemTreeLeaf.new(...)
+	end
+	local __name = __h:GetName()
+	self.__items[__name] = __h
+	return __h
+end
+
+function CreateAddon:Remove(__h)
+	local __temp = nil
+	if type(__h) == "table" then
+		__temp = __h
+	elseif type(__h) == "string" then
+		__temp = self:Lookup(__h)
+	end
+	local __name = __temp:GetName()
+	self.__items[__name] = nil
+	__temp:Destroy()
+end
+
+function CreateAddon:IsExist(__h)
+	for k, v in pairs(self.__items) do
+		if __h == k then
+			return true
+		end
+	end
+	return false
+end
+
 ----------------------------------------------
 -- GUI Global Interface
 ----------------------------------------------
 EasyUI = EasyUI or {}
 
 local _API = {
+	class = class,
 	CreateFrame = WndFrame.new,
 	CreateWindow = WndWindow.new,
 	CreatePageSet = WndPageSet.new,
@@ -2159,7 +2195,6 @@ local _API = {
 	CreateBox = ItemBox.new,
 	CreateTreeLeaf = ItemTreeLeaf.new,
 	CreateAddon = CreateAddon.new,
-	Fetch = Fetch,
 }
 setmetatable(EasyUI, { __metatable = true, __index = _API, __newindex = function() end })
 
