@@ -360,8 +360,8 @@ function WndButton:ctor(__parent, __name, __data)
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
 	self:SetType("WndButton")
-	if __data.w and __data.h then
-		self:SetSize(__data.w, __data.h)
+	if __data.w then
+		self:SetSize(__data.w)
 	end
 	if __data.enable ~= nil then
 		self:Enable(__data.enable)
@@ -394,10 +394,10 @@ function WndButton:IsEnabled()
 	return self.__this:IsEnabled()
 end
 
-function WndButton:SetSize(...)
-	self.__this:SetSize(...)
-	self.__this:Lookup("", ""):SetSize(...)
-	self.__text:SetSize(...)
+function WndButton:SetSize(__w)
+	self.__this:SetSize(__w, 26)
+	self.__this:Lookup("", ""):SetSize(__w, 26)
+	self.__text:SetSize(__w, 26)
 end
 
 -- WndUIButton Object
@@ -627,7 +627,7 @@ function WndComboBox:SetSize(__w)
 	local handle = self.__this:Lookup("", "")
 	handle:SetSize(__w, 25)
 	handle:Lookup("Image_ComboBoxBg"):SetSize(__w,25)
-	handle:Lookup("Text_Default"):SetSize(__w, 25)
+	handle:Lookup("Text_Default"):SetSize(__w - 20, 25)
 	local btn = self.__this:Lookup("Btn_ComboBox")
 	btn:SetRelPos(__w - 25, 3)
 	local h = btn:Lookup("", "")
@@ -2155,7 +2155,11 @@ function CreateAddon:Remove(__h)
 		__temp = self:Lookup(__h)
 	end
 	local __name = __temp:GetName()
-	self.__items[__name] = nil
+	if __temp:GetType() == "WndFrame" then
+		self.__items = {}
+	else
+		self.__items[__name] = nil
+	end
 	__temp:Destroy()
 end
 
