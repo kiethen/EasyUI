@@ -107,7 +107,13 @@ end
 EasyManager.ShowAddonInfo = function(hWin, tWidget)
 	for k, v in pairs(tWidget) do
 		if v.type == "Text" then
-			EasyManager:Append("Text", hWin, v.name, {w = v.w, h = v.h, x = v.x, y = v.y, text = v.text})
+			EasyManager:Append("Text", hWin, v.name, {w = v.w, h = v.h, x = v.x, y = v.y, text = v.text, font = v.font})
+		elseif v.type == "TextButton" then
+			local handle = EasyManager:Append("Handle", hWin, v.name, {w = v.w, h = v.h, x = v.x, y = v.y})
+			local text = EasyManager:Append("Text", handle, "t_" .. v.name, {w = v.w, h = v.h, text = v.text, font = v.font})
+			handle.OnEnter = function() text:SetFontScheme(163) end
+			handle.OnLeave = function() text:SetFontScheme(v.font) end
+			handle.OnClick = v.callback
 		elseif v.type == "Button" then
 			local hButton = EasyManager:Append("Button", hWin, v.name, {w = v.w, x = v.x, y = v.y, text = v.text})
 			hButton.OnClick = v.callback

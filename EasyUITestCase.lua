@@ -121,3 +121,23 @@ local tConfig = {
 	},
 }
 EasyManager.RegisterPanel(tConfig)
+
+local tConfigDev = {
+	szName = "DevTools",
+	szTitle = "开发者工具集",
+	dwIcon = 3406,
+	szClass = "Other",
+	tWidget = {
+		{
+			name = "M_Title", type = "Text", w = 80, h = 28, x = 0, y = 0, text = "开发者工具集", font = 136,
+		},{
+			name = "M_Detail", type = "Text", w = 80, h = 28, x = 0, y = 30, text = "        此工具集包含插件开发所需要的图片和动画查看器、事件和字体查看器等。",
+		},{
+			name = "M_DevTools", type = "TextButton", w = 100, h = 25, x = 0, y = 60, text = "<打开工具集>", font = 164,
+			callback = function()
+				DevTools.OpenPanel()
+			end
+		}
+	},
+}
+EasyManager.RegisterPanel(tConfigDev)

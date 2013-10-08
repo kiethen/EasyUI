@@ -1644,7 +1644,7 @@ local ItemImage = class(ItemBase)
 function ItemImage:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local __string = "<image>w=100 h=100 postype=0 lockshowhide=0 </image>"
+	local __string = "<image>w=100 h=100 postype=0 lockshowhide=0 eventid=0 </image>"
 	if __data.w then
 		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
 	end
@@ -1656,6 +1656,9 @@ function ItemImage:ctor(__parent, __name, __data)
 	end
 	if __data.lockshowhide then
 		__string = string.gsub(__string, "lockshowhide=%d+", string.format("lockshowhide=%d", __data.lockshowhide))
+	end
+	if __data.eventid then
+		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
 	end
 	local hwnd = _AppendItem(__parent, __string, __name)
 	self.__this = hwnd
@@ -1673,6 +1676,17 @@ function ItemImage:ctor(__parent, __name, __data)
 		__parent = __parent:GetHandle()
 	end
 	__parent:FormatAllItemPos()
+
+	--Bind Image Events
+	self.__this.OnItemMouseEnter = function()
+		self:_FireEvent("OnEnter")
+	end
+	self.__this.OnItemMouseLeave = function()
+		self:_FireEvent("OnLeave")
+	end
+	self.__this.OnItemLButtonClick = function()
+		self:_FireEvent("OnClick")
+	end
 end
 
 function ItemImage:SetFrame(...)
@@ -1827,7 +1841,7 @@ local ItemAnimate = class(ItemBase)
 function ItemAnimate:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
-	local __string = "<animate>w=30 h=30 postype=0 </animate>"
+	local __string = "<animate>w=30 h=30 postype=0 eventid=0 </animate>"
 	if __data.w then
 		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
 	end
@@ -1836,6 +1850,9 @@ function ItemAnimate:ctor(__parent, __name, __data)
 	end
 	if __data.postype then
 		__string = string.gsub(__string, "postype=%d+", string.format("postype=%d", __data.postype))
+	end
+	if __data.eventid then
+		__string = string.gsub(__string, "eventid=%d+", string.format("eventid=%d", __data.eventid))
 	end
 	local hwnd = _AppendItem(__parent, __string, __name)
 	self.__this = hwnd
@@ -1854,6 +1871,17 @@ function ItemAnimate:ctor(__parent, __name, __data)
 		__parent = __parent:GetHandle()
 	end
 	__parent:FormatAllItemPos()
+
+	--Bind Animate Events
+	self.__this.OnItemMouseEnter = function()
+		self:_FireEvent("OnEnter")
+	end
+	self.__this.OnItemMouseLeave = function()
+		self:_FireEvent("OnLeave")
+	end
+	self.__this.OnItemLButtonClick = function()
+		self:_FireEvent("OnClick")
+	end
 end
 
 function ItemAnimate:SetGroup(...)
