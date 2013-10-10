@@ -225,9 +225,7 @@ function WndFrame:ctor(__name, __data)
 		frame:Lookup("Btn_Close").OnLButtonClick = function()
 			self:Destroy()
 		end
-		if __data.title then
-			self:SetTitle(__data.title)
-		end
+		self:SetTitle(__data.title or "")
 	end
 end
 
@@ -285,12 +283,8 @@ function WndWindow:ctor(__parent, __name, __data)
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
 	self:SetType("WndWindow")
-	if __data.w and __data.h then
-		self:SetSize(__data.w, __data.h)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:SetSize(__data.w or 100, __data.h or 100)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
 end
 
 function WndWindow:SetSize(...)
@@ -316,12 +310,8 @@ function WndPageSet:ctor(__parent, __name, __data)
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
 	self:SetType("WndPageSet")
-	if __data.w and __data.h then
-		self:SetSize(__data.w, __data.h)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:SetSize(__data.w or 100, __data.h or 100)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
 end
 
 function WndPageSet:AddPage(...)
@@ -360,15 +350,9 @@ function WndButton:ctor(__parent, __name, __data)
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
 	self:SetType("WndButton")
-	if __data.w then
-		self:SetSize(__data.w)
-	end
-	if __data.enable ~= nil then
-		self:Enable(__data.enable)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:Enable(__data.enable or true)
+	self:SetSize(__data.w or 91)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
 
 	--Bind Button Events
 	self.__this.OnLButtonClick = function()
@@ -432,21 +416,11 @@ function WndEdit:ctor(__parent, __name, __data)
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
 	self:SetType("WndEdit")
-	if __data.w and __data.h then
-		self:SetSize(__data.w, __data.h)
-	end
-	if __data.limit then
-		self:SetLimit(__data.limit)
-	end
-	if __data.multi ~= nil then
-		self:SetMultiLine(__data.multi)
-	end
-	if __data.enable ~= nil then
-		self:Enable(__data.enable)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:SetLimit(__data.limit or 36)
+	self:SetMultiLine(__data.multi or false)
+	self:Enable(__data.enable or true)
+	self:SetSize(__data.w or 187, __data.h or 25)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
 
 	--Bind Edit Events
 	self.__edit.OnEditChanged = function()
@@ -526,15 +500,10 @@ function WndCheckBox:ctor(__parent, __name, __data)
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
 	self:SetType("WndCheckBox")
-	if __data.check then
-		self:Check(__data.check)
-	end
-	if __data.enable ~= nil then
-		self:Enable(__data.enable)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:Check(__data.check or false)
+	self:Enable(__data.enable or true)
+	self:SetSize(__data.w or 150)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
 
 	--Bind CheckBox Events
 	self.__this.OnCheckBoxCheck = function()
@@ -603,12 +572,8 @@ function WndComboBox:ctor(__parent, __name, __data)
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
 	self:SetType("WndComboBox")
-	if __data.w then
-		self:SetSize(__data.w)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:SetSize(__data.w or 185)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
 
 	--Bind ComboBox Events
 	self.__this:Lookup("Btn_ComboBox").OnLButtonClick = function()
@@ -657,20 +622,13 @@ function WndRadioBox:ctor(__parent, __name, __data)
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
 	self:SetType("WndRadioBox")
-	if __data.w then
-		self:SetSize(__data.w)
-	end
-	if __data.check then
-		self:Check(__data.check)
-	end
-	if __data.enable then
-		self:Enable(__data.enable)
-	end
+	self:Check(__data.check or false)
+	self:Enable(__data.enable or true)
+	self:SetSize(__data.w or 150)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
+
 	self.__this.__group = __data.group
 	self:SetGroup(__data.group)
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
 
 	--Bind RadioBox Events
 	self.__this.OnCheckBoxCheck = function()
@@ -758,17 +716,12 @@ function WndUICheckBox:ctor(__parent, __name, __data)
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
 	self:SetType("WndUICheckBox")
-	if __data.w and __data.h then
-		self:SetSize(__data.w, __data.h)
-	end
-	if __data.check then
-		self:Check(__data.check)
-	end
+	self:Check(__data.check or false)
+	self:SetSize(__data.w or 83, __data.h or 30)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
+
 	self.__this.__group = __data.group
 	self:SetGroup(__data.group)
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
 
 	--Bind UICheckBox Events
 	self.__this.OnCheckBoxCheck = function()
@@ -832,15 +785,9 @@ function WndCSlider:ctor(__parent, __name, __data)
 	self.__step = __data.step
 	self.__unit = __data.unit or ""
 	self.__scroll:SetStepCount(__data.step)
-	if __data.w then
-		self:SetSize(__data.w)
-	end
-	if __data.value then
-		self:UpdateScrollPos(__data.value)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:SetSize(__data.w or 120)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
+	self:UpdateScrollPos(__data.value or 0)
 
 	--Bind CSlider Events
 	self.__scroll.OnScrollBarPosChanged = function()
@@ -902,12 +849,8 @@ function WndColorBox:ctor(__parent, __name, __data)
 	self.__b = __data.b
 	self:SetText(__data.text)
 	self:SetColor(__data.r, __data.g, __data.b)
-	if __data.w then
-		self:SetSize(__data.w)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:SetSize(__data.w or 140)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
 
 	--Bind ColorBox Events
 	self.__shadow.OnItemLButtonClick = function()
@@ -948,9 +891,10 @@ function WndScroll:ctor(__parent, __name, __data)
 	self.__down = self.__this:Lookup("Btn_Down")
 	self.__scroll = self.__this:Lookup("Scroll_List")
 	self.__handle = self.__this:Lookup("", "")
-	if __data.w and __data.h then
-		self:SetSize(__data.w, __data.h)
-	end
+	
+	self:SetSize(__data.w or 500, __data.h or 345)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
+
 	self.__up.OnLButtonHold = function()
 		self.__scroll:ScrollPrev(1)
 	end
@@ -982,9 +926,6 @@ function WndScroll:ctor(__parent, __name, __data)
 		end
 		self.__handle:SetItemStartRelPos(0, -__value * 10)
 	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
 end
 
 function WndScroll:GetHandle()
@@ -1218,9 +1159,8 @@ function ItemHandle:ctor(__parent, __name, __data)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
+
 	if __parent.__addon then
 		__parent = __parent:GetHandle()
 	end
@@ -1320,9 +1260,7 @@ function ItemText:ctor(__parent, __name, __data)
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
 	self:SetText(__data.text or "")
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
 	if __parent.__addon then
 		__parent = __parent:GetHandle()
 	end
@@ -1483,9 +1421,7 @@ function ItemBox:ctor(__parent, __name, __data)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
 	if __parent.__addon then
 		__parent = __parent:GetHandle()
 	end
@@ -1669,9 +1605,7 @@ function ItemImage:ctor(__parent, __name, __data)
 		local __frame = __data.frame or nil
 		self:SetImage(__image, __frame)
 	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
 	if __parent.__addon then
 		__parent = __parent:GetHandle()
 	end
@@ -1779,9 +1713,7 @@ function ItemShadow:ctor(__parent, __name, __data)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
 	if __parent.__addon then
 		__parent = __parent:GetHandle()
 	end
@@ -1864,9 +1796,7 @@ function ItemAnimate:ctor(__parent, __name, __data)
 		local __loop = __data.loop or -1
 		self:SetAnimate(__image, __group, __loop)
 	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
 	if __parent.__addon then
 		__parent = __parent:GetHandle()
 	end
@@ -1943,9 +1873,7 @@ function ItemTreeLeaf:ctor(__parent, __name, __data)
 	self.__this = hwnd
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
 	if __parent.__addon then
 		__parent = __parent:GetHandle()
 	end
@@ -2230,6 +2158,6 @@ local _API = {
 }
 setmetatable(EasyUI, { __metatable = true, __index = _API, __newindex = function() end })
 
-RegisterEvent("CALL_LUA_ERROR", function()
-	OutputMessage("MSG_SYS", arg0)
-end)
+-- RegisterEvent("CALL_LUA_ERROR", function()
+-- 	OutputMessage("MSG_SYS", arg0)
+-- end)

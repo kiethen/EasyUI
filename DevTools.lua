@@ -15,6 +15,7 @@ local tImageTXTTitle = {
 
 local tImageFileList = {
 	Button = {
+		"UI/Image/Button/cgbutton",
 		"UI/Image/Button/CommonButton_1",
 		"UI/Image/Button/FrendnpartyButton",
 		"UI/Image/Button/ShopButton",
@@ -82,9 +83,11 @@ local tImageFileList = {
 	},
 
 	Minimap = {
+		"UI/Image/Minimap/battleminimap",
 		"UI/Image/Minimap/Mapmark",
 		"UI/Image/Minimap/Minimap",
 		"UI/Image/Minimap/Minimap2",
+		"UI/Image/Minimap/Minimap3",
 	},
 
 	QuestPanel = {
@@ -109,22 +112,42 @@ local tImageFileList = {
 		"UI/Image/UICommon/arenaintroduction",
 		"UI/Image/UICommon/battlefiled",
 		"UI/Image/UICommon/blackmarket",
+		"UI/Image/UICommon/camp",
 		"UI/Image/UICommon/Commonpanel",
 		"UI/Image/UICommon/Commonpanel2",
+		"UI/Image/UICommon/Commonpanel3",
 		"UI/Image/UICommon/Commonpanel4",
 		"UI/Image/UICommon/Commonpanel5",
 		"UI/Image/UICommon/Commonpanel6",
 		"UI/Image/UICommon/Commonpanel7",
 		"UI/Image/UICommon/CompassPanel",
+		"UI/Image/UICommon/crossingpanel1",
+		"UI/Image/UICommon/crossingpanel4",
+		"UI/Image/UICommon/crossingpanel5",
+		"UI/Image/UICommon/crossingpanel6",
+		"UI/Image/UICommon/crossingpanel7",
+		"UI/Image/UICommon/exteriorbox",
+		"UI/Image/UICommon/exteriorbox3",
+		"UI/Image/UICommon/feedanimials",
 		"UI/Image/UICommon/FEPanel",
 		"UI/Image/UICommon/FEPanel3",
+		"UI/Image/UICommon/guildmainpanel1",
+		"UI/Image/UICommon/guildmainpanel2",
 		"UI/Image/UICommon/HelpPanel",
+		"UI/Image/UICommon/kuang_cyclopaedia_calender",
 		"UI/Image/UICommon/LoginCommon",
 		"UI/Image/UICommon/LoginSchool",
 		"UI/Image/UICommon/MailCommon",
+		"UI/Image/UICommon/new_cyclopaedia_calender",
+		"UI/Image/UICommon/newskills1",
+		"UI/Image/UICommon/newskills3",
 		"UI/Image/UICommon/rankingpanel",
 		"UI/Image/UICommon/PasswordPanel",
+		"UI/Image/UICommon/sciencetree",
 		"UI/Image/UICommon/ScienceTreeNode",
+		"UI/Image/UICommon/skills",
+		"UI/Image/UICommon/skills2",
+		"UI/Image/UICommon/theflop",
 		"UI/Image/UICommon/Talk_Face",
 	},
 }
@@ -215,14 +238,14 @@ DevTools.Init = function()
 		PopupMenu(DevTools.GetMenu(m))
 	end
 
-	local hUITexViewShadowBg = DevTools:Append("Shadow", hWinUITexView, "BG", {x = 30, y = 50, w = 708, h = 350})
+	local hUITexViewShadowBg = DevTools:Append("Shadow", hWinUITexView, "BG", {x = 15, y = 50, w = 738, h = 365})
 	hUITexViewShadowBg:SetColorRGB(0, 0, 0)
 
-	local hUITexViewContentScroll = DevTools:Append("Scroll", hWinUITexView ,"hUITexViewContentScroll",{ x = 30,y = 50,w = 728, h = 350})
-	local hUITexViewContent = DevTools:Append("Handle", hUITexViewContentScroll, "UITexViewContent", {x = 5, y = 5, w = 718, h = 340})
+	local hUITexViewContentScroll = DevTools:Append("Scroll", hWinUITexView ,"hUITexViewContentScroll",{ x = 15,y = 50,w = 755, h = 365})
+	local hUITexViewContent = DevTools:Append("Handle", hUITexViewContentScroll, "UITexViewContent", {x = 5, y = 5, w = 738, h = 355})
 	hUITexViewContentScroll:OnUpdateScorllList()
 
-	--字体查看器
+	--事件和字体查看器
 	local hBtnFontView = DevTools:Append("UICheckBox", hPageSet, "BtnFontView", {x = 150, y = 0, w = 150, h = 30, text = "事件和字体查看", group = "DevClass"})
 	local hWinFontView = DevTools:Append("Window", hPageSet, "WindowFontView", {x = 0, y = 30, w = 758, h = 400})
 	hPageSet:AddPage(hWinFontView:GetSelf(), hBtnFontView:GetSelf())
@@ -237,10 +260,21 @@ DevTools.Init = function()
 
 	DevTools.LoadEventIDBox(hWinFontView)
 
-	DevTools:Append("Image", frame, "SplitImg", {w = 5, h = 400, x = 350, y = 100, image = "ui\\Image\\UICommon\\CommonPanel.UITex", frame = 43})
+	DevTools:Append("Image", hWinFontView, "SplitImg", {w = 5, h = 400, x = 340, y = 20, image = "ui\\Image\\UICommon\\CommonPanel.UITex", frame = 43})
 
 	local hTextViewContentScroll = DevTools:Append("Scroll", hWinFontView ,"hTextViewContentScroll",{x = 370, y = 20, w = 380, h = 390})
 	DevTools.LoadTextDummy(hTextViewContentScroll)
+
+	--图标查看器
+	local hBtnIconView = DevTools:Append("UICheckBox", hPageSet, "BtnIconView", {x = 300, y = 0, w = 100, h = 30, text = "图标查看", group = "DevClass"})
+	local hWinIconView = DevTools:Append("Window", hPageSet, "WindowIconView", {x = 0, y = 30, w = 758, h = 400})
+	hPageSet:AddPage(hWinIconView:GetSelf(), hBtnIconView:GetSelf())
+	hBtnIconView.OnCheck = function(bCheck)
+		if bCheck then
+			hPageSet:ActivePage(2)
+		end
+	end
+	DevTools.LoadIconBox(hWinIconView)
 
 	return frame
 end
@@ -275,6 +309,15 @@ DevTools.OutputTip = function(item)
 		"<Text>text=" .. EncodeComponentsString(item.nH) .. " font=162 </text>"
 	OutputTip(szTipInfo, 1000, {nMouseX, nMouseY, 0, 0})
 end
+
+DevTools.OutputIconTip = function(ID)
+	local nMouseX, nMouseY = Cursor.GetPos()
+	local szTipInfo =
+		"<Text>text=" .. EncodeComponentsString("★ 图标ID：") .. " font=162 </text>" ..
+		"<Text>text=" .. EncodeComponentsString(ID) .. " font=100 </text>"
+	OutputTip(szTipInfo, 1000, {nMouseX, nMouseY, 0, 0})
+end
+
 
 DevTools.GetImageFrameInfo = function(szImageFile)
 	return KG_Table.Load(szImageFile, tImageTXTTitle, FILE_OPEN_MODE.NORMAL)
@@ -334,6 +377,7 @@ DevTools.LoadUITex = function(szBaseName)
 		for i = 0, 9 do
 			local ani = DevTools:Append("Animate", hContent,"Animate_" .. i, {w = 50,h = 50, x = nAniX, y = nAniY, image = string.format("%s.UITex", szBaseName), eventid = 277})
 			ani:SetGroup(i)
+			ani:SetLoopCount(-1)
 			ani:AutoSize()
 
 			local nAniW, nAniH = ani:GetSize()
@@ -361,7 +405,7 @@ DevTools.LoadUITex = function(szBaseName)
 			if nAniNextY <= nAniY + nAniH then
 				nAniNextY = nAniY + nAniH + 10
 			end
-			if nAniX >= 700 then
+			if nAniX >= 500 then
 				nAniY = nAniNextY
 				nAniX = 10
 			end
@@ -373,17 +417,8 @@ DevTools.LoadUITex = function(szBaseName)
 end
 
 DevTools.LoadEventIDBox = function(hWin)
-	local x, y = 30, 60
 	for k, v in ipairs(tEventIndex) do
-		local hCheckBox = DevTools:Append("CheckBox", hWin, "CheckBox_" .. v[2], {x = x, y = y, w = 100, text = v[1]})
-		if hCheckBox then
-			--UIEditor.tWndSCEventCheckBox[value] = checkBox
-		end
-		x = x + 100
-		if x > 300 then
-			x = 30
-			y = y + 40
-		end
+		DevTools:Append("CheckBox", hWin, "CheckBox_" .. v[2], {x = ((k - 1) % 3) * 100 + 30, y = math.floor((k - 1) / 3) * 40 + 60, w = 100, text = v[1]})
 	end
 	DevTools:Append("Text", hWin, "EventIDTexr", {x = 35, y = 10, text = "事件ID："})
 	hBtnCalc = DevTools:Append("Button", hWin, "BtnCalc", {x = 200, y = 10, text = "计算"})
@@ -447,6 +482,53 @@ DevTools.LoadTextDummy = function(hScroll)
 		end
 	end
 	hScroll:OnUpdateScorllList()
+end
+
+DevTools.LoadIconBox = function(hWin)
+	local hIconViewContent = DevTools:Append("Handle", hWin, "IconViewContent", {x = 33, y = 33, w = 700, h = 300})
+	for i = 1, 84 do
+		local icon = DevTools:Append("Image", hIconViewContent, "Icon_" .. i, {x = ((i - 1) % 14) * 50, y = math.floor((i - 1) / 14) * 50, w = 45, h = 45, eventid = 277})
+		icon:FromIconID(i)
+		icon.OnEnter = function() DevTools.OutputIconTip(i) end
+		icon.OnLeave = function() HideTip() end
+	end
+	local hBtnPrev = DevTools:Append("Button", hWin, "BtnIconPrev", {x = 200, y = 350, text = "上一页", enable = false})
+	local hBtnNext = DevTools:Append("Button", hWin, "BtnIconNext", {x = 410, y = 350, text = "下一页"})
+	local n, nTol = 1, math.ceil(3481 / 84)
+	local hPage = DevTools:Append("Text", hWin, "TextIconPage", {x = 340, y = 350, text = n .. "/" .. nTol})
+	hBtnPrev.OnClick = function()
+		n = math.max(1, n - 1)
+		hPage:SetText(n .. "/" .. nTol)
+		if n == 1 then
+			hBtnPrev:Enable(false)
+		else
+			hBtnPrev:Enable(true)
+		end
+		hBtnNext:Enable(true)
+		for i = 1, 84 do
+			local icon, k = DevTools:Lookup("Icon_" .. i), (n - 1) * 84 + i
+			icon:FromIconID(k)
+			icon.OnEnter = function() DevTools.OutputIconTip(k) end
+			icon.OnLeave = function() HideTip() end
+		end
+	end
+	hBtnNext.OnClick = function()
+		n = math.min(nTol, n + 1)
+		hPage:SetText(n .. "/" .. nTol)
+		if n == nTol then
+			hBtnNext:Enable(false)
+		else
+			hBtnNext:Enable(true)
+		end
+		hBtnPrev:Enable(true)
+		for i = 1, 84 do
+			local icon, k = DevTools:Lookup("Icon_" .. i), (n - 1) * 84 + i
+			icon:FromIconID(k)
+			icon.OnEnter = function() DevTools.OutputIconTip(k) end
+			icon.OnLeave = function() HideTip() end
+		end
+	end
+
 end
 
 DevTools.OpenPanel = function()
