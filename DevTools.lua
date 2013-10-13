@@ -374,7 +374,7 @@ DevTools.LoadUITex = function(szBaseName)
 		local nAniX = 10
 		local nAniY = 10
 		local nAniNextY = nAniY
-		for i = 0, 9 do
+		for i = 0, 99 do
 			local ani = DevTools:Append("Animate", hContent,"Animate_" .. i, {w = 50,h = 50, x = nAniX, y = nAniY, image = string.format("%s.UITex", szBaseName), eventid = 277})
 			ani:SetGroup(i)
 			ani:SetLoopCount(-1)
