@@ -2007,6 +2007,14 @@ end
 
 -- Addon Class
 local CreateAddon = class()
+local Addon_List = {}
+function CreateAddon_new(__name)
+	if not Addon_List[__name] then
+		Addon_List[__name] = CreateAddon.new(__name)
+	end
+	return Addon_List[__name]
+end
+
 function CreateAddon:ctor(__name)
 	self.__listeners = {self}
 
@@ -2154,7 +2162,7 @@ local _API = {
 	CreateShadow = ItemShadow.new,
 	CreateBox = ItemBox.new,
 	CreateTreeLeaf = ItemTreeLeaf.new,
-	CreateAddon = CreateAddon.new,
+	CreateAddon = CreateAddon_new,
 }
 setmetatable(EasyUI, { __metatable = true, __index = _API, __newindex = function() end })
 
