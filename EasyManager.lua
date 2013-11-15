@@ -65,7 +65,7 @@ EasyManager.Init = function()
 			local imgHover = EasyManager:Append("Image", hBox, "imgHover" .. i .. j, {w = 160, h = 50, image = "ui\\image\\uicommon\\rankingpanel.UITex", frame = 11, lockshowhide = 1})
 			hBox.imgSel = EasyManager:Append("Image", hBox, "imgSel" .. i .. j, {w = 160, h = 50, image = "ui\\image\\uicommon\\rankingpanel.UITex", frame = 11, lockshowhide = 1})
 
-			EasyManager:Append("Image", hBox, "imgIcon" .. i .. j, {w = 40, h = 40, x = 5,y = 5}):SetImage(3406)
+			EasyManager:Append("Image", hBox, "imgIcon" .. i .. j, {w = 40, h = 40, x = 5,y = 5}):SetImage(tAddonList[j].dwIcon)
 			EasyManager:Append("Text", hBox, "txt" .. i .. j, {w = 100, h = 50, x = 55, y = 0, text = tAddonList[j].szTitle})
 
 			hBox.OnEnter = function() imgHover:Show() end
@@ -111,7 +111,7 @@ EasyManager.ShowAddonInfo = function(hWin, tWidget)
 		elseif v.type == "TextButton" then
 			local handle = EasyManager:Append("Handle", hWin, v.name, {w = v.w, h = v.h, x = v.x, y = v.y})
 			local text = EasyManager:Append("Text", handle, "t_" .. v.name, {w = v.w, h = v.h, text = v.text, font = v.font})
-			handle.OnEnter = function() text:SetFontScheme(163) end
+			handle.OnEnter = function() text:SetFontScheme(168) end
 			handle.OnLeave = function() text:SetFontScheme(v.font) end
 			handle.OnClick = v.callback
 		elseif v.type == "Button" then
