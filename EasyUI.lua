@@ -865,7 +865,7 @@ end
 function WndColorBox:SetSize(__w)
 	self.__this:SetSize(__w, 25)
 	self.__this:Lookup("", ""):SetSize(__w, 25)
-	self.__text:SetText(__w - 25, 25)
+	self.__text:SetSize(__w - 25, 25)
 end
 
 function WndColorBox:SetText(__text)
@@ -891,7 +891,7 @@ function WndScroll:ctor(__parent, __name, __data)
 	self.__down = self.__this:Lookup("Btn_Down")
 	self.__scroll = self.__this:Lookup("Scroll_List")
 	self.__handle = self.__this:Lookup("", "")
-	
+
 	self:SetSize(__data.w or 500, __data.h or 345)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
 
