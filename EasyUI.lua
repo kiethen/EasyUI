@@ -2142,7 +2142,6 @@ end
 EasyUI = EasyUI or {}
 
 local _API = {
-	class = class,
 	CreateFrame = WndFrame.new,
 	CreateWindow = WndWindow.new,
 	CreatePageSet = WndPageSet.new,
@@ -2166,6 +2165,8 @@ local _API = {
 }
 setmetatable(EasyUI, { __metatable = true, __index = _API, __newindex = function() end })
 
--- RegisterEvent("CALL_LUA_ERROR", function()
--- 	OutputMessage("MSG_SYS", arg0)
--- end)
+function ImportEasyUI()
+	for k, v in pairs(EasyUI) do
+		_G[k] = v
+	end
+end
