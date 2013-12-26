@@ -3,9 +3,9 @@
 -- 创建插件
 EasyTestAddon = CreateAddon("EasyTestAddon")
 
-EasyTestAddon:Register("OnFrameDragEnd", "OnDragEnd")
-EasyTestAddon:Register("OnFrameDestroy", "OnDestroy")
-EasyTestAddon:Register("OnFrameKeyDown", "OnKeyDown")
+EasyTestAddon:BindEvent("OnFrameDragEnd", "OnDragEnd")
+EasyTestAddon:BindEvent("OnFrameDestroy", "OnDestroy")
+EasyTestAddon:BindEvent("OnFrameKeyDown", "OnKeyDown")
 
 EasyTestAddon.szText = "这是一行字符串"
 

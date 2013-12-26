@@ -71,7 +71,9 @@ function EasyManager:Init()
 			hBox.OnLeave = function() imgHover:Hide() end
 			hBox.OnClick = function()
 				if self.hLastBtn then
-					self.hLastBtn.imgSel:Hide()
+					if self.hLastBtn.imgSel then
+						self.hLastBtn.imgSel:Hide()
+					end
 				end
 				self.hLastBtn = hBox
 				hBox.imgSel:Show()

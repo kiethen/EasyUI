@@ -2174,7 +2174,7 @@ function CreateAddon:ctor(__name)
 	end
 end
 
-function CreateAddon:Register(__src, __tar)
+function CreateAddon:BindEvent(__src, __tar)
 	self[__src] = function()
 		self:_FireEvent(__tar)
 	end
@@ -2303,3 +2303,8 @@ do
 		_G[k] = v
 	end
 end
+
+
+RegisterEvent("CALL_LUA_ERROR", function()
+	OutputMessage("MSG_SYS", arg0)
+end)

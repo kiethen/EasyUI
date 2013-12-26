@@ -181,33 +181,33 @@ local tEventIndex = {
 	{"滚动事件", 12},
 }
 
-DevTools.OnCreate = function()
+function DevTools:OnCreate()
 	this:RegisterEvent("UI_SCALED")
-	DevTools.UpdateAnchor(this)
+	self:UpdateAnchor(this)
 end
 
-DevTools.UpdateAnchor = function(frame)
+function DevTools:UpdateAnchor(frame)
 	frame:SetPoint("CENTER", 0, 0, "CENTER", 0, 0)
 end
 
-DevTools.OnEvent = function(event)
+function DevTools:OnScript(event)
 	if event == "UI_SCALED" then
-		DevTools.UpdateAnchor(this)
+		self:UpdateAnchor(this)
 	end
 end
 
-DevTools.Init = function()
-	local frame = DevTools:Append("Frame", "DevTools", {title = "开发者工具集", style = "NORMAL"})
+function DevTools:Init()
+	local frame = self:Append("Frame", "DevTools", {title = "开发者工具集", style = "NORMAL"})
 
-	local imgTab = DevTools:Append("Image", frame,"TabImg",{w = 770,h = 33,x = 0,y = 50})
+	local imgTab = self:Append("Image", frame,"TabImg",{w = 770,h = 33,x = 0,y = 50})
     imgTab:SetImage("ui\\Image\\UICommon\\ActivePopularize2.UITex", 46)
 	imgTab:SetImageType(11)
 
-	local hPageSet = DevTools:Append("PageSet", frame, "PageSet", {x = 0, y = 50, w = 768, h = 434})
+	local hPageSet = self:Append("PageSet", frame, "PageSet", {x = 0, y = 50, w = 768, h = 434})
 
 	--图像查看器
-	local hBtnUITexView = DevTools:Append("UICheckBox", hPageSet, "BtnUITexView", {x = 50, y = 0, w = 100, h = 30, text = "图像查看", group = "DevClass", check = true})
-	local hWinUITexView = DevTools:Append("Window", hPageSet, "WindowUITexView", {x = 0, y = 30, w = 768, h = 400})
+	local hBtnUITexView = self:Append("UICheckBox", hPageSet, "BtnUITexView", {x = 50, y = 0, w = 100, h = 30, text = "图像查看", group = "DevClass", check = true})
+	local hWinUITexView = self:Append("Window", hPageSet, "WindowUITexView", {x = 0, y = 30, w = 768, h = 400})
 	hPageSet:AddPage(hWinUITexView:GetSelf(), hBtnUITexView:GetSelf())
 	hBtnUITexView.OnCheck = function(bCheck)
 		if bCheck then
@@ -216,38 +216,38 @@ DevTools.Init = function()
 	end
 	nViewType = 1
 
-	DevTools:Append("Text", hWinUITexView, "ViewType", {x = 30, y = 10, text = "组件类型："})
-	local hUITexViewRadioBox_Img = DevTools:Append("RadioBox", hWinUITexView, "RB_1", {x = 100, y = 12, text = "图像", group = "ViewType", check = true})
+	self:Append("Text", hWinUITexView, "ViewType", {x = 30, y = 10, text = "组件类型："})
+	local hUITexViewRadioBox_Img = self:Append("RadioBox", hWinUITexView, "RB_1", {x = 100, y = 12, text = "图像", group = "ViewType", check = true})
 	hUITexViewRadioBox_Img.OnCheck = function(arg0)
 		if arg0 then
 			nViewType = 1
-			DevTools.LoadUITex(szUitexPath)
+			self:LoadUITex(szUitexPath)
 		end
 	end
-	local hUITexViewRadioBox_Ani = DevTools:Append("RadioBox", hWinUITexView, "RB_2", {x = 170, y = 12, text = "动画", group = "ViewType"})
+	local hUITexViewRadioBox_Ani = self:Append("RadioBox", hWinUITexView, "RB_2", {x = 170, y = 12, text = "动画", group = "ViewType"})
 	hUITexViewRadioBox_Ani.OnCheck = function(arg0)
 		if arg0 then
 			nViewType = 2
-			DevTools.LoadUITex(szUitexPath)
+			self:LoadUITex(szUitexPath)
 		end
 	end
 
-	DevTools:Append("Text", hWinUITexView, "UITexPath", {x = 300, y = 10, text = "路径："})
-	local hUITexViewComboBox_Path = DevTools:Append("ComboBox", hWinUITexView, "CB_1", {x = 340, y = 12, w = 400})
+	self:Append("Text", hWinUITexView, "UITexPath", {x = 300, y = 10, text = "路径："})
+	local hUITexViewComboBox_Path = self:Append("ComboBox", hWinUITexView, "CB_1", {x = 340, y = 12, w = 400})
 	hUITexViewComboBox_Path.OnClick = function(m)
-		PopupMenu(DevTools.GetMenu(m))
+		PopupMenu(self:GetMenu(m))
 	end
 
-	local hUITexViewShadowBg = DevTools:Append("Shadow", hWinUITexView, "BG", {x = 15, y = 50, w = 738, h = 365})
+	local hUITexViewShadowBg = self:Append("Shadow", hWinUITexView, "BG", {x = 15, y = 50, w = 738, h = 365})
 	hUITexViewShadowBg:SetColorRGB(0, 0, 0)
 
-	local hUITexViewContentScroll = DevTools:Append("Scroll", hWinUITexView ,"hUITexViewContentScroll",{ x = 15,y = 50,w = 755, h = 365})
-	local hUITexViewContent = DevTools:Append("Handle", hUITexViewContentScroll, "UITexViewContent", {x = 5, y = 5, w = 738, h = 355})
+	local hUITexViewContentScroll = self:Append("Scroll", hWinUITexView ,"hUITexViewContentScroll",{ x = 15,y = 50,w = 755, h = 365})
+	local hUITexViewContent = self:Append("Handle", hUITexViewContentScroll, "UITexViewContent", {x = 5, y = 5, w = 738, h = 355})
 	hUITexViewContentScroll:UpdateList()
 
 	--事件和字体查看器
-	local hBtnFontView = DevTools:Append("UICheckBox", hPageSet, "BtnFontView", {x = 150, y = 0, w = 150, h = 30, text = "事件和字体查看", group = "DevClass"})
-	local hWinFontView = DevTools:Append("Window", hPageSet, "WindowFontView", {x = 0, y = 30, w = 758, h = 400})
+	local hBtnFontView = self:Append("UICheckBox", hPageSet, "BtnFontView", {x = 150, y = 0, w = 150, h = 30, text = "事件和字体查看", group = "DevClass"})
+	local hWinFontView = self:Append("Window", hPageSet, "WindowFontView", {x = 0, y = 30, w = 758, h = 400})
 	hPageSet:AddPage(hWinFontView:GetSelf(), hBtnFontView:GetSelf())
 	hBtnFontView.OnCheck = function(bCheck)
 		if bCheck then
@@ -255,40 +255,40 @@ DevTools.Init = function()
 		end
 	end
 
-	DevTools:Append("Image", hWinFontView, "imgDivide1", {w = 280, h = 8, x = 30, y = 45, image = "ui\\Image\\UICommon\\CommonPanel.UITex", frame = 45}):SetImageType(11)
-	DevTools:Append("Image", hWinFontView, "imgDivide2", {w = 280, h = 8, x = 30, y = 370, image = "ui\\Image\\UICommon\\CommonPanel.UITex", frame = 45}):SetImageType(11)
+	self:Append("Image", hWinFontView, "imgDivide1", {w = 280, h = 8, x = 30, y = 45, image = "ui\\Image\\UICommon\\CommonPanel.UITex", frame = 45}):SetImageType(11)
+	self:Append("Image", hWinFontView, "imgDivide2", {w = 280, h = 8, x = 30, y = 370, image = "ui\\Image\\UICommon\\CommonPanel.UITex", frame = 45}):SetImageType(11)
 
-	DevTools.LoadEventIDBox(hWinFontView)
+	self:LoadEventIDBox(hWinFontView)
 
-	DevTools:Append("Image", hWinFontView, "SplitImg", {w = 5, h = 400, x = 340, y = 20, image = "ui\\Image\\UICommon\\CommonPanel.UITex", frame = 43})
+	self:Append("Image", hWinFontView, "SplitImg", {w = 5, h = 400, x = 340, y = 20, image = "ui\\Image\\UICommon\\CommonPanel.UITex", frame = 43})
 
-	local hTextViewContentScroll = DevTools:Append("Scroll", hWinFontView ,"hTextViewContentScroll",{x = 370, y = 20, w = 380, h = 390})
-	DevTools.LoadTextDummy(hTextViewContentScroll)
+	local hTextViewContentScroll = self:Append("Scroll", hWinFontView ,"hTextViewContentScroll",{x = 370, y = 20, w = 380, h = 390})
+	self:LoadTextDummy(hTextViewContentScroll)
 
 	--图标查看器
-	local hBtnIconView = DevTools:Append("UICheckBox", hPageSet, "BtnIconView", {x = 300, y = 0, w = 100, h = 30, text = "图标查看", group = "DevClass"})
-	local hWinIconView = DevTools:Append("Window", hPageSet, "WindowIconView", {x = 0, y = 30, w = 758, h = 400})
+	local hBtnIconView = self:Append("UICheckBox", hPageSet, "BtnIconView", {x = 300, y = 0, w = 100, h = 30, text = "图标查看", group = "DevClass"})
+	local hWinIconView = self:Append("Window", hPageSet, "WindowIconView", {x = 0, y = 30, w = 758, h = 400})
 	hPageSet:AddPage(hWinIconView:GetSelf(), hBtnIconView:GetSelf())
 	hBtnIconView.OnCheck = function(bCheck)
 		if bCheck then
 			hPageSet:ActivePage(2)
 		end
 	end
-	DevTools.LoadIconBox(hWinIconView)
+	self:LoadIconBox(hWinIconView)
 
 	return frame
 end
 
-DevTools.GetMenu = function(menu)
+function DevTools:GetMenu(menu)
 	for k, v in pairs(tImageFileList) do
 		local m_t = {szOption = k}
 		for kk, vv in pairs(v) do
 			local m_c = {
 				szOption = vv,
 				fnAction = function()
-					DevTools.LoadUITex(vv)
+					self:LoadUITex(vv)
 					szUitexPath = vv
-					DevTools:Lookup("CB_1"):SetText(string.format("%s.UITex", vv))
+					self:Lookup("CB_1"):SetText(string.format("%s.UITex", vv))
 				end
 			}
 			table.insert(m_t, m_c)
@@ -298,7 +298,7 @@ DevTools.GetMenu = function(menu)
 	return menu
 end
 
-DevTools.OutputTip = function(item)
+function DevTools:OutputTip(item)
 	local nMouseX, nMouseY = Cursor.GetPos()
 	local szTipInfo =
 		"<Text>text=" .. EncodeComponentsString("★ 帧编号：") .. " font=162 </text>" ..
@@ -310,7 +310,7 @@ DevTools.OutputTip = function(item)
 	OutputTip(szTipInfo, 1000, {nMouseX, nMouseY, 0, 0})
 end
 
-DevTools.OutputIconTip = function(ID)
+function DevTools:OutputIconTip(ID)
 	local nMouseX, nMouseY = Cursor.GetPos()
 	local szTipInfo =
 		"<Text>text=" .. EncodeComponentsString("★ 图标ID：") .. " font=162 </text>" ..
@@ -319,22 +319,22 @@ DevTools.OutputIconTip = function(ID)
 end
 
 
-DevTools.GetImageFrameInfo = function(szImageFile)
+function DevTools:GetImageFrameInfo(szImageFile)
 	return KG_Table.Load(szImageFile, tImageTXTTitle, FILE_OPEN_MODE.NORMAL)
 end
 
-DevTools.LoadUITex = function(szBaseName)
-	local hContent = DevTools:Lookup("UITexViewContent")
+function DevTools:LoadUITex(szBaseName)
+	local hContent = self:Lookup("UITexViewContent")
 	hContent:ClearHandle()
 
-	local hHOver = DevTools:Append("Image", hContent, "ImageHover", {x = 0, y = 0, w = 50, h = 50, image = "ui\\Image\\Common\\Box.UITex", frame = 1, lockshowhide=1})
+	local hHOver = self:Append("Image", hContent, "ImageHover", {x = 0, y = 0, w = 50, h = 50, image = "ui\\Image\\Common\\Box.UITex", frame = 1, lockshowhide=1})
 	hHOver:SetImageType(10)
 	hHOver:SetAlpha(150)
 
 	if not szBaseName then
 		return
 	end
-	local tInfo = DevTools.GetImageFrameInfo(szBaseName .. ".txt")
+	local tInfo = self:GetImageFrameInfo(szBaseName .. ".txt")
 	if not tInfo then
 		return
 	end
@@ -345,7 +345,7 @@ DevTools.LoadUITex = function(szBaseName)
 			local tLine = tInfo:Search(i)
 			if tLine then
 				if tonumber(tLine.Width) ~= 0 and tonumber(tLine.High) ~= 0 then
-					local img = DevTools:Append("Image", hContent, "Image_" .. i, {x = tonumber(tLine.Left), y = tonumber(tLine.Top), w = tonumber(tLine.Width), h = tonumber(tLine.High), image = string.format("%s.UITex", szBaseName), frame = i, eventid = 277})
+					local img = self:Append("Image", hContent, "Image_" .. i, {x = tonumber(tLine.Left), y = tonumber(tLine.Top), w = tonumber(tLine.Width), h = tonumber(tLine.High), image = string.format("%s.UITex", szBaseName), frame = i, eventid = 277})
 
 					img.nFrameIndex = i
 					img.szBaseFileName = szBaseName
@@ -359,7 +359,7 @@ DevTools.LoadUITex = function(szBaseName)
 						hHOver:SetSize(img.nW + 2, img.nH + 2)
 						local x, y = img:GetAbsPos()
 						hHOver:SetAbsPos(x - 1, y - 1)
-						DevTools.OutputTip(img)
+						self:OutputTip(img)
 					end
 					img.OnLeave = function()
 						hHOver:Hide()
@@ -375,7 +375,7 @@ DevTools.LoadUITex = function(szBaseName)
 		local nAniY = 10
 		local nAniNextY = nAniY
 		for i = 0, 99 do
-			local ani = DevTools:Append("Animate", hContent,"Animate_" .. i, {w = 50,h = 50, x = nAniX, y = nAniY, image = string.format("%s.UITex", szBaseName), eventid = 277})
+			local ani = self:Append("Animate", hContent,"Animate_" .. i, {w = 50,h = 50, x = nAniX, y = nAniY, image = string.format("%s.UITex", szBaseName), eventid = 277})
 			ani:SetGroup(i)
 			ani:SetLoopCount(-1)
 			ani:AutoSize()
@@ -394,7 +394,7 @@ DevTools.LoadUITex = function(szBaseName)
 				hHOver:SetSize(ani.nW + 2, ani.nH + 2)
 				local x, y = ani:GetAbsPos()
 				hHOver:SetAbsPos(x - 1, y - 1)
-				DevTools.OutputTip(ani)
+				self:OutputTip(ani)
 			end
 			ani.OnLeave = function()
 				hHOver:Hide()
@@ -413,37 +413,37 @@ DevTools.LoadUITex = function(szBaseName)
 	end
 	hContent:FormatAllItemPos()
 	hContent:SetSizeByAllItemSize()
-	DevTools:Lookup("hUITexViewContentScroll"):UpdateList()
+	self:Lookup("hUITexViewContentScroll"):UpdateList()
 end
 
-DevTools.LoadEventIDBox = function(hWin)
+function DevTools:LoadEventIDBox(hWin)
 	for k, v in ipairs(tEventIndex) do
-		DevTools:Append("CheckBox", hWin, "CheckBox_" .. v[2], {x = ((k - 1) % 3) * 100 + 30, y = math.floor((k - 1) / 3) * 40 + 60, w = 100, text = v[1]})
+		self:Append("CheckBox", hWin, "CheckBox_" .. v[2], {x = ((k - 1) % 3) * 100 + 30, y = math.floor((k - 1) / 3) * 40 + 60, w = 100, text = v[1]})
 	end
-	DevTools:Append("Text", hWin, "EventIDTexr", {x = 35, y = 10, text = "事件ID："})
-	hBtnCalc = DevTools:Append("Button", hWin, "BtnCalc", {x = 200, y = 10, text = "计算"})
-	hEventIDEdit = DevTools:Append("Edit", hWin, "EventIDEdit", {w = 100, h = 25, x = 90, y = 11, text = "0"})
+	self:Append("Text", hWin, "EventIDTexr", {x = 35, y = 10, text = "事件ID："})
+	hBtnCalc = self:Append("Button", hWin, "BtnCalc", {x = 200, y = 10, text = "计算"})
+	hEventIDEdit = self:Append("Edit", hWin, "EventIDEdit", {w = 100, h = 25, x = 90, y = 11, text = "0"})
 	hBtnCalc.OnClick = function()
 		local tBitTab = {}
 		for i = 1, 22 do
 			tBitTab[i] = 0
-			if DevTools:Lookup("CheckBox_" .. i):IsChecked() then
+			if self:Lookup("CheckBox_" .. i):IsChecked() then
 				tBitTab[i] = 1
 			end
 		end
-		local nEventID = DevTools.BitTable2UInt(tBitTab) or 0
+		local nEventID = self:BitTable2UInt(tBitTab) or 0
 		hEventIDEdit:SetText(nEventID)
 	end
-	local hCheckAll = DevTools:Append("CheckBox", hWin, "CheckBoxAll", {x = 130, y = 380, w = 100, text = "全选"})
+	local hCheckAll = self:Append("CheckBox", hWin, "CheckBoxAll", {x = 130, y = 380, w = 100, text = "全选"})
 	hCheckAll.OnCheck = function(bCheck)
 		for i = 1, 22 do
-			DevTools:Lookup("CheckBox_" .. i):Check(bCheck)
+			self:Lookup("CheckBox_" .. i):Check(bCheck)
 		end
 	end
-	local hCheckRev = DevTools:Append("CheckBox", hWin, "CheckBoxRev", {x = 230, y = 380, w = 100, text = "反选"})
+	local hCheckRev = self:Append("CheckBox", hWin, "CheckBoxRev", {x = 230, y = 380, w = 100, text = "反选"})
 	hCheckRev.OnCheck = function(bCheck)
 		for i = 1, 22 do
-			local hCheck = DevTools:Lookup("CheckBox_" .. i)
+			local hCheck = self:Lookup("CheckBox_" .. i)
 			if hCheck:IsChecked() then
 				hCheck:Check(false)
 			else
@@ -453,7 +453,7 @@ DevTools.LoadEventIDBox = function(hWin)
 	end
 end
 
-DevTools.BitTable2UInt = function(tBitTab)
+function DevTools:BitTable2UInt(tBitTab)
 	local nUInt = 0
 	for i = 1, 24 do
 		nUInt = nUInt + (tBitTab[i] or 0) * (2 ^ (i - 1))
@@ -461,10 +461,10 @@ DevTools.BitTable2UInt = function(tBitTab)
 	return nUInt
 end
 
-DevTools.LoadTextDummy = function(hScroll)
+function DevTools:LoadTextDummy(hScroll)
 	for i = 0, 255 do
-		local hBox = DevTools:Append("Handle", hScroll, "hFont_" .. i, {w = 40, h = 30, postype = 8})
-		local text = DevTools:Append("Text", hBox, "FontDummy_" .. i, {w = 10, h = 10})
+		local hBox = self:Append("Handle", hScroll, "hFont_" .. i, {w = 40, h = 30, postype = 8})
+		local text = self:Append("Text", hBox, "FontDummy_" .. i, {w = 10, h = 10})
 		text:SetFontScheme(i)
 		text.nFontScheme = i
 
@@ -484,18 +484,18 @@ DevTools.LoadTextDummy = function(hScroll)
 	hScroll:UpdateList()
 end
 
-DevTools.LoadIconBox = function(hWin)
-	local hIconViewContent = DevTools:Append("Handle", hWin, "IconViewContent", {x = 33, y = 33, w = 700, h = 300})
+function DevTools:LoadIconBox(hWin)
+	local hIconViewContent = self:Append("Handle", hWin, "IconViewContent", {x = 33, y = 33, w = 700, h = 300})
 	for i = 1, 84 do
-		local icon = DevTools:Append("Image", hIconViewContent, "Icon_" .. i, {x = ((i - 1) % 14) * 50, y = math.floor((i - 1) / 14) * 50, w = 45, h = 45, eventid = 277})
+		local icon = self:Append("Image", hIconViewContent, "Icon_" .. i, {x = ((i - 1) % 14) * 50, y = math.floor((i - 1) / 14) * 50, w = 45, h = 45, eventid = 277})
 		icon:FromIconID(i)
-		icon.OnEnter = function() DevTools.OutputIconTip(i) end
+		icon.OnEnter = function() self:OutputIconTip(i) end
 		icon.OnLeave = function() HideTip() end
 	end
-	local hBtnPrev = DevTools:Append("Button", hWin, "BtnIconPrev", {x = 200, y = 350, text = "上一页", enable = false})
-	local hBtnNext = DevTools:Append("Button", hWin, "BtnIconNext", {x = 410, y = 350, text = "下一页"})
+	local hBtnPrev = self:Append("Button", hWin, "BtnIconPrev", {x = 200, y = 350, text = "上一页", enable = false})
+	local hBtnNext = self:Append("Button", hWin, "BtnIconNext", {x = 410, y = 350, text = "下一页"})
 	local n, nTol = 1, math.ceil(3481 / 84)
-	local hPage = DevTools:Append("Text", hWin, "TextIconPage", {x = 340, y = 350, text = n .. "/" .. nTol})
+	local hPage = self:Append("Text", hWin, "TextIconPage", {x = 340, y = 350, text = n .. "/" .. nTol})
 	hBtnPrev.OnClick = function()
 		n = math.max(1, n - 1)
 		hPage:SetText(n .. "/" .. nTol)
@@ -506,9 +506,9 @@ DevTools.LoadIconBox = function(hWin)
 		end
 		hBtnNext:Enable(true)
 		for i = 1, 84 do
-			local icon, k = DevTools:Lookup("Icon_" .. i), (n - 1) * 84 + i
+			local icon, k = self:Lookup("Icon_" .. i), (n - 1) * 84 + i
 			icon:FromIconID(k)
-			icon.OnEnter = function() DevTools.OutputIconTip(k) end
+			icon.OnEnter = function() self:OutputIconTip(k) end
 			icon.OnLeave = function() HideTip() end
 		end
 	end
@@ -522,20 +522,20 @@ DevTools.LoadIconBox = function(hWin)
 		end
 		hBtnPrev:Enable(true)
 		for i = 1, 84 do
-			local icon, k = DevTools:Lookup("Icon_" .. i), (n - 1) * 84 + i
+			local icon, k = self:Lookup("Icon_" .. i), (n - 1) * 84 + i
 			icon:FromIconID(k)
-			icon.OnEnter = function() DevTools.OutputIconTip(k) end
+			icon.OnEnter = function() self:OutputIconTip(k) end
 			icon.OnLeave = function() HideTip() end
 		end
 	end
 
 end
 
-DevTools.OpenPanel = function()
-	local frame = EasyManager:Lookup("DevTools")
+function DevTools:OpenPanel()
+	local frame = self:Lookup("DevTools")
 	if frame and frame:IsVisible() then
-		DevTools:Remove(frame)
+		self:Remove(frame)
 	else
-		frame = DevTools.Init()
+		frame = self:Init()
 	end
 end

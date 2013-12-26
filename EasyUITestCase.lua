@@ -145,9 +145,22 @@ local tConfigDev = {
 		},{
 			name = "M_DevTools", type = "TextButton", w = 100, h = 25, x = 0, y = 60, text = "<打开工具集>", font = 177,
 			callback = function()
-				DevTools.OpenPanel()
+				DevTools:OpenPanel()
 			end
 		}
 	},
 }
 EasyManager:RegisterPanel(tConfigDev)
+
+do
+	for i = 1, 10 do
+		local cfg = {
+			szName = "TestA" .. i,
+			szTitle = "测试" .. i,
+			dwIcon = 3019 + i,
+			szClass = "Other",
+			tWidget = {},
+		}
+		EasyManager:RegisterPanel(cfg)
+	end
+end
