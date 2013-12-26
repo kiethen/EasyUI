@@ -3,6 +3,12 @@
 -- 创建插件
 EasyTestAddon = CreateAddon("EasyTestAddon")
 
+EasyTestAddon:Register("OnFrameDragEnd", "OnDragEnd")
+EasyTestAddon:Register("OnFrameDestroy", "OnDestroy")
+EasyTestAddon:Register("OnFrameKeyDown", "OnKeyDown")
+
+EasyTestAddon.szText = "这是一行字符串"
+
 -- 窗体创建回调
 function EasyTestAddon:OnCreate()
 	Output("Create")
@@ -10,13 +16,6 @@ function EasyTestAddon:OnCreate()
 end
 
 -- 事件回调
---~ EasyTestAddon.OnEvent = function(event)
---~ 	if event == "DO_SKILL_CAST" then
---~ 		if arg0 == UI_GetClientPlayerID() then
---~ 			Output(Table_GetSkillName(arg1, arg2))
---~ 		end
---~ 	end
---~ end
 --/script ReloadUIAddon()
 function EasyTestAddon:OnScript(event)
 	if event == "DO_SKILL_CAST" then
@@ -43,7 +42,7 @@ end
 
 -- 窗体拖动回调
 function EasyTestAddon:OnDragEnd()
-	Output("OnDragEnd")
+	Output("OnDragEnd", self.szText)
 end
 
 -- 窗体按键响应回调

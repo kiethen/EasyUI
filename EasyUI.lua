@@ -191,7 +191,7 @@ end
 function WndBase:_FireEvent(__event, ...)
 	for __k, __v in pairs(self.__listeners) do
 		if __v[__event] then
-			local res, err = pcall(__v[__event], self, ...)
+			local res, err = pcall(__v[__event], ...)
 			if not res then
 				OutputMessage("MSG_SYS", "ERROR:" .. err .."\n")
 			end
@@ -350,7 +350,7 @@ function WndButton:ctor(__parent, __name, __data)
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
 	self:SetType("WndButton")
-	self:Enable(__data.enable or true)
+	self:Enable((__data.enable == nil or __data.enable) and true or false)
 	self:SetSize(__data.w or 91)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
 
@@ -363,6 +363,16 @@ function WndButton:ctor(__parent, __name, __data)
 	end
 	self.__this.OnMouseLeave = function()
 		self:_FireEvent("OnLeave")
+	end
+end
+
+function WndButton:Enable(__enable)
+	if __enable then
+		self.__text:SetFontColor(255, 255, 255)
+		self.__this:Enable(true)
+	else
+		self.__text:SetFontColor(180, 180, 180)
+		self.__this:Enable(false)
 	end
 end
 
@@ -397,16 +407,11 @@ function WndUIButton:ctor(__parent, __name, __data)
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
 	self:SetType("WndUIButton")
-	if __data.ani then
-		self:SetAnimate(unpack(__data.ani))
-		self:_UpdateNormal()
-	end
-	if __data.w and __data.h then
-		self:SetSize(__data.w, __data.h)
-	end
-	local __x = __data.x or 0
-	local __y = __data.y or 0
-	self:SetRelPos(__x, __y)
+	self.__animate = __data.ani
+	self:SetSize(__data.w or 40, __data.h or 40)
+	self:Enable((__data.enable == nil or __data.enable) and true or false)
+	self:SetRelPos(__data.x or 0, __data.y or 0)
+	self:_UpdateNormal()
 
 	--Bind Button Events
 	self.__this.OnMouseEnter = function()
@@ -443,6 +448,16 @@ function WndUIButton:ctor(__parent, __name, __data)
 		if self:IsEnabled() then
 			self:_UpdateOver()
 		end
+	end
+end
+
+function WndUIButton:Enable(__enable)
+	if __enable then
+		self.__text:SetFontColor(255, 255, 255)
+		self.__this:Enable(true)
+	else
+		self.__text:SetFontColor(180, 180, 180)
+		self.__this:Enable(false)
 	end
 end
 
@@ -510,7 +525,7 @@ function WndEdit:ctor(__parent, __name, __data)
 	self:SetType("WndEdit")
 	self:SetLimit(__data.limit or 36)
 	self:SetMultiLine(__data.multi or false)
-	self:Enable(__data.enable or true)
+	self:Enable((__data.enable == nil or __data.enable) and true or false)
 	self:SetSize(__data.w or 187, __data.h or 25)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
 
@@ -547,7 +562,7 @@ function WndEdit:Enable(__enable)
 		self.__edit:SetFontColor(255, 255, 255)
 		self.__edit:Enable(true)
 	else
-		self.__edit:SetFontColor(160, 160, 160)
+		self.__edit:SetFontColor(180, 180, 180)
 		self.__edit:Enable(false)
 	end
 end
@@ -593,7 +608,7 @@ function WndCheckBox:ctor(__parent, __name, __data)
 	self:SetParent(__parent)
 	self:SetType("WndCheckBox")
 	self:Check(__data.check or false)
-	self:Enable(__data.enable or true)
+	self:Enable((__data.enable == nil or __data.enable) and true or false)
 	self:SetSize(__data.w or 150)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
 
@@ -619,7 +634,7 @@ function WndCheckBox:Enable(__enable)
 		self.__text:SetFontColor(255, 255, 255)
 		self.__this:Enable(true)
 	else
-		self.__text:SetFontColor(160, 160, 160)
+		self.__text:SetFontColor(180, 180, 180)
 		self.__this:Enable(false)
 	end
 end
@@ -664,6 +679,7 @@ function WndComboBox:ctor(__parent, __name, __data)
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
 	self:SetType("WndComboBox")
+	self:Enable((__data.enable == nil or __data.enable) and true or false)
 	self:SetSize(__data.w or 185)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
 
@@ -676,6 +692,16 @@ function WndComboBox:ctor(__parent, __name, __data)
 		__menu.x = __x
 		__menu.y = __y + __h
 		self:_FireEvent("OnClick", __menu)
+	end
+end
+
+function WndComboBox:Enable(__enable)
+	if __enable then
+		self.__text:SetFontColor(255, 255, 255)
+		self.__this:Lookup("Btn_ComboBox"):Enable(true)
+	else
+		self.__text:SetFontColor(180, 180, 180)
+		self.__this:Lookup("Btn_ComboBox"):Enable(false)
 	end
 end
 
@@ -715,7 +741,7 @@ function WndRadioBox:ctor(__parent, __name, __data)
 	self:SetParent(__parent)
 	self:SetType("WndRadioBox")
 	self:Check(__data.check or false)
-	self:Enable(__data.enable or true)
+	self:Enable((__data.enable == nil or __data.enable) and true or false)
 	self:SetSize(__data.w or 150)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
 
@@ -766,7 +792,7 @@ function WndRadioBox:Enable(__enable)
 		self.__text:SetFontColor(255, 255, 255)
 		self.__this:Enable(true)
 	else
-		self.__text:SetFontColor(160, 160, 160)
+		self.__text:SetFontColor(180, 180, 180)
 		self.__this:Enable(false)
 	end
 end
@@ -878,6 +904,7 @@ function WndCSlider:ctor(__parent, __name, __data)
 	self.__unit = __data.unit or ""
 	self.__scroll:SetStepCount(__data.step)
 	self:SetSize(__data.w or 120)
+	self:Enable((__data.enable == nil or __data.enable) and true or false)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
 	self:UpdateScrollPos(__data.value or 0)
 
@@ -887,6 +914,16 @@ function WndCSlider:ctor(__parent, __name, __data)
 		local __value = self:GetValue(__step)
 		self.__text:SetText(__value .. self.__unit)
 		self:_FireEvent("OnChange", __value)
+	end
+end
+
+function WndCSlider:Enable(__enable)
+	if __enable then
+		self.__text:SetFontColor(255, 255, 255)
+		self.__scroll:Enable(true)
+	else
+		self.__text:SetFontColor(180, 180, 180)
+		self.__scroll:Enable(false)
 	end
 end
 
@@ -1214,7 +1251,7 @@ end
 function ItemBase:_FireEvent(__event, ...)
 	for __k, __v in pairs(self.__listeners) do
 		if __v[__event] then
-			local res, err = pcall(__v[__event], self, ...)
+			local res, err = pcall(__v[__event],  ...)
 			if not res then
 				OutputMessage("MSG_SYS", "ERROR:" .. err .. "\n")
 			end
@@ -2123,7 +2160,7 @@ function CreateAddon:ctor(__name)
 	self.OnFrameRender = function()
 		self:_FireEvent("OnRender")
 	end
-	self.OnFrameDragEnd = function()
+	--[[self.OnFrameDragEnd = function()
 		self:_FireEvent("OnDragEnd")
 	end
 	self.OnFrameDestroy = function()
@@ -2131,9 +2168,15 @@ function CreateAddon:ctor(__name)
 	end
 	self.OnFrameKeyDown = function()
 		self:_FireEvent("OnKeyDown")
-	end
+	end]]
 	self.OnEvent = function(__event)
 		self:_FireEvent("OnScript", __event)
+	end
+end
+
+function CreateAddon:Register(__src, __tar)
+	self[__src] = function()
+		self:_FireEvent(__tar)
 	end
 end
 
