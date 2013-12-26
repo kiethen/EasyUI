@@ -397,6 +397,10 @@ function WndUIButton:ctor(__parent, __name, __data)
 	self:SetSelf(self.__this)
 	self:SetParent(__parent)
 	self:SetType("WndUIButton")
+	if __data.ani then
+		self:SetAnimate(unpack(__data.ani))
+		self:_UpdateNormal()
+	end
 	if __data.w and __data.h then
 		self:SetSize(__data.w, __data.h)
 	end
@@ -407,13 +411,13 @@ function WndUIButton:ctor(__parent, __name, __data)
 	--Bind Button Events
 	self.__this.OnMouseEnter = function()
 		if self:IsEnabled() then
-			self:UpdateOver()
+			self:_UpdateOver()
 		end
 		self:_FireEvent("OnEnter")
 	end
 	self.__this.OnMouseLeave = function()
 		if self:IsEnabled() then
-			self:UpdateNormal()
+			self:_UpdateNormal()
 		end
 		self:_FireEvent("OnLeave")
 	end
@@ -422,22 +426,22 @@ function WndUIButton:ctor(__parent, __name, __data)
 	end
 	self.__this.OnLButtonDown = function()
 		if self:IsEnabled() then
-			self:UpdateDown()
+			self:_UpdateDown()
 		end
 	end
 	self.__this.OnLButtonUp = function()
 		if self:IsEnabled() then
-			self:UpdateOver()
+			self:_UpdateOver()
 		end
 	end
 	self.__this.OnRButtonDown = function()
 		if self:IsEnabled() then
-			self:UpdateDown()
+			self:_UpdateDown()
 		end
 	end
 	self.__this.OnRButtonUp = function()
 		if self:IsEnabled() then
-			self:UpdateOver()
+			self:_UpdateOver()
 		end
 	end
 end
@@ -467,9 +471,9 @@ end
 function WndUIButton:Enable(__enable)
 	self.__this:Enable(__enable)
 	if __enable then
-		self:UpdateNormal()
+		self:_UpdateNormal()
 	else
-		self:UpdateDisable()
+		self:_UpdateDisable()
 	end
 end
 
@@ -2239,6 +2243,7 @@ local _API = {
 	CreateCSlider = WndCSlider.new,
 	CreateColorBox = WndColorBox.new,
 	CreateScroll = WndScroll.new,
+	CreateUIButton = WndUIButton.new,
 	CreateUICheckBox = WndUICheckBox.new,
 	CreateHandle = ItemHandle.new,
 	CreateText = ItemText.new,

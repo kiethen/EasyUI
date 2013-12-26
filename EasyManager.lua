@@ -155,12 +155,31 @@ EasyManager.OpenPanel = function()
 	end
 end
 
-local tMenu = {
-	{
-		szOption = "插件管理",
-		fnAction = function()
+RegisterEvent("LOADING_END", function()
+	local hWnd = Station.Lookup("Normal/Minimap/Wnd_Minimap/Wnd_Over")
+	if not hWnd:Lookup("Btn_EasyManager") then
+		local btn = CreateUIButton(hWnd, "Btn_EasyManager", {w = 34, h = 34, x = -10, y = 90, ani = {"ui\\Image\\Button\\SystemButton_1.UITex", 13, 14, 15, 12}})
+		btn.OnClick = function()
 			EasyManager.OpenPanel()
-		end,
-	}
-}
-TraceButton_AppendAddonMenu(tMenu)
+		end
+		btn.OnEnter = function()
+			local x, y = this:GetAbsPos()
+			local w, h = this:GetSize()
+			local szTip = GetFormatText("插件管理", 163) .. GetFormatText("\n单击这里可以插件管理器。", 162)
+			OutputTip(szTip, 400, {x, y, w, h})
+		end
+		btn.OnLeave = function()
+			HideTip()
+		end
+	end
+end)
+
+--~ local tMenu = {
+--~ 	{
+--~ 		szOption = "插件管理",
+--~ 		fnAction = function()
+--~ 			EasyManager.OpenPanel()
+--~ 		end,
+--~ 	}
+--~ }
+--~ TraceButton_AppendAddonMenu(tMenu)
