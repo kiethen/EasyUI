@@ -191,7 +191,7 @@ end
 function WndBase:_FireEvent(__event, ...)
 	for __k, __v in pairs(self.__listeners) do
 		if __v[__event] then
-			local res, err = pcall(__v[__event], ...)
+			local res, err = pcall(__v[__event], self, ...)
 			if not res then
 				OutputMessage("MSG_SYS", "ERROR:" .. err .."\n")
 			end
@@ -1214,7 +1214,7 @@ end
 function ItemBase:_FireEvent(__event, ...)
 	for __k, __v in pairs(self.__listeners) do
 		if __v[__event] then
-			local res, err = pcall(__v[__event], ...)
+			local res, err = pcall(__v[__event], self, ...)
 			if not res then
 				OutputMessage("MSG_SYS", "ERROR:" .. err .. "\n")
 			end
@@ -2133,14 +2133,14 @@ function CreateAddon:ctor(__name)
 		self:_FireEvent("OnKeyDown")
 	end
 	self.OnEvent = function(__event)
-		self:_FireEvent("OnEvent", __event)
+		self:_FireEvent("OnScript", __event)
 	end
 end
 
 function CreateAddon:_FireEvent(__event, ...)
 	for __k, __v in pairs(self.__listeners) do
 		if __v[__event] then
-			local res, err = pcall(__v[__event], ...)
+			local res, err = pcall(__v[__event], self, ...)
 			if not res then
 				OutputMessage("MSG_SYS", "ERROR:" .. err .. "\n")
 			end
