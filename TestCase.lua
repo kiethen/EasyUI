@@ -160,7 +160,7 @@ function EasyTest.Case()
 --~ 			Output("Test")
 --~ 		end
 --~ 	end
---~ 	scroll1:OnUpdateScorllList() --滚动条必须在每次更新子项目时调用此接口
+--~ 	scroll1:UpdateList() --滚动条必须在每次更新子项目时调用此接口
 
 	--创建图像
 	local image1 = EasyTest:Append("Image", frame,"image1",{w = 36,h = 36,x = 5,y = 10})
@@ -202,7 +202,7 @@ function EasyTest.Case()
 		h.OnEnter = function() img:Show() end
 		h.OnLeave = function() img:Hide() end
 	end
-	scroll2:OnUpdateScorllList()
+	scroll2:UpdateList()
 
 	--创建TreeLeaf
 --~ 	local scroll2 = EasyTest:CreateScroll(window2,"ScrollTest2",{x = 300,y = 0,w = 200,h = 350})
@@ -222,5 +222,5 @@ function EasyTest.Case()
 --~ 			EasyTest:CreateText(tree2,"treetitlea"..i,{text="标题"..i,x = 35,w = 60,h = 25})
 --~ 		end]]
 --~ 	end
---~ 	scroll2:OnUpdateScorllList()
+--~ 	scroll2:UpdateList()
 end

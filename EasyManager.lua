@@ -85,7 +85,7 @@ EasyManager.Init = function()
 				PlaySound(SOUND.UI_SOUND, g_sound.Button)
 			end
 		end
-		hScroll:OnUpdateScorllList()
+		hScroll:UpdateList()
 	end
 	return frame
 end

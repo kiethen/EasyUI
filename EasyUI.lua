@@ -390,6 +390,7 @@ function WndUIButton:ctor(__parent, __name, __data)
 	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "WndUIButton", __name)
+	self.__image = hwnd:Lookup("", "Image_Default")
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
@@ -402,6 +403,93 @@ function WndUIButton:ctor(__parent, __name, __data)
 	local __x = __data.x or 0
 	local __y = __data.y or 0
 	self:SetRelPos(__x, __y)
+
+	--Bind Button Events
+	self.__this.OnMouseEnter = function()
+		if self:IsEnabled() then
+			self:UpdateOver()
+		end
+		self:_FireEvent("OnEnter")
+	end
+	self.__this.OnMouseLeave = function()
+		if self:IsEnabled() then
+			self:UpdateNormal()
+		end
+		self:_FireEvent("OnLeave")
+	end
+	self.__this.OnLButtonClick = function()
+		self:_FireEvent("OnClick")
+	end
+	self.__this.OnLButtonDown = function()
+		if self:IsEnabled() then
+			self:UpdateDown()
+		end
+	end
+	self.__this.OnLButtonUp = function()
+		if self:IsEnabled() then
+			self:UpdateOver()
+		end
+	end
+	self.__this.OnRButtonDown = function()
+		if self:IsEnabled() then
+			self:UpdateDown()
+		end
+	end
+	self.__this.OnRButtonUp = function()
+		if self:IsEnabled() then
+			self:UpdateOver()
+		end
+	end
+end
+
+function WndUIButton:SetAnimate(...)
+	local a = {...}
+	assert(#a == 5, "the number of arguments must be five.")
+	self.__animate = a
+end
+
+function WndUIButton:_UpdateNormal()
+	self.__image:FromUITex(self.__animate[1], self.__animate[2])
+end
+
+function WndUIButton:_UpdateOver()
+	self.__image:FromUITex(self.__animate[1], self.__animate[3])
+end
+
+function WndUIButton:_UpdateDown()
+	self.__image:FromUITex(self.__animate[1], self.__animate[4])
+end
+
+function WndUIButton:_UpdateDisable()
+	self.__image:FromUITex(self.__animate[1], self.__animate[5])
+end
+
+function WndUIButton:Enable(__enable)
+	self.__this:Enable(__enable)
+	if __enable then
+		self:UpdateNormal()
+	else
+		self:UpdateDisable()
+	end
+end
+
+function WndUIButton:IsEnabled()
+	return self.__this:IsEnabled()
+end
+
+function WndUIButton:SetText(...)
+	self.__text:SetText(...)
+end
+
+function WndUIButton:GetText()
+	return self.__text:GetText()
+end
+
+function WndUIButton:SetSize(__w, __h)
+	self.__this:SetSize(__w, __h)
+	self.__this:Lookup("", ""):SetSize(__w, __h)
+	self.__image:SetSize(__w, __h)
+	self.__text:SetSize(__w, __h)
 end
 
 -- WndEdit Object
@@ -969,7 +1057,7 @@ function WndScroll:ScrollEnd()
 	self.__scroll:ScrollEnd()
 end
 
-function WndScroll:OnUpdateScorllList()
+function WndScroll:UpdateList()
 	self.__handle:FormatAllItemPos()
 	local __w, __h = self.__handle:GetSize()
 	local __wAll, __hAll = self.__handle:GetAllItemSize()
@@ -2139,8 +2227,6 @@ end
 ----------------------------------------------
 -- GUI Global Interface
 ----------------------------------------------
-EasyUI = EasyUI or {}
-
 local _API = {
 	CreateFrame = WndFrame.new,
 	CreateWindow = WndWindow.new,
@@ -2163,10 +2249,9 @@ local _API = {
 	CreateTreeLeaf = ItemTreeLeaf.new,
 	CreateAddon = CreateAddon_new,
 }
-setmetatable(EasyUI, { __metatable = true, __index = _API, __newindex = function() end })
 
-function ImportEasyUI()
-	for k, v in pairs(EasyUI) do
+do
+	for k, v in pairs(_API) do
 		_G[k] = v
 	end
 end

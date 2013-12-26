@@ -243,7 +243,7 @@ DevTools.Init = function()
 
 	local hUITexViewContentScroll = DevTools:Append("Scroll", hWinUITexView ,"hUITexViewContentScroll",{ x = 15,y = 50,w = 755, h = 365})
 	local hUITexViewContent = DevTools:Append("Handle", hUITexViewContentScroll, "UITexViewContent", {x = 5, y = 5, w = 738, h = 355})
-	hUITexViewContentScroll:OnUpdateScorllList()
+	hUITexViewContentScroll:UpdateList()
 
 	--事件和字体查看器
 	local hBtnFontView = DevTools:Append("UICheckBox", hPageSet, "BtnFontView", {x = 150, y = 0, w = 150, h = 30, text = "事件和字体查看", group = "DevClass"})
@@ -413,7 +413,7 @@ DevTools.LoadUITex = function(szBaseName)
 	end
 	hContent:FormatAllItemPos()
 	hContent:SetSizeByAllItemSize()
-	DevTools:Lookup("hUITexViewContentScroll"):OnUpdateScorllList()
+	DevTools:Lookup("hUITexViewContentScroll"):UpdateList()
 end
 
 DevTools.LoadEventIDBox = function(hWin)
@@ -481,7 +481,7 @@ DevTools.LoadTextDummy = function(hScroll)
 			text:Hide()
 		end
 	end
-	hScroll:OnUpdateScorllList()
+	hScroll:UpdateList()
 end
 
 DevTools.LoadIconBox = function(hWin)
