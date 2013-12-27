@@ -288,7 +288,7 @@ function DevTools:GetMenu(menu)
 				fnAction = function()
 					self:LoadUITex(vv)
 					szUitexPath = vv
-					self:Lookup("CB_1"):SetText(string.format("%s.UITex", vv))
+					self:Fetch("CB_1"):SetText(string.format("%s.UITex", vv))
 				end
 			}
 			table.insert(m_t, m_c)
@@ -324,7 +324,7 @@ function DevTools:GetImageFrameInfo(szImageFile)
 end
 
 function DevTools:LoadUITex(szBaseName)
-	local hContent = self:Lookup("UITexViewContent")
+	local hContent = self:Fetch("UITexViewContent")
 	hContent:ClearHandle()
 
 	local hHOver = self:Append("Image", hContent, "ImageHover", {x = 0, y = 0, w = 50, h = 50, image = "ui\\Image\\Common\\Box.UITex", frame = 1, lockshowhide=1})
@@ -413,7 +413,7 @@ function DevTools:LoadUITex(szBaseName)
 	end
 	hContent:FormatAllItemPos()
 	hContent:SetSizeByAllItemSize()
-	self:Lookup("hUITexViewContentScroll"):UpdateList()
+	self:Fetch("hUITexViewContentScroll"):UpdateList()
 end
 
 function DevTools:LoadEventIDBox(hWin)
@@ -427,7 +427,7 @@ function DevTools:LoadEventIDBox(hWin)
 		local tBitTab = {}
 		for i = 1, 22 do
 			tBitTab[i] = 0
-			if self:Lookup("CheckBox_" .. i):IsChecked() then
+			if self:Fetch("CheckBox_" .. i):IsChecked() then
 				tBitTab[i] = 1
 			end
 		end
@@ -437,13 +437,13 @@ function DevTools:LoadEventIDBox(hWin)
 	local hCheckAll = self:Append("CheckBox", hWin, "CheckBoxAll", {x = 130, y = 380, w = 100, text = "全选"})
 	hCheckAll.OnCheck = function(bCheck)
 		for i = 1, 22 do
-			self:Lookup("CheckBox_" .. i):Check(bCheck)
+			self:Fetch("CheckBox_" .. i):Check(bCheck)
 		end
 	end
 	local hCheckRev = self:Append("CheckBox", hWin, "CheckBoxRev", {x = 230, y = 380, w = 100, text = "反选"})
 	hCheckRev.OnCheck = function(bCheck)
 		for i = 1, 22 do
-			local hCheck = self:Lookup("CheckBox_" .. i)
+			local hCheck = self:Fetch("CheckBox_" .. i)
 			if hCheck:IsChecked() then
 				hCheck:Check(false)
 			else
@@ -506,7 +506,7 @@ function DevTools:LoadIconBox(hWin)
 		end
 		hBtnNext:Enable(true)
 		for i = 1, 84 do
-			local icon, k = self:Lookup("Icon_" .. i), (n - 1) * 84 + i
+			local icon, k = self:Fetch("Icon_" .. i), (n - 1) * 84 + i
 			icon:FromIconID(k)
 			icon.OnEnter = function() self:OutputIconTip(k) end
 			icon.OnLeave = function() HideTip() end
@@ -522,7 +522,7 @@ function DevTools:LoadIconBox(hWin)
 		end
 		hBtnPrev:Enable(true)
 		for i = 1, 84 do
-			local icon, k = self:Lookup("Icon_" .. i), (n - 1) * 84 + i
+			local icon, k = self:Fetch("Icon_" .. i), (n - 1) * 84 + i
 			icon:FromIconID(k)
 			icon.OnEnter = function() self:OutputIconTip(k) end
 			icon.OnLeave = function() HideTip() end
@@ -532,9 +532,9 @@ function DevTools:LoadIconBox(hWin)
 end
 
 function DevTools:OpenPanel()
-	local frame = self:Lookup("DevTools")
+	local frame = self:Fetch("DevTools")
 	if frame and frame:IsVisible() then
-		self:Remove(frame)
+		frame:Destroy()
 	else
 		frame = self:Init()
 	end

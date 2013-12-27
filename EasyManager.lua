@@ -92,7 +92,7 @@ end
 
 function EasyManager:Selected(hBox, nS, nTotal)
 	for i = 1, nTotal do
-		local hI = self:Lookup("hBox" .. nS .. i)
+		local hI = self:Fetch("hBox" .. nS .. i)
 		if hI.bSel then
 			hI.bSel = false
 			hI.imgSel:Hide()
@@ -179,9 +179,9 @@ function EasyManager:OnDestroy()
 end
 
 function EasyManager:OpenPanel()
-	local frame = self:Lookup("EasyManager")
+	local frame = self:Fetch("EasyManager")
 	if frame and frame:IsVisible() then
-		self:Remove(frame)
+		frame:Destroy()
 	else
 		frame = self:Init()
 		PlaySound(SOUND.UI_SOUND,g_sound.OpenFrame)

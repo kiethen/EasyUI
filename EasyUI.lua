@@ -1233,7 +1233,7 @@ function ItemBase:GetParent()
 end
 
 function ItemBase:Destroy()
-	self:GetParent():RemoveItem(self.__this)
+	self.__parent:RemoveItem(self.__this)
 end
 
 function ItemBase:Show()
@@ -2182,7 +2182,7 @@ function CreateAddon:_FireEvent(__event, ...)
 	end
 end
 
-function CreateAddon:Lookup(__name)
+function CreateAddon:Fetch(__name)
 	for k, v in pairs(self.__items) do
 		if __name == k then
 			return v
@@ -2235,31 +2235,6 @@ function CreateAddon:Append(__type, ...)
 	local __name = __h:GetName()
 	self.__items[__name] = __h
 	return __h
-end
-
-function CreateAddon:Remove(__h)
-	local __temp = nil
-	if type(__h) == "table" then
-		__temp = __h
-	elseif type(__h) == "string" then
-		__temp = self:Lookup(__h)
-	end
-	local __name = __temp:GetName()
-	if __temp:GetType() == "WndFrame" then
-		self.__items = {}
-	else
-		self.__items[__name] = nil
-	end
-	__temp:Destroy()
-end
-
-function CreateAddon:IsExist(__h)
-	for k, v in pairs(self.__items) do
-		if __h == k then
-			return true
-		end
-	end
-	return false
 end
 
 ----------------------------------------------

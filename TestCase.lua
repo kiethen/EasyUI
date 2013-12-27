@@ -82,7 +82,7 @@ function EasyTest.Case()
 	local button1 = EasyTest:Append("Button", window1,"button1",{text = "关闭",x = 50,y = 0,w = 91,h = 26})
 	--绑定按钮点击事件
 	button1.OnClick = function()
-		EasyTest:Remove("TestFrame1")
+		button1:Destroy()
 	end
 
 	--创建一个按钮
