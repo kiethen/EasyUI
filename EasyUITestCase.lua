@@ -159,7 +159,14 @@ do
 			szTitle = "≤‚ ‘" .. i,
 			dwIcon = 3019 + i,
 			szClass = "Other",
-			tWidget = {},
+			tWidget = {
+				{
+					name = "ANE"..i, type = "Button", w = 91, x = 0, y = 0, text = "≤‚ ‘∞¥≈•"..i,
+					callback = function()
+						Output("111")
+					end
+				}
+			},
 		}
 		EasyManager:RegisterPanel(cfg)
 	end

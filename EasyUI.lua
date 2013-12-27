@@ -2160,15 +2160,6 @@ function CreateAddon:ctor(__name)
 	self.OnFrameRender = function()
 		self:_FireEvent("OnRender")
 	end
-	--[[self.OnFrameDragEnd = function()
-		self:_FireEvent("OnDragEnd")
-	end
-	self.OnFrameDestroy = function()
-		self:_FireEvent("OnDestroy")
-	end
-	self.OnFrameKeyDown = function()
-		self:_FireEvent("OnKeyDown")
-	end]]
 	self.OnEvent = function(__event)
 		self:_FireEvent("OnScript", __event)
 	end
@@ -2305,6 +2296,6 @@ do
 end
 
 
-RegisterEvent("CALL_LUA_ERROR", function()
-	OutputMessage("MSG_SYS", arg0)
-end)
+--~ RegisterEvent("CALL_LUA_ERROR", function()
+--~ 	OutputMessage("MSG_SYS", arg0)
+--~ end)

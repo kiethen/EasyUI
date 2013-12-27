@@ -1,5 +1,6 @@
 
 EasyManager = CreateAddon("EasyManager")
+EasyManager:BindEvent("OnFrameDestroy", "OnDestroy")
 
 EasyManager.tAddonClass = {
 	{"All", "Ыљга"},
@@ -41,7 +42,7 @@ function EasyManager:Init()
 	local hPageSet = self:Append("PageSet", frame, "PageSet", {x = 0, y = 50, w = 768, h = 434})
 	for i = 1, #self.tAddonClass do
 		-- Nav
-		local hBtn = self:Append("UICheckBox", hPageSet, "TabClass", {x = 20 + 55 * ( i- 1), y = 0, w = 55, h = 30, text = self.tAddonClass[i][2], group = "AddonClass"})
+		local hBtn = self:Append("UICheckBox", hPageSet, "TabClass" .. i, {x = 20 + 55 * ( i- 1), y = 0, w = 55, h = 30, text = self.tAddonClass[i][2], group = "AddonClass"})
 		if i == 1 then
 			hBtn:Check(true)
 		end
@@ -58,7 +59,7 @@ function EasyManager:Init()
 		local tAddonList = self:GetAddonList(self.tAddonClass[i][1])
 		for j = 1, #tAddonList, 1 do
 			--Addon Box
-			local hBox = self:Append("Handle", hScroll, "h" .. i .. j, {w = 160, h = 50, postype = 8})
+			local hBox = self:Append("Handle", hScroll, "hBox" .. i .. j, {w = 160, h = 50, postype = 8})
 			self:Append("Image", hBox, "imgBg" .. i .. j, {w = 155, h = 50, image = "ui\\image\\uicommon\\rankingpanel.UITex", frame = 10})
 
 			local imgHover = self:Append("Image", hBox, "imgHover" .. i .. j, {w = 160, h = 50, image = "ui\\image\\uicommon\\rankingpanel.UITex", frame = 11, lockshowhide = 1})
@@ -67,28 +68,54 @@ function EasyManager:Init()
 			self:Append("Image", hBox, "imgIcon" .. i .. j, {w = 40, h = 40, x = 5,y = 5}):SetImage(tAddonList[j].dwIcon)
 			self:Append("Text", hBox, "txt" .. i .. j, {w = 100, h = 50, x = 55, y = 0, text = tAddonList[j].szTitle})
 
-			hBox.OnEnter = function() imgHover:Show() end
-			hBox.OnLeave = function() imgHover:Hide() end
+			hBox.OnEnter = function()
+				hBox.bOver = true
+				self:UpdateBgStatus(hBox)
+			end
+			hBox.OnLeave = function()
+				hBox.bOver = false
+				self:UpdateBgStatus(hBox)
+			end
 			hBox.OnClick = function()
-				if self.hLastBtn then
-					if self.hLastBtn.imgSel then
-						self.hLastBtn.imgSel:Hide()
-					end
+				if not hBox.winSel then
+					hBox.winSel = self:Append("Window", hWin, "Window" .. i .. j, {w = 530, h = 380, x = 210, y = 20})
+					self:AppendAddonInfo(hBox.winSel, tAddonList[j].tWidget)
 				end
-				self.hLastBtn = hBox
-				hBox.imgSel:Show()
-
-				if self.hLastWin then
-					self:Remove(self.hLastWin)
-				end
-				self.hLastWin = self:Append("Window", hWin, "Window" .. i .. j, {w = 530, h = 380, x = 210, y = 20})
-				self:ShowAddonInfo(self.hLastWin, tAddonList[j].tWidget)
+				self:Selected(hBox, i, #tAddonList)
 				PlaySound(SOUND.UI_SOUND, g_sound.Button)
 			end
 		end
 		hScroll:UpdateList()
 	end
 	return frame
+end
+
+function EasyManager:Selected(hBox, nS, nTotal)
+	for i = 1, nTotal do
+		local hI = self:Lookup("hBox" .. nS .. i)
+		if hI.bSel then
+			hI.bSel = false
+			hI.imgSel:Hide()
+			if hI.winSel then
+				hI.winSel:Hide()
+			end
+		end
+	end
+	hBox.bSel = true
+	hBox.winSel:Show()
+	self:UpdateBgStatus(hBox)
+end
+
+function EasyManager:UpdateBgStatus(hBox)
+	if hBox.bSel then
+		hBox.imgSel:Show()
+		hBox.imgSel:SetAlpha(255)
+	elseif hBox.bOver then
+		hBox.imgSel:Show()
+		hBox.imgSel:SetAlpha(150)
+	else
+		hBox.imgSel:Hide()
+	end
 end
 
 function EasyManager:GetAddonList(szClass)
@@ -105,7 +132,7 @@ function EasyManager:GetAddonList(szClass)
 	return temp
 end
 
-function EasyManager:ShowAddonInfo(hWin, tWidget)
+function EasyManager:AppendAddonInfo(hWin, tWidget)
 	for k, v in pairs(tWidget) do
 		if v.type == "Text" then
 			self:Append("Text", hWin, v.name, {w = v.w, h = v.h, x = v.x, y = v.y, text = v.text, font = v.font})
@@ -147,12 +174,17 @@ function EasyManager:RegisterPanel(tData)
 	table.insert(self.tAddonModules, tData)
 end
 
+function EasyManager:OnDestroy()
+	PlaySound(SOUND.UI_SOUND,g_sound.CloseFrame)
+end
+
 function EasyManager:OpenPanel()
 	local frame = self:Lookup("EasyManager")
 	if frame and frame:IsVisible() then
 		self:Remove(frame)
 	else
 		frame = self:Init()
+		PlaySound(SOUND.UI_SOUND,g_sound.OpenFrame)
 	end
 end
 
