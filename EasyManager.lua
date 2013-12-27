@@ -143,28 +143,41 @@ function EasyManager:AppendAddonInfo(hWin, tWidget)
 			handle.OnLeave = function() text:SetFontScheme(v.font) end
 			handle.OnClick = v.callback
 		elseif v.type == "Button" then
-			local hButton = self:Append("Button", hWin, v.name, {w = v.w, x = v.x, y = v.y, text = v.text, enable = v.enable})
+			local hButton = self:Append("Button", hWin, v.name, {w = v.w, x = v.x, y = v.y, text = v.text})
+			hButton:Enable((v.enable == nil) and true or v.enable())
 			hButton.OnClick = v.callback
 		elseif v.type == "CheckBox" then
-			local hCheckBox = self:Append("CheckBox", hWin, v.name, {w = v.w, x = v.x, y = v.y, text = v.text, enable = v.enable})
+			local hCheckBox = self:Append("CheckBox", hWin, v.name, {w = v.w, x = v.x, y = v.y, text = v.text})
 			hCheckBox:Check(v.default())
-			hCheckBox.OnCheck = v.callback
+			hCheckBox:Enable((v.enable == nil) and true or v.enable())
+			hCheckBox.OnCheck = function(arg0)
+				v.callback(arg0)
+				for _, v2 in pairs(tWidget) do
+					if v2.enable ~= nil then
+						self:Fetch(v2.name):Enable(v2.enable())
+					end
+				end
+			end
 		elseif v.type == "RadioBox" then
-			local hRadioBox = self:Append("RadioBox", hWin, v.name, {w = v.w, x = v.x, y = v.y, text = v.text, group = v.group, enable = v.enable})
+			local hRadioBox = self:Append("RadioBox", hWin, v.name, {w = v.w, x = v.x, y = v.y, text = v.text, group = v.group})
 			hRadioBox:Check(v.default())
+			hRadioBox:Enable((v.enable == nil) and true or v.enable())
 			hRadioBox.OnCheck = v.callback
 		elseif v.type == "ComboBox" then
-			local hComboBox = self:Append("ComboBox", hWin, v.name, {w = v.w, x = v.x, y = v.y, text = v.text, enable = v.enable})
+			local hComboBox = self:Append("ComboBox", hWin, v.name, {w = v.w, x = v.x, y = v.y, text = v.text})
+			hComboBox:Enable((v.enable == nil) and true or v.enable())
 			hComboBox.OnClick = v.callback
 		elseif v.type == "ColorBox" then
 			local hColorBox = self:Append("ColorBox", hWin, v.name, {w = v.w, x = v.x, y = v.y, text = v.text})
 			hColorBox:SetColor(unpack(v.default()))
 			hColorBox.OnChange = v.callback
 		elseif v.type == "Edit" then
-			local hEditBox = self:Append("Edit", hWin, v.name, {w = v.w, h = v.h, x = v.x, y = v.y, text = v.default(), enable = v.enable})
+			local hEditBox = self:Append("Edit", hWin, v.name, {w = v.w, h = v.h, x = v.x, y = v.y, text = v.default()})
+			hEditBox:Enable((v.enable == nil) and true or v.enable())
 			hEditBox.OnChange = v.callback
 		elseif v.type == "CSlider" then
-			local hCSlider = self:Append("CSlider", hWin, v.name, {w = v.w, x = v.x, y = v.y, text = v.text, min = v.min, max = v.max, step = v.step, value = v.default(), unit = v.unit, enable = v.enable})
+			local hCSlider = self:Append("CSlider", hWin, v.name, {w = v.w, x = v.x, y = v.y, text = v.text, min = v.min, max = v.max, step = v.step, value = v.default(), unit = v.unit})
+			hCSlider:Enable((v.enable == nil) and true or v.enable())
 			hCSlider.OnChange = v.callback
 		end
 	end

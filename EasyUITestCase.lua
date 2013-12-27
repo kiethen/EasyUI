@@ -36,7 +36,10 @@ local tConfig = {
 				Output(EasyUITestCase)
 			end
 		},{
-			name = "AN1_2", type = "Button", w = 91, x = 200, y = 0, text = "测试按钮3", enable = false,
+			name = "AN1_2", type = "Button", w = 91, x = 200, y = 0, text = "测试按钮3",
+			enable = function()
+				return EasyUITestCase.bCheckBoxOn1
+			end,
 			callback = function()
 				Output(EasyUITestCase)
 			end
@@ -86,6 +89,9 @@ local tConfig = {
 			end
 		},{
 			name = "AN7", type = "RadioBox", w = 100, x = 200, y = 80, text = "单选框3", group = "test",
+			enable = function()
+				return EasyUITestCase.bCheckBoxOn2
+			end,
 			default = function()
 				return EasyUITestCase.nRadioValue == 3
 			end,
@@ -96,6 +102,9 @@ local tConfig = {
 			end
 		},{
 			name = "AN8", type = "ComboBox", w = 150, x = 0, y = 120, text = "下拉框",
+			enable = function()
+				return EasyUITestCase.bCheckBoxOn3
+			end,
 			callback = function(m)
 				table.insert(m,{szOption = "测试菜单1"})
 				table.insert(m,{szOption = "测试菜单2"})
@@ -111,6 +120,9 @@ local tConfig = {
 			end
 		},{
 			name = "AN10", type = "Edit",w = 300, x = 0, y = 160,
+			enable = function()
+				return EasyUITestCase.bCheckBoxOn3
+			end,
 			default = function()
 				return EasyUITestCase.szEditBox
 			end,
@@ -121,6 +133,9 @@ local tConfig = {
 			name = "AN11", type = "Text", w = 80, h = 28, x = 0, y = 200, text = "这是滑动条",
 		},{
 			name = "AN12", type = "CSlider", w = 160, x = 85, y = 200, min = 0, max = 100, step = 100, unit = "%",
+			enable = function()
+				return EasyUITestCase.bCheckBoxOn3
+			end,
 			default = function()
 				return EasyUITestCase.nSliderValue
 			end,
