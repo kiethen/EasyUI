@@ -55,13 +55,17 @@ local function class(super)
 end
 
 local __ini = "Interface/EasyUI/ini/%s.ini"
-
+local NAME_INDEX = 1
 ----------------------------------------------
 -- Wnd Type Controls
 ----------------------------------------------
 
 -- Append Control
 local _AppendWnd = function(__parent, __type, __name)
+	if not __name then
+		__name = string.format("EASYUI_INDEX_%d", NAME_INDEX)
+		NAME_INDEX = NAME_INDEX + 1
+	end
 	if __parent.__addon then
 		__parent = __parent:GetSelf()
 	end
@@ -83,7 +87,7 @@ function WndBase:GetName()
 	return self.__this:GetName()
 end
 
-function WndBase:SetSelf(__this)
+function WndBase:_SetSelf(__this)
 	self.__this = __this
 end
 
@@ -93,6 +97,7 @@ end
 
 function WndBase:SetSize(...)
 	self.__this:SetSize(...)
+	return self
 end
 
 function WndBase:GetSize()
@@ -101,6 +106,7 @@ end
 
 function WndBase:SetRelPos(...)
 	self.__this:SetRelPos(...)
+	return self
 end
 
 function WndBase:GetRelPos()
@@ -109,6 +115,7 @@ end
 
 function WndBase:SetAbsPos(...)
 	self.__this:SetAbsPos(...)
+	return self
 end
 
 function WndBase:GetAbsPos()
@@ -117,9 +124,10 @@ end
 
 function WndBase:Enable(...)
 	self.__this:Enable(...)
+	return self
 end
 
-function WndBase:SetParent(__parent)
+function WndBase:_SetParent(__parent)
 	self.__parent = __parent
 end
 
@@ -127,7 +135,7 @@ function WndBase:GetParent()
 	return self.__parent
 end
 
-function WndBase:SetType(__type)
+function WndBase:_SetType(__type)
 	self.__type = __type
 end
 
@@ -162,18 +170,22 @@ end
 
 function WndBase:Scale(...)
 	self.__this:Scale(...)
+	return self
 end
 
 function WndBase:CorrectPos(...)
 	self.__this:CorrectPos(...)
+	return self
 end
 
 function WndBase:SetMousePenetrable(...)
 	self.__this:SetMousePenetrable(...)
+	return self
 end
 
 function WndBase:SetAlpha(...)
 	self.__this:SetAlpha(...)
+	return self
 end
 
 function WndBase:GetAlpha()
@@ -182,10 +194,12 @@ end
 
 function WndBase:ChangeRelation(...)
 	self.__this:ChangeRelation(...)
+	return self
 end
 
 function WndBase:SetPoint(...)
 	self.__this:SetPoint(...)
+	return self
 end
 
 function WndBase:_FireEvent(__event, ...)
@@ -219,8 +233,8 @@ function WndFrame:ctor(__name, __data)
 	frame:SetName(__name)
 	--self:Register(__name)
 	self.__this = frame
-	self:SetSelf(self.__this)
-	self:SetType("WndFrame")
+	self:_SetSelf(self.__this)
+	self:_SetType("WndFrame")
 	if __data.style and __data.style ~= "NONE" then
 		frame:Lookup("Btn_Close").OnLButtonClick = function()
 			self:Destroy()
@@ -239,14 +253,16 @@ end
 
 function WndFrame:SetTitle(...)
 	self.__this:Lookup("", "Text_Title"):SetText(...)
+	return self
 end
 
-function WndFrame:GetTitle(...)
+function WndFrame:GetTitle()
 	return self.__this:Lookup("", "Text_Title"):GetText()
 end
 
 function WndFrame:EnableDrag(...)
 	self.__this:EnableDrag(...)
+	return self
 end
 
 function WndFrame:IsDragable()
@@ -255,18 +271,22 @@ end
 
 function WndFrame:SetDragArea(...)
 	self.__this:SetDragArea(...)
+	return self
 end
 
 function WndFrame:RegisterEvent(...)
 	self.__this:RegisterEvent(...)
+	return self
 end
 
 function WndFrame:FadeIn(...)
 	self.__this:FadeIn(...)
+	return self
 end
 
 function WndFrame:FadeOut(...)
 	self.__this:FadeOut(...)
+	return self
 end
 
 function WndFrame:IsAddOn()
@@ -276,13 +296,13 @@ end
 -- WndWindow Object
 local WndWindow = class(WndBase)
 function WndWindow:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "WndWindow", __name)
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndWindow")
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
+	self:_SetType("WndWindow")
 	self:SetSize(__data.w or 100, __data.h or 100)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
 end
@@ -290,6 +310,7 @@ end
 function WndWindow:SetSize(...)
 	self.__this:SetSize(...)
 	self.__this:Lookup("", ""):SetSize(...)
+	return self
 end
 
 function WndWindow:GetHandle()
@@ -303,19 +324,20 @@ end
 -- WndPageSet Object
 local WndPageSet = class(WndBase)
 function WndPageSet:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "WndPageSet", __name)
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndPageSet")
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
+	self:_SetType("WndPageSet")
 	self:SetSize(__data.w or 100, __data.h or 100)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
 end
 
 function WndPageSet:AddPage(...)
 	self.__this:AddPage(...)
+	return self
 end
 
 function WndPageSet:GetActivePage()
@@ -328,6 +350,7 @@ end
 
 function WndPageSet:ActivePage(...)
 	self.__this:ActivePage(...)
+	return self
 end
 
 function WndPageSet:GetActivePageIndex()
@@ -341,15 +364,15 @@ end
 -- WndButton Object
 local WndButton = class(WndBase)
 function WndButton:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "WndButton", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self:SetText(__data.text or "")
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndButton")
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
+	self:_SetType("WndButton")
 	self:Enable((__data.enable == nil or __data.enable) and true or false)
 	self:SetSize(__data.w or 91)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
@@ -374,10 +397,12 @@ function WndButton:Enable(__enable)
 		self.__text:SetFontColor(180, 180, 180)
 		self.__this:Enable(false)
 	end
+	return self
 end
 
 function WndButton:SetText(...)
 	self.__text:SetText(...)
+	return self
 end
 
 function WndButton:GetText()
@@ -392,21 +417,22 @@ function WndButton:SetSize(__w)
 	self.__this:SetSize(__w, 26)
 	self.__this:Lookup("", ""):SetSize(__w, 26)
 	self.__text:SetSize(__w, 26)
+	return self
 end
 
 -- WndUIButton Object
 local WndUIButton = class(WndBase)
 function WndUIButton:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "WndUIButton", __name)
 	self.__image = hwnd:Lookup("", "Image_Default")
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndUIButton")
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
+	self:_SetType("WndUIButton")
 	self.__animate = __data.ani
 	self:SetSize(__data.w or 40, __data.h or 40)
 	self:Enable((__data.enable == nil or __data.enable) and true or false)
@@ -455,16 +481,13 @@ function WndUIButton:Enable(__enable)
 	if __enable then
 		self.__text:SetFontColor(255, 255, 255)
 		self.__this:Enable(true)
+		self:_UpdateNormal()
 	else
 		self.__text:SetFontColor(180, 180, 180)
 		self.__this:Enable(false)
+		self:_UpdateDisable()
 	end
-end
-
-function WndUIButton:SetAnimate(...)
-	local a = {...}
-	assert(#a == 5, "the number of arguments must be five.")
-	self.__animate = a
+	return self
 end
 
 function WndUIButton:_UpdateNormal()
@@ -483,21 +506,13 @@ function WndUIButton:_UpdateDisable()
 	self.__image:FromUITex(self.__animate[1], self.__animate[5])
 end
 
-function WndUIButton:Enable(__enable)
-	self.__this:Enable(__enable)
-	if __enable then
-		self:_UpdateNormal()
-	else
-		self:_UpdateDisable()
-	end
-end
-
 function WndUIButton:IsEnabled()
 	return self.__this:IsEnabled()
 end
 
 function WndUIButton:SetText(...)
 	self.__text:SetText(...)
+	return self
 end
 
 function WndUIButton:GetText()
@@ -509,20 +524,21 @@ function WndUIButton:SetSize(__w, __h)
 	self.__this:Lookup("", ""):SetSize(__w, __h)
 	self.__image:SetSize(__w, __h)
 	self.__text:SetSize(__w, __h)
+	return self
 end
 
 -- WndEdit Object
 local WndEdit = class(WndBase)
 function WndEdit:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "WndEdit", __name)
 	self.__edit = hwnd:Lookup("Edit_Default")
 	self:SetText(__data.text or "")
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndEdit")
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
+	self:_SetType("WndEdit")
 	self:SetLimit(__data.limit or 36)
 	self:SetMultiLine(__data.multi or false)
 	self:Enable((__data.enable == nil or __data.enable) and true or false)
@@ -547,14 +563,17 @@ function WndEdit:SetSize(__w, __h)
 	self.__this:Lookup("", ""):SetSize(__w + 4, __h)
 	self.__this:Lookup("", "Image_Default"):SetSize(__w + 4, __h)
 	self.__edit:SetSize(__w, __h)
+	return self
 end
 
-function WndEdit:SetLimit(__limit)
-	self.__edit:SetLimit(__limit)
+function WndEdit:SetLimit(...)
+	self.__edit:SetLimit(...)
+	return self
 end
 
-function WndEdit:SetMultiLine(__multi)
-	self.__edit:SetMultiLine(__multi)
+function WndEdit:SetMultiLine(...)
+	self.__edit:SetMultiLine(...)
+	return self
 end
 
 function WndEdit:Enable(__enable)
@@ -565,6 +584,7 @@ function WndEdit:Enable(__enable)
 		self.__edit:SetFontColor(180, 180, 180)
 		self.__edit:Enable(false)
 	end
+	return self
 end
 
 function WndEdit:SelectAll()
@@ -573,6 +593,11 @@ end
 
 function WndEdit:SetText(...)
 	self.__edit:SetText(...)
+	return self
+end
+
+function WndEdit:GetText()
+	return self.__edit:GetText()
 end
 
 function WndEdit:ClearText()
@@ -581,32 +606,36 @@ end
 
 function WndEdit:SetType(...)
 	self.__edit:SetType(...)
+	return self
 end
 
 function WndEdit:SetFontScheme(...)
 	self.__edit:SetFontScheme(...)
+	return self
 end
 
 function WndEdit:SetFontColor(...)
 	self.__edit:SetFontColor(...)
+	return self
 end
 
 function WndEdit:SetSelectFontScheme(...)
 	self.__edit:SetSelectFontScheme(...)
+	return self
 end
 
 -- WndCheckBox Object
 local WndCheckBox = class(WndBase)
 function WndCheckBox:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "WndCheckBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndCheckBox")
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
+	self:_SetType("WndCheckBox")
 	self:Check(__data.check or false)
 	self:Enable((__data.enable == nil or __data.enable) and true or false)
 	self:SetSize(__data.w or 150)
@@ -623,10 +652,12 @@ end
 
 function WndCheckBox:SetSize(__w)
 	self.__text:SetSize(__w - 28, 25)
+	return self
 end
 
-function WndCheckBox:Check(__check)
-	self.__this:Check(__check)
+function WndCheckBox:Check(...)
+	self.__this:Check(...)
+	return self
 end
 
 function WndCheckBox:Enable(__enable)
@@ -637,14 +668,16 @@ function WndCheckBox:Enable(__enable)
 		self.__text:SetFontColor(180, 180, 180)
 		self.__this:Enable(false)
 	end
+	return self
 end
 
 function WndCheckBox:IsChecked()
 	return self.__this:IsCheckBoxChecked()
 end
 
-function WndCheckBox:SetText(__text)
-	self.__text:SetText(__text)
+function WndCheckBox:SetText(...)
+	self.__text:SetText(...)
+	return self
 end
 
 function WndCheckBox:GetText()
@@ -653,6 +686,7 @@ end
 
 function WndCheckBox:SetFontColor(...)
 	self.__text:SetFontColor(...)
+	return self
 end
 
 function WndCheckBox:GetFontColor()
@@ -661,6 +695,7 @@ end
 
 function WndCheckBox:SetFontScheme(...)
 	self.__text:SetFontScheme(...)
+	return self
 end
 
 function WndCheckBox:GetFontScheme()
@@ -670,15 +705,15 @@ end
 -- WndComboBox Object
 local WndComboBox = class(WndBase)
 function WndComboBox:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "WndComboBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndComboBox")
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
+	self:_SetType("WndComboBox")
 	self:Enable((__data.enable == nil or __data.enable) and true or false)
 	self:SetSize(__data.w or 185)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
@@ -703,6 +738,7 @@ function WndComboBox:Enable(__enable)
 		self.__text:SetFontColor(180, 180, 180)
 		self.__this:Lookup("Btn_ComboBox"):Enable(false)
 	end
+	return self
 end
 
 function WndComboBox:SetSize(__w)
@@ -717,10 +753,12 @@ function WndComboBox:SetSize(__w)
 	h:SetSize(__w, 25)
 	local __x, __y = handle:GetAbsPos()
 	h:SetAbsPos(__x, __y)
+	return self
 end
 
-function WndComboBox:SetText(__text)
-	self.__text:SetText(__text)
+function WndComboBox:SetText(...)
+	self.__text:SetText(...)
+	return self
 end
 
 function WndComboBox:GetText()
@@ -731,15 +769,15 @@ end
 local WndRadioBox = class(WndBase)
 local __RadioBoxGroups = {}
 function WndRadioBox:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "WndRadioBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__text:SetText(__data.text or "")
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndRadioBox")
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
+	self:_SetType("WndRadioBox")
 	self:Check(__data.check or false)
 	self:Enable((__data.enable == nil or __data.enable) and true or false)
 	self:SetSize(__data.w or 150)
@@ -763,6 +801,7 @@ end
 
 function WndRadioBox:SetSize(__w)
 	self.__text:SetSize(__w - 28, 25)
+	return self
 end
 
 function WndRadioBox:SetGroup(__group)
@@ -773,6 +812,7 @@ function WndRadioBox:SetGroup(__group)
 		table.insert(__RadioBoxGroups[__group], self)
 	end
 	self.__group = __group
+	return self
 end
 
 function WndRadioBox:GetGroup()
@@ -783,8 +823,9 @@ function WndRadioBox:IsChecked()
 	return self.__this:IsCheckBoxChecked()
 end
 
-function WndRadioBox:Check(__check)
-	self.__this:Check(__check)
+function WndRadioBox:Check(...)
+	self.__this:Check(...)
+	return self
 end
 
 function WndRadioBox:Enable(__enable)
@@ -795,10 +836,12 @@ function WndRadioBox:Enable(__enable)
 		self.__text:SetFontColor(180, 180, 180)
 		self.__this:Enable(false)
 	end
+	return self
 end
 
-function WndRadioBox:SetText(__text)
-	self.__text:SetText(__text)
+function WndRadioBox:SetText(...)
+	self.__text:SetText(...)
+	return self
 end
 
 function WndRadioBox:GetText()
@@ -807,6 +850,7 @@ end
 
 function WndRadioBox:SetFontColor(...)
 	self.__text:SetFontColor(...)
+	return self
 end
 
 function WndRadioBox:GetFontColor()
@@ -815,6 +859,7 @@ end
 
 function WndRadioBox:SetFontScheme(...)
 	self.__text:SetFontScheme(...)
+	return self
 end
 
 function WndRadioBox:GetFontScheme()
@@ -825,15 +870,15 @@ end
 local WndUICheckBox = class(WndBase)
 local __UICheckBoxGroups = {}
 function WndUICheckBox:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "WndUICheckBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self:SetText(__data.text or "")
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndUICheckBox")
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
+	self:_SetType("WndUICheckBox")
 	self:Check(__data.check or false)
 	self:SetSize(__data.w or 83, __data.h or 30)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
@@ -862,42 +907,47 @@ function WndUICheckBox:SetGroup(__group)
 		table.insert(__UICheckBoxGroups[__group], self)
 	end
 	self.__group = __group
+	return self
 end
 
 function WndUICheckBox:GetGroup()
 	return self.__group
 end
 
-function WndUICheckBox:Check(__check)
-	self.__this:Check(__check)
+function WndUICheckBox:Check(...)
+	self.__this:Check(...)
+	return self
 end
 
 function WndUICheckBox:SetText(...)
 	self.__text:SetText(...)
+	return self
 end
 
 function WndUICheckBox:SetAnimation(...)
 	self.__this:SetAnimation(...)
+	return self
 end
 
 function WndUICheckBox:SetSize(...)
 	self.__this:SetSize(...)
 	self.__this:Lookup("", ""):SetSize(...)
 	self.__text:SetSize(...)
+	return self
 end
 
 -- WndCSlider Object
 local WndCSlider = class(WndBase)
 function WndCSlider:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "WndCSlider", __name)
 	self.__scroll = hwnd:Lookup("Scroll_Default")
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndCSlider")
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
+	self:_SetType("WndCSlider")
 	self.__min = __data.min
 	self.__max = __data.max
 	self.__step = __data.step
@@ -925,6 +975,7 @@ function WndCSlider:Enable(__enable)
 		self.__text:SetFontColor(180, 180, 180)
 		self.__scroll:Enable(false)
 	end
+	return self
 end
 
 function WndCSlider:SetSize(__w)
@@ -934,6 +985,7 @@ function WndCSlider:SetSize(__w)
 	self.__scroll:SetSize(__w, 25)
 	self.__text:SetRelPos(__w + 5, 2)
 	self.__this:Lookup("", ""):FormatAllItemPos()
+	return self
 end
 
 function WndCSlider:GetValue(__step)
@@ -959,20 +1011,21 @@ end
 function WndCSlider:UpdateScrollPos(__value)
 	self.__text:SetText(__value .. self.__unit)
 	self.__scroll:SetScrollPos(self:GetStep(__value))
+	return self
 end
 
 -- WndColorBox Object
 local WndColorBox = class(WndBase)
 function WndColorBox:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "WndColorBox", __name)
 	self.__text = hwnd:Lookup("", "Text_Default")
 	self.__shadow = hwnd:Lookup("", "Shadow_Default")
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndColorBox")
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
+	self:_SetType("WndColorBox")
 	self.__r = __data.r
 	self.__g = __data.g
 	self.__b = __data.b
@@ -995,27 +1048,30 @@ function WndColorBox:SetSize(__w)
 	self.__this:SetSize(__w, 25)
 	self.__this:Lookup("", ""):SetSize(__w, 25)
 	self.__text:SetSize(__w - 25, 25)
+	return self
 end
 
-function WndColorBox:SetText(__text)
-	self.__text:SetText(__text)
+function WndColorBox:SetText(...)
+	self.__text:SetText(...)
+	return self
 end
 
 function WndColorBox:SetColor(...)
 	self.__shadow:SetColorRGB(...)
 	self.__text:SetFontColor(...)
+	return self
 end
 
 -- WndScroll Object
 local WndScroll = class(WndBase)
 function WndScroll:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local hwnd = _AppendWnd(__parent, "WndScroll", __name)
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
-	self:SetType("WndScroll")
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
+	self:_SetType("WndScroll")
 	self.__up = self.__this:Lookup("Btn_Up")
 	self.__down = self.__this:Lookup("Btn_Down")
 	self.__scroll = self.__this:Lookup("Scroll_List")
@@ -1076,6 +1132,7 @@ end
 
 function WndScroll:SetHandleStyle(...)
 	self.__handle:SetHandleStyle(...)
+	return self
 end
 
 function WndScroll:ClearHandle()
@@ -1123,6 +1180,7 @@ function WndScroll:SetSize(__w, __h)
 	self.__scroll:SetRelPos(__w - 17, 20)
 	self.__up:SetRelPos(__w - 20, 3)
 	self.__down:SetRelPos(__w - 20, __h - 20)
+	return self
 end
 
 ----------------------------------------------
@@ -1131,6 +1189,10 @@ end
 
 -- Append Control
 local _AppendItem = function(__parent, __string, __name)
+	if not __name then
+		__name = string.format("EASYUI_INDEX_%d", NAME_INDEX)
+		NAME_INDEX = NAME_INDEX + 1
+	end
 	if __parent.__addon then
 		__parent = __parent:GetHandle()
 	end
@@ -1150,6 +1212,7 @@ end
 
 function ItemBase:SetName(...)
 	self.__this:SetName(...)
+	return self
 end
 
 function ItemBase:GetName()
@@ -1158,13 +1221,15 @@ end
 
 function ItemBase:Scale(...)
 	self.__this:Scale(...)
+	return self
 end
 
 function ItemBase:LockShowAndHide(...)
 	self.__this:LockShowAndHide(...)
+	return self
 end
 
-function ItemBase:SetSelf(__this)
+function ItemBase:_SetSelf(__this)
 	self.__this = __this
 end
 
@@ -1174,6 +1239,7 @@ end
 
 function ItemBase:SetSize(...)
 	self.__this:SetSize(...)
+	return self
 end
 
 function ItemBase:GetSize()
@@ -1182,6 +1248,7 @@ end
 
 function ItemBase:SetRelPos(...)
 	self.__this:SetRelPos(...)
+	return self
 end
 
 function ItemBase:GetRelPos()
@@ -1190,6 +1257,7 @@ end
 
 function ItemBase:SetAbsPos(...)
 	self.__this:SetAbsPos(...)
+	return self
 end
 
 function ItemBase:GetAbsPos()
@@ -1198,14 +1266,16 @@ end
 
 function ItemBase:SetAlpha(...)
 	self.__this:SetAlpha(...)
+	return self
 end
 
 function ItemBase:SetTip(...)
 	self.__this:SetTip(...)
+	return self
 end
 
 function ItemBase:GetTip()
-	self.__this:GetTip()
+	return self.__this:GetTip()
 end
 
 function ItemBase:GetAlpha()
@@ -1218,13 +1288,14 @@ end
 
 function ItemBase:SetPosType(...)
 	self.__this:SetPosType(...)
+	return self
 end
 
 function ItemBase:GetPosType()
 	return self.__this:GetPosType()
 end
 
-function ItemBase:SetParent(__parent)
+function ItemBase:_SetParent(__parent)
 	self.__parent = __parent
 end
 
@@ -1262,7 +1333,7 @@ end
 -- Handle Object
 local ItemHandle = class(ItemBase)
 function ItemHandle:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local __string = "<handle>w=10 h=10 handletype=0 postype=0 eventid=272 </handle>"
 	if __data.w then
@@ -1286,8 +1357,8 @@ function ItemHandle:ctor(__parent, __name, __data)
 	--Output(__string)
 	local hwnd = _AppendItem(__parent, __string, __name)
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
 
 	if __parent.__addon then
@@ -1307,10 +1378,6 @@ function ItemHandle:ctor(__parent, __name, __data)
 	end
 end
 
-function ItemHandle:OnLClick(__fn)
-	self.__this.OnItemLButtonClick = __fn
-end
-
 function ItemHandle:GetHandle()
 	return self.__this
 end
@@ -1321,6 +1388,7 @@ end
 
 function ItemHandle:SetHandleStyle(...)
 	self.__this:SetHandleStyle(...)
+	return self
 end
 
 function ItemHandle:GetItemStartRelPos()
@@ -1329,6 +1397,7 @@ end
 
 function ItemHandle:SetItemStartRelPos(...)
 	self.__this:SetItemStartRelPos(...)
+	return self
 end
 
 function ItemHandle:SetSizeByAllItemSize()
@@ -1345,10 +1414,12 @@ end
 
 function ItemHandle:EnableFormatWhenAppend(...)
 	self.__this:EnableFormatWhenAppend(...)
+	return self
 end
 
 function ItemHandle:ExchangeItemIndex(...)
 	self.__this:ExchangeItemIndex(...)
+	return self
 end
 
 function ItemHandle:Sort()
@@ -1356,7 +1427,7 @@ function ItemHandle:Sort()
 end
 
 function ItemHandle:GetItemCount()
-	self.__this:GetItemCount()
+	return self.__this:GetItemCount()
 end
 
 function ItemHandle:ClearHandle()
@@ -1366,7 +1437,7 @@ end
 -- Text Object
 local ItemText = class(ItemBase)
 function ItemText:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local __string = "<text>w=150 h=30 valign=1 font=18 postype=0 </text>"
 	if __data.w then
@@ -1386,8 +1457,8 @@ function ItemText:ctor(__parent, __name, __data)
 	end
 	local hwnd = _AppendItem(__parent, __string, __name)
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
 	self:SetText(__data.text or "")
 	self:SetRelPos(__data.x or 0, __data.y or 0)
 	if __parent.__addon then
@@ -1398,6 +1469,7 @@ end
 
 function ItemText:SetText(...)
 	self.__this:SetText(...)
+	return self
 end
 
 function ItemText:GetText()
@@ -1406,6 +1478,7 @@ end
 
 function ItemText:SetFontScheme(...)
 	self.__this:SetFontScheme(...)
+	return self
 end
 
 function ItemText:GetFontScheme()
@@ -1418,6 +1491,7 @@ end
 
 function ItemText:SetVAlign(...)
 	self.__this:SetVAlign(...)
+	return self
 end
 
 function ItemText:GetVAlign()
@@ -1426,6 +1500,7 @@ end
 
 function ItemText:SetHAlign(...)
 	self.__this:SetHAlign(...)
+	return self
 end
 
 function ItemText:GetHAlign()
@@ -1434,6 +1509,7 @@ end
 
 function ItemText:SetRowSpacing(...)
 	self.__this:SetRowSpacing(...)
+	return self
 end
 
 function ItemText:GetRowSpacing()
@@ -1442,6 +1518,7 @@ end
 
 function ItemText:SetMultiLine(...)
 	self.__this:SetMultiLine(...)
+	return self
 end
 
 function ItemText:IsMultiLine()
@@ -1450,6 +1527,7 @@ end
 
 function ItemText:FormatTextForDraw(...)
 	self.__this:FormatTextForDraw(...)
+	return self
 end
 
 function ItemText:AutoSize()
@@ -1458,6 +1536,7 @@ end
 
 function ItemText:SetCenterEachLine(...)
 	self.__this:SetCenterEachLine(...)
+	return self
 end
 
 function ItemText:IsCenterEachLine()
@@ -1466,6 +1545,7 @@ end
 
 function ItemText:SetRichText(...)
 	self.__this:SetRichText(...)
+	return self
 end
 
 function ItemText:IsRichText()
@@ -1478,18 +1558,22 @@ end
 
 function ItemText:SetFontScale(...)
 	self.__this:SetFontScale(...)
+	return self
 end
 
 function ItemText:SetFontID(...)
 	self.__this:SetFontID(...)
+	return self
 end
 
 function ItemText:SetFontBorder(...)
 	self.__this:SetFontBorder(...)
+	return self
 end
 
 function ItemText:SetFontShadow(...)
 	self.__this:SetFontShadow(...)
+	return self
 end
 
 function ItemText:GetFontID()
@@ -1514,6 +1598,7 @@ end
 
 function ItemText:SetFontColor(...)
 	self.__this:SetFontColor(...)
+	return self
 end
 
 function ItemText:GetFontColor()
@@ -1522,6 +1607,7 @@ end
 
 function ItemText:SetFontSpacing(...)
 	self.__this:SetFontSpacing(...)
+	return self
 end
 
 function ItemText:GetFontSpacing()
@@ -1531,7 +1617,7 @@ end
 -- Box Object
 local ItemBox = class(ItemBase)
 function ItemBox:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local __string = "<box>w=48 h=48 postype=0 eventid=272 </box>"
 	if __data.w then
@@ -1548,8 +1634,8 @@ function ItemBox:ctor(__parent, __name, __data)
 	end
 	local hwnd = _AppendItem(__parent, __string, __name)
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
 	if __parent.__addon then
 		__parent = __parent:GetHandle()
@@ -1570,6 +1656,7 @@ end
 
 function ItemBox:SetObject(...)
 	self.__this:SetObject(...)
+	return self
 end
 
 function ItemBox:GetObject()
@@ -1594,6 +1681,7 @@ end
 
 function ItemBox:EnableObject(...)
 	self.__this:EnableObject(...)
+	return self
 end
 
 function ItemBox:IsObjectEnable()
@@ -1602,6 +1690,7 @@ end
 
 function ItemBox:SetObjectCoolDown(...)
 	self.__this:SetObjectCoolDown(...)
+	return self
 end
 
 function ItemBox:IsObjectCoolDown()
@@ -1610,18 +1699,22 @@ end
 
 function ItemBox:SetObjectSparking(...)
 	self.__this:SetObjectSparking(...)
+	return self
 end
 
 function ItemBox:SetObjectInUse(...)
 	self.__this:SetObjectInUse(...)
+	return self
 end
 
 function ItemBox:SetObjectStaring(...)
 	self.__this:SetObjectStaring(...)
+	return self
 end
 
 function ItemBox:SetObjectSelected(...)
 	self.__this:SetObjectSelected(...)
+	return self
 end
 
 function ItemBox:IsObjectSelected()
@@ -1630,6 +1723,7 @@ end
 
 function ItemBox:SetObjectMouseOver(...)
 	self.__this:SetObjectMouseOver(...)
+	return self
 end
 
 function ItemBox:IsObjectMouseOver()
@@ -1638,6 +1732,7 @@ end
 
 function ItemBox:SetObjectPressed(...)
 	self.__this:SetObjectPressed(...)
+	return self
 end
 
 function ItemBox:IsObjectPressed()
@@ -1646,6 +1741,7 @@ end
 
 function ItemBox:SetCoolDownPercentage(...)
 	self.__this:SetCoolDownPercentage(...)
+	return self
 end
 
 function ItemBox:GetCoolDownPercentage()
@@ -1654,6 +1750,7 @@ end
 
 function ItemBox:SetObjectIcon(...)
 	self.__this:SetObjectIcon(...)
+	return self
 end
 
 function ItemBox:GetObjectIcon()
@@ -1666,6 +1763,7 @@ end
 
 function ItemBox:SetOverText(...)
 	self.__this:SetOverText(...)
+	return self
 end
 
 function ItemBox:GetOverText()
@@ -1674,6 +1772,7 @@ end
 
 function ItemBox:SetOverTextFontScheme(...)
 	self.__this:SetOverTextFontScheme(...)
+	return self
 end
 
 function ItemBox:GetOverTextFontScheme()
@@ -1682,6 +1781,7 @@ end
 
 function ItemBox:SetOverTextPosition(...)
 	self.__this:SetOverTextPosition(...)
+	return self
 end
 
 function ItemBox:GetOverTextPosition()
@@ -1690,6 +1790,7 @@ end
 
 function ItemBox:SetExtentImage(...)
 	self.__this:SetExtentImage(...)
+	return self
 end
 
 function ItemBox:ClearExtentImage()
@@ -1698,6 +1799,7 @@ end
 
 function ItemBox:SetExtentAnimate(...)
 	self.__this:SetExtentAnimate(...)
+	return self
 end
 
 function ItemBox:ClearExtentAnimate()
@@ -1707,7 +1809,7 @@ end
 -- Image Object
 local ItemImage = class(ItemBase)
 function ItemImage:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local __string = "<image>w=100 h=100 postype=0 lockshowhide=0 eventid=0 </image>"
 	if __data.w then
@@ -1727,8 +1829,8 @@ function ItemImage:ctor(__parent, __name, __data)
 	end
 	local hwnd = _AppendItem(__parent, __string, __name)
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
 	if __data.image then
 		local __image = __data.image
 		local __frame = __data.frame or nil
@@ -1754,6 +1856,7 @@ end
 
 function ItemImage:SetFrame(...)
 	self.__this:SetFrame(...)
+	return self
 end
 
 function ItemImage:GetFrame()
@@ -1762,6 +1865,7 @@ end
 
 function ItemImage:SetImageType(...)
 	self.__this:SetImageType(...)
+	return self
 end
 
 function ItemImage:GetImageType()
@@ -1770,6 +1874,7 @@ end
 
 function ItemImage:SetPercentage(...)
 	self.__this:SetPercentage(...)
+	return self
 end
 
 function ItemImage:GetPercentage()
@@ -1778,6 +1883,7 @@ end
 
 function ItemImage:SetRotate(...)
 	self.__this:SetRotate(...)
+	return self
 end
 
 function ItemImage:GetRotate()
@@ -1790,22 +1896,27 @@ end
 
 function ItemImage:FromUITex(...)
 	self.__this:FromUITex(...)
+	return self
 end
 
 function ItemImage:FromTextureFile(...)
 	self.__this:FromTextureFile(...)
+	return self
 end
 
 function ItemImage:FromScene(...)
 	self.__this:FromScene(...)
+	return self
 end
 
 function ItemImage:FromImageID(...)
 	self.__this:FromImageID(...)
+	return self
 end
 
 function ItemImage:FromIconID(...)
 	self.__this:FromIconID(...)
+	return self
 end
 
 function ItemImage:SetImage(__image, __frame)
@@ -1818,12 +1929,13 @@ function ItemImage:SetImage(__image, __frame)
 	elseif type(__image) == "number" then
 		self:FromIconID(__image)
 	end
+	return self
 end
 
 -- Shadow Object
 local ItemShadow = class(ItemBase)
 function ItemShadow:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local __string = "<shadow>w=15 h=15 postype=0 eventid=277 </shadow>"
 	if __data.w then
@@ -1840,8 +1952,8 @@ function ItemShadow:ctor(__parent, __name, __data)
 	end
 	local hwnd = _AppendItem(__parent, __string, __name)
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
 	if __parent.__addon then
 		__parent = __parent:GetHandle()
@@ -1851,6 +1963,7 @@ end
 
 function ItemShadow:SetShadowColor(...)
 	self.__this:SetShadowColor(...)
+	return self
 end
 
 function ItemShadow:GetShadowColor()
@@ -1859,6 +1972,7 @@ end
 
 function ItemShadow:SetColorRGB(...)
 	self.__this:SetColorRGB(...)
+	return self
 end
 
 function ItemShadow:GetColorRGB()
@@ -1867,6 +1981,7 @@ end
 
 function ItemShadow:SetTriangleFan(...)
 	self.__this:SetTriangleFan(...)
+	return self
 end
 
 function ItemShadow:IsTriangleFan()
@@ -1875,14 +1990,17 @@ end
 
 function ItemShadow:AppendTriangleFanPoint(...)
 	self.__this:AppendTriangleFanPoint(...)
+	return self
 end
 
 function ItemShadow:SetD3DPT(...)
 	self.__this:SetD3DPT(...)
+	return self
 end
 
 function ItemShadow:AppendTriangleFan3DPoint(...)
 	self.__this:AppendTriangleFan3DPoint(...)
+	return self
 end
 
 function ItemShadow:ClearTriangleFanPoint()
@@ -1891,16 +2009,18 @@ end
 
 function ItemShadow:AppendDoodadID(...)
 	self.__this:AppendDoodadID(...)
+	return self
 end
 
 function ItemShadow:AppendCharacterID(...)
 	self.__this:AppendCharacterID(...)
+	return self
 end
 
 -- ItemAnimate Object
 local ItemAnimate = class(ItemBase)
 function ItemAnimate:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local __string = "<animate>w=30 h=30 postype=0 eventid=0 </animate>"
 	if __data.w then
@@ -1917,8 +2037,8 @@ function ItemAnimate:ctor(__parent, __name, __data)
 	end
 	local hwnd = _AppendItem(__parent, __string, __name)
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
 	if __data.image then
 		local __image = __data.image
 		local __group = __data.group or 0
@@ -1945,18 +2065,22 @@ end
 
 function ItemAnimate:SetGroup(...)
 	self.__this:SetGroup(...)
+	return self
 end
 
 function ItemAnimate:SetLoopCount(...)
 	self.__this:SetLoopCount(...)
+	return self
 end
 
 function ItemAnimate:SetImagePath(...)
 	self.__this:SetImagePath(...)
+	return self
 end
 
 function ItemAnimate:SetAnimate(...)
 	self.__this:SetAnimate(...)
+	return self
 end
 
 function ItemAnimate:AutoSize()
@@ -1969,6 +2093,7 @@ end
 
 function ItemAnimate:SetIdenticalInterval(...)
 	self.__this:SetIdenticalInterval(...)
+	return self
 end
 
 function ItemAnimate:IsFinished()
@@ -1977,6 +2102,7 @@ end
 
 function ItemAnimate:SetAnimateType(...)
 	self.__this:SetAnimateType(...)
+	return self
 end
 
 function ItemAnimate:GetAnimateType()
@@ -1986,7 +2112,7 @@ end
 -- TreeLeaf Object
 local ItemTreeLeaf = class(ItemBase)
 function ItemTreeLeaf:ctor(__parent, __name, __data)
-	assert(__parent ~= nil and __name ~= nil, "parent or name can not be null.")
+	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
 	local __string = "<treeleaf>w=150 h=25 indentwidth=20 alwaysnode=1 indent=0 eventid=257 </treeleaf>"
 	if __data.w then
@@ -2000,8 +2126,8 @@ function ItemTreeLeaf:ctor(__parent, __name, __data)
 	end
 	local hwnd = _AppendItem(__parent, __string, __name)
 	self.__this = hwnd
-	self:SetSelf(self.__this)
-	self:SetParent(__parent)
+	self:_SetSelf(self.__this)
+	self:_SetParent(__parent)
 	self:SetRelPos(__data.x or 0, __data.y or 0)
 	if __parent.__addon then
 		__parent = __parent:GetHandle()
@@ -2024,14 +2150,17 @@ end
 
 function ItemTreeLeaf:SetHandleStyle(...)
 	self.__this:SetHandleStyle(...)
+	return self
 end
 
 function ItemTreeLeaf:SetRowHeight(...)
 	self.__this:SetRowHeight(...)
+	return self
 end
 
 function ItemTreeLeaf:SetRowSpacing(...)
 	self.__this:SetRowSpacing(...)
+	return self
 end
 
 function ItemTreeLeaf:ClearHandle()
@@ -2044,6 +2173,7 @@ end
 
 function ItemTreeLeaf:SetItemStartRelPos(...)
 	self.__this:SetItemStartRelPos(...)
+	return self
 end
 
 function ItemTreeLeaf:SetSizeByAllItemSize()
@@ -2064,10 +2194,12 @@ end
 
 function ItemTreeLeaf:EnableFormatWhenAppend(...)
 	self.__this:EnableFormatWhenAppend(...)
+	return self
 end
 
 function ItemTreeLeaf:ExchangeItemIndex(...)
 	self.__this:ExchangeItemIndex(...)
+	return self
 end
 
 function ItemTreeLeaf:Sort()
@@ -2080,6 +2212,7 @@ end
 
 function ItemTreeLeaf:ExpandOrCollapse(...)
 	self.__this:ExpandOrCollapse(...)
+	return self
 end
 
 function ItemTreeLeaf:Expand()
@@ -2092,6 +2225,7 @@ end
 
 function ItemTreeLeaf:SetIndent(...)
 	self.__this:SetIndent(...)
+	return self
 end
 
 function ItemTreeLeaf:GetIndent()
@@ -2100,6 +2234,7 @@ end
 
 function ItemTreeLeaf:SetEachIndentWidth(...)
 	self.__this:SetEachIndentWidth(...)
+	return self
 end
 
 function ItemTreeLeaf:GetEachIndentWidth()
@@ -2108,10 +2243,12 @@ end
 
 function ItemTreeLeaf:SetNodeIconSize(...)
 	self.__this:SetNodeIconSize(...)
+	return self
 end
 
 function ItemTreeLeaf:SetIconImage(...)
 	self.__this:SetIconImage(...)
+	return self
 end
 
 function ItemTreeLeaf:PtInIcon(...)
@@ -2128,6 +2265,7 @@ end
 
 function ItemTreeLeaf:SetShowIndex(...)
 	self.__this:SetShowIndex(...)
+	return self
 end
 
 function ItemTreeLeaf:GetShowIndex()
