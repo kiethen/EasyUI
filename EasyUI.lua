@@ -154,10 +154,12 @@ end
 
 function WndBase:Show()
 	self.__this:Show()
+	return self
 end
 
 function WndBase:Hide()
 	self.__this:Hide()
+	return self
 end
 
 function WndBase:IsVisible()
@@ -249,6 +251,7 @@ end
 
 function WndFrame:ClearHandle()
 	self.__this:Lookup("", ""):Clear()
+	return self
 end
 
 function WndFrame:SetTitle(...)
@@ -319,6 +322,7 @@ end
 
 function WndWindow:ClearHandle()
 	self.__this:Lookup("", ""):Clear()
+	return self
 end
 
 -- WndPageSet Object
@@ -589,6 +593,7 @@ end
 
 function WndEdit:SelectAll()
 	self.__this:SelectAll()
+	return self
 end
 
 function WndEdit:SetText(...)
@@ -602,6 +607,7 @@ end
 
 function WndEdit:ClearText()
 	self.__edit:ClearText()
+	return self
 end
 
 function WndEdit:SetType(...)
@@ -1137,22 +1143,27 @@ end
 
 function WndScroll:ClearHandle()
 	self.__handle:Clear()
+	return self
 end
 
 function WndScroll:ScrollPagePrev()
 	self.__scroll:ScrollPagePrev()
+	return self
 end
 
 function WndScroll:ScrollPageNext()
 	self.__scroll:ScrollPageNext()
+	return self
 end
 
 function WndScroll:ScrollHome()
 	self.__scroll:ScrollHome()
+	return self
 end
 
 function WndScroll:ScrollEnd()
 	self.__scroll:ScrollEnd()
+	return self
 end
 
 function WndScroll:UpdateList()
@@ -1309,10 +1320,12 @@ end
 
 function ItemBase:Show()
 	self.__this:Show()
+	return self
 end
 
 function ItemBase:Hide()
 	self.__this:Hide()
+	return self
 end
 
 function ItemBase:IsVisible()
@@ -1384,6 +1397,7 @@ end
 
 function ItemHandle:FormatAllItemPos()
 	self.__this:FormatAllItemPos()
+	return self
 end
 
 function ItemHandle:SetHandleStyle(...)
@@ -1402,6 +1416,7 @@ end
 
 function ItemHandle:SetSizeByAllItemSize()
 	self.__this:SetSizeByAllItemSize()
+	return self
 end
 
 function ItemHandle:GetAllItemSize()
@@ -1424,6 +1439,7 @@ end
 
 function ItemHandle:Sort()
 	self.__this:Sort()
+	return self
 end
 
 function ItemHandle:GetItemCount()
@@ -1432,6 +1448,7 @@ end
 
 function ItemHandle:ClearHandle()
 	self.__this:Clear()
+	return self
 end
 
 -- Text Object
@@ -1532,6 +1549,7 @@ end
 
 function ItemText:AutoSize()
 	self.__this:AutoSize()
+	return self
 end
 
 function ItemText:SetCenterEachLine(...)
@@ -1759,6 +1777,7 @@ end
 
 function ItemBox:ClearObjectIcon()
 	self.__this:ClearObjectIcon()
+	return self
 end
 
 function ItemBox:SetOverText(...)
@@ -1795,6 +1814,7 @@ end
 
 function ItemBox:ClearExtentImage()
 	self.__this:ClearExtentImage()
+	return self
 end
 
 function ItemBox:SetExtentAnimate(...)
@@ -1804,6 +1824,7 @@ end
 
 function ItemBox:ClearExtentAnimate()
 	self.__this:ClearExtentAnimate()
+	return self
 end
 
 -- Image Object
@@ -2085,10 +2106,12 @@ end
 
 function ItemAnimate:AutoSize()
 	self.__this:AutoSize()
+	return self
 end
 
 function ItemAnimate:Replay()
 	self.__this:Replay()
+	return self
 end
 
 function ItemAnimate:SetIdenticalInterval(...)
@@ -2146,6 +2169,7 @@ end
 
 function ItemTreeLeaf:FormatAllItemPos()
 	self.__this:FormatAllItemPos()
+	return self
 end
 
 function ItemTreeLeaf:SetHandleStyle(...)
@@ -2165,6 +2189,7 @@ end
 
 function ItemTreeLeaf:ClearHandle()
 	self.__this:Clear()
+	return self
 end
 
 function ItemTreeLeaf:GetItemStartRelPos()
@@ -2178,6 +2203,7 @@ end
 
 function ItemTreeLeaf:SetSizeByAllItemSize()
 	self.__this:SetSizeByAllItemSize()
+	return self
 end
 
 function ItemTreeLeaf:GetAllItemSize()
@@ -2204,6 +2230,7 @@ end
 
 function ItemTreeLeaf:Sort()
 	self.__this:Sort()
+	return self
 end
 
 function ItemTreeLeaf:IsExpand()
@@ -2217,10 +2244,12 @@ end
 
 function ItemTreeLeaf:Expand()
 	self.__this:Expand()
+	return self
 end
 
 function ItemTreeLeaf:Collapse()
 	self.__this:Collapse()
+	return self
 end
 
 function ItemTreeLeaf:SetIndent(...)
@@ -2257,10 +2286,12 @@ end
 
 function ItemTreeLeaf:AdjustNodeIconPos()
 	self.__this:AdjustNodeIconPos()
+	return self
 end
 
 function ItemTreeLeaf:AutoSetIconSize()
 	self.__this:AutoSetIconSize()
+	return self
 end
 
 function ItemTreeLeaf:SetShowIndex(...)
