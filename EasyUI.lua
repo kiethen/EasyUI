@@ -800,8 +800,8 @@ function WndRadioBox:ctor(__parent, __name, __data)
 					v:Check(false)
 				end
 			end
+			self:_FireEvent("OnCheck", true)
 		end
-		self:_FireEvent("OnCheck", true)
 	end
 end
 
@@ -1456,7 +1456,7 @@ local ItemText = class(ItemBase)
 function ItemText:ctor(__parent, __name, __data)
 	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
-	local __string = "<text>w=150 h=30 valign=1 font=18 postype=0 </text>"
+	local __string = "<text>w=150 h=30 valign=1 font=162 postype=0 </text>"
 	if __data.w then
 		__string = string.gsub(__string, "w=%d+", string.format("w=%d", __data.w))
 	end
