@@ -193,20 +193,21 @@ end
 
 function EasyManager:OpenPanel()
 	local frame = self:Fetch("EasyManager")
-	if frame and frame:IsVisible() then
+	if frame and frame:IsValid() and frame:IsVisible() then
 		frame:Destroy()
 	else
 		frame = self:Init()
 		PlaySound(SOUND.UI_SOUND,g_sound.OpenFrame)
 	end
 end
-
 RegisterEvent("LOADING_END", function()
 	local hWnd = Station.Lookup("Normal/Minimap/Wnd_Minimap/Wnd_Over")
-	if not hWnd:Lookup("Btn_EasyManager") then
-		local btn = CreateUIButton(hWnd, "Btn_EasyManager", {w = 34, h = 34, x = -5, y = 130, ani = {"ui\\Image\\Button\\SystemButton.UITex", 39, 40, 41, 42}})
+	local btn = hWnd:Lookup("Btn_EasyManager")
+	if not btn then
+		btn = CreateUIButton(hWnd, "Btn_EasyManager", {w = 34, h = 34, x = -5, y = 130, ani = {"ui\\Image\\Button\\SystemButton.UITex", 39, 40, 41, 42}})
 		btn.OnClick = function()
-			EasyManager:OpenPanel()
+			-- When ReloadUIAddon() called, the _G and EasyManager would not be update here
+			this.__reference:OpenPanel()
 		end
 		btn.OnEnter = function()
 			local x, y = this:GetAbsPos()
@@ -218,4 +219,5 @@ RegisterEvent("LOADING_END", function()
 			HideTip()
 		end
 	end
+	btn.__reference = EasyManager
 end)

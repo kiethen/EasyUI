@@ -168,7 +168,7 @@ local tConfigDev = {
 EasyManager:RegisterPanel(tConfigDev)
 
 do
-	for i = 1, 10 do
+	for i = 1, 3 do
 		local cfg = {
 			szName = "TestA" .. i,
 			szTitle = "≤‚ ‘" .. i,
