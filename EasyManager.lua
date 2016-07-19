@@ -203,21 +203,23 @@ end
 RegisterEvent("LOADING_END", function()
 	local hWnd = Station.Lookup("Normal/Minimap/Wnd_Minimap/Wnd_Over")
 	local btn = hWnd:Lookup("Btn_EasyManager")
-	if not btn then
-		btn = EasyUI.CreateUIButton(hWnd, "Btn_EasyManager", {w = 34, h = 34, x = -5, y = 130, ani = {"ui\\Image\\Button\\SystemButton.UITex", 39, 40, 41, 42}})
-		btn.OnClick = function()
+	if btn then
+		btn.__reference = EasyManager
+	else
+		local uiBtn = EasyUI.CreateUIButton(hWnd, "Btn_EasyManager", {w = 34, h = 34, x = -5, y = 130, ani = {"ui\\Image\\Button\\SystemButton.UITex", 39, 40, 41, 42}})
+		uiBtn:GetSelf().__reference = EasyManager
+		uiBtn.OnClick = function()
 			-- When ReloadUIAddon() called, the _G and EasyManager would not be update here
 			this.__reference:OpenPanel()
 		end
-		btn.OnEnter = function()
+		uiBtn.OnEnter = function()
 			local x, y = this:GetAbsPos()
 			local w, h = this:GetSize()
 			local szTip = GetFormatText("插件管理", 163) .. GetFormatText("\n单击这里可以打开插件管理器。", 162)
 			OutputTip(szTip, 400, {x, y, w, h})
 		end
-		btn.OnLeave = function()
+		uiBtn.OnLeave = function()
 			HideTip()
 		end
 	end
-	btn.__reference = EasyManager
 end)
