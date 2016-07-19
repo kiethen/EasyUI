@@ -1,7 +1,7 @@
 
 
 -- ´´½¨²å¼þ
-EasyTestAddon = CreateAddon("EasyTestAddon")
+EasyTestAddon = EasyUI.CreateAddon("EasyTestAddon")
 
 EasyTestAddon:BindEvent("OnFrameDragEnd", "OnDragEnd")
 EasyTestAddon:BindEvent("OnFrameDestroy", "OnDestroy")

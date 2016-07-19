@@ -1,5 +1,5 @@
 
-EasyManager = CreateAddon("EasyManager")
+EasyManager = EasyUI.CreateAddon("EasyManager")
 EasyManager:BindEvent("OnFrameDestroy", "OnDestroy")
 
 EasyManager.tAddonClass = {
@@ -204,7 +204,7 @@ RegisterEvent("LOADING_END", function()
 	local hWnd = Station.Lookup("Normal/Minimap/Wnd_Minimap/Wnd_Over")
 	local btn = hWnd:Lookup("Btn_EasyManager")
 	if not btn then
-		btn = CreateUIButton(hWnd, "Btn_EasyManager", {w = 34, h = 34, x = -5, y = 130, ani = {"ui\\Image\\Button\\SystemButton.UITex", 39, 40, 41, 42}})
+		btn = EasyUI.CreateUIButton(hWnd, "Btn_EasyManager", {w = 34, h = 34, x = -5, y = 130, ani = {"ui\\Image\\Button\\SystemButton.UITex", 39, 40, 41, 42}})
 		btn.OnClick = function()
 			-- When ReloadUIAddon() called, the _G and EasyManager would not be update here
 			this.__reference:OpenPanel()

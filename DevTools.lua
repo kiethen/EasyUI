@@ -1,5 +1,5 @@
 
-DevTools = CreateAddon("DevTools")
+DevTools = EasyUI.CreateAddon("DevTools")
 
 local nViewType = nil
 local szUitexPath = nil

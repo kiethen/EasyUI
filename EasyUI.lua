@@ -6,6 +6,12 @@
 -- CreatData: 2013.9.24
 ----------------------------------------------
 
+do
+	if EasyUI then
+		return
+	end
+end
+
 ----------------------------------------------
 -- Lua OOP
 ----------------------------------------------
@@ -2443,8 +2449,9 @@ local _API = {
 }
 
 do
+	EasyUI = {}
 	for k, v in pairs(_API) do
-		_G[k] = v
+		EasyUI[k] = v
 	end
 end
 
