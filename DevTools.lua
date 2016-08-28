@@ -1,5 +1,5 @@
 
-DevTools = CreateAddon("DevTools")
+DevTools = EasyUI.CreateAddon("DevTools")
 
 local nViewType = nil
 local szUitexPath = nil
@@ -421,8 +421,8 @@ function DevTools:LoadEventIDBox(hWin)
 		self:Append("CheckBox", hWin, "CheckBox_" .. v[2], {x = ((k - 1) % 3) * 100 + 30, y = math.floor((k - 1) / 3) * 40 + 60, w = 100, text = v[1]})
 	end
 	self:Append("Text", hWin, "EventIDTexr", {x = 35, y = 10, text = "事件ID："})
-	hBtnCalc = self:Append("Button", hWin, "BtnCalc", {x = 200, y = 10, text = "计算"})
-	hEventIDEdit = self:Append("Edit", hWin, "EventIDEdit", {w = 100, h = 25, x = 90, y = 11, text = "0"})
+	local hBtnCalc = self:Append("Button", hWin, "BtnCalc", {x = 200, y = 10, text = "计算"})
+	local hEventIDEdit = self:Append("Edit", hWin, "EventIDEdit", {w = 100, h = 25, x = 90, y = 11, text = "0"})
 	hBtnCalc.OnClick = function()
 		local tBitTab = {}
 		for i = 1, 22 do

@@ -1,5 +1,5 @@
 
-EasyTest  =  CreateAddon("EasyTest")
+EasyTest  =  EasyUI.CreateAddon("EasyTest")
 
 function GetLuaFrameInfo()
 	local tLayer =

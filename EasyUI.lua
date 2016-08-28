@@ -6,6 +6,12 @@
 -- CreatData: 2013.9.24
 ----------------------------------------------
 
+do
+	if EasyUI then
+		return
+	end
+end
+
 ----------------------------------------------
 -- Lua OOP
 ----------------------------------------------
@@ -81,6 +87,10 @@ local WndBase = class()
 function WndBase:ctor(__this)
 	self.__addon = true
 	self.__listeners = {self}
+end
+
+function WndBase:IsValid()
+	return self.__this:IsValid()
 end
 
 function WndBase:GetName()
@@ -773,7 +783,6 @@ end
 
 -- WndRadioBox Object
 local WndRadioBox = class(WndBase)
-local __RadioBoxGroups = {}
 function WndRadioBox:ctor(__parent, __name, __data)
 	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
@@ -795,8 +804,8 @@ function WndRadioBox:ctor(__parent, __name, __data)
 	--Bind RadioBox Events
 	self.__this.OnCheckBoxCheck = function()
 		if self.__group then
-			for k, v in pairs(__RadioBoxGroups[self.__group]) do
-				if v:GetGroup() == this.__group and v:GetName() ~= this:GetName() then
+			for k, v in pairs(self.__parent.groups[self.__group]) do
+				if v:IsValid() and v:GetGroup() == self.__group and v:GetName() ~= self:GetName() then
 					v:Check(false)
 				end
 			end
@@ -812,10 +821,13 @@ end
 
 function WndRadioBox:SetGroup(__group)
 	if __group then
-		if not __RadioBoxGroups[__group] then
-			__RadioBoxGroups[__group] = {}
+		if not self.__parent.groups then
+			self.__parent.groups = {}
 		end
-		table.insert(__RadioBoxGroups[__group], self)
+		if not self.__parent.groups[__group] then
+			self.__parent.groups[__group] = {}
+		end
+		table.insert(self.__parent.groups[__group], self)
 	end
 	self.__group = __group
 	return self
@@ -874,7 +886,6 @@ end
 
 -- WndUICheckBox Object
 local WndUICheckBox = class(WndBase)
-local __UICheckBoxGroups = {}
 function WndUICheckBox:ctor(__parent, __name, __data)
 	assert(__parent ~= nil, "parent can not be null.")
 	__data = __data or {}
@@ -895,8 +906,8 @@ function WndUICheckBox:ctor(__parent, __name, __data)
 	--Bind UICheckBox Events
 	self.__this.OnCheckBoxCheck = function()
 		if self.__group then
-			for k, v in pairs(__UICheckBoxGroups[self.__group]) do
-				if v:GetGroup() == this.__group and v:GetName() ~= this:GetName() then
+			for k, v in pairs(self.__parent.groups[self.__group]) do
+				if v:IsValid() and v:GetGroup() == self.__group and v:GetName() ~= self:GetName() then
 					v:Check(false)
 				end
 			end
@@ -907,10 +918,13 @@ end
 
 function WndUICheckBox:SetGroup(__group)
 	if __group then
-		if not __UICheckBoxGroups[__group] then
-			__UICheckBoxGroups[__group] = {}
+		if not self.__parent.groups then
+			self.__parent.groups = {}
 		end
-		table.insert(__UICheckBoxGroups[__group], self)
+		if not self.__parent.groups[__group] then
+			self.__parent.groups[__group] = {}
+		end
+		table.insert(self.__parent.groups[__group], self)
 	end
 	self.__group = __group
 	return self
@@ -1124,6 +1138,7 @@ function WndScroll:GetHandle()
 end
 
 function WndScroll:AddItem(__name)
+	assert(false, "do not use this api")
 	local __item = ScrollItems.new(self:GetHandle(), "Handle_Item", "Item_" .. __name)
 	__item:Show()
 	local __cover = __item:GetSelf():Lookup("Image_Cover")
@@ -2306,7 +2321,7 @@ end
 -- Addon Class
 local CreateAddon = class()
 local Addon_List = {}
-function CreateAddon_new(__name)
+local function CreateAddon_new(__name)
 	if not Addon_List[__name] then
 		Addon_List[__name] = CreateAddon.new(__name)
 	end
@@ -2434,8 +2449,9 @@ local _API = {
 }
 
 do
+	EasyUI = {}
 	for k, v in pairs(_API) do
-		_G[k] = v
+		EasyUI[k] = v
 	end
 end
 
